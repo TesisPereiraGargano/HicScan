@@ -12,8 +12,8 @@ public class ConfigurationUseCase {
     
     private final OntoForms ontoForms;
     
-    public ConfigurationUseCase() {
-        this.ontoForms = new OntoForms();
+    public ConfigurationUseCase(OntoForms ontoForms) {
+        this.ontoForms = ontoForms;
     }
     
     public String createOntology(String fileName, byte[] fileContent) {

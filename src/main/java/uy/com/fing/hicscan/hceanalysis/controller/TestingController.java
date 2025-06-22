@@ -14,8 +14,8 @@ public class TestingController {
 
     private final OntoBreastScreenClient ontoBreastScreenClient;
 
-    public TestingController() {
-        this.ontoBreastScreenClient = new OntoBreastScreenClient();
+    public TestingController(OntoBreastScreenClient ontoBreastScreenClient) {
+        this.ontoBreastScreenClient = ontoBreastScreenClient;
     }
 
     @GetMapping("/recommendation")

@@ -11,11 +11,17 @@ import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntoForms {
     
     private static final String UPLOAD_FILENAME = "Breast_cancer_recommendation_drugs_08_04_2025.rdf";
-    private static final String ONTOFORMS_BASE_URL = "http://localhost:8081/ontoforms-api/v1/";
+    
+    @Value("${ontoforms.client.url}")
+    private String ontoformsBaseUrl;
+    
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     
@@ -83,7 +89,7 @@ public class OntoForms {
         System.arraycopy(afterFile, 0, fullBody, beforeFile.length + fileContent.length, afterFile.length);
         
         String responseBody = executePostRequest(
-            ONTOFORMS_BASE_URL + "ontologies",
+            ontoformsBaseUrl + "ontologies",
             "multipart/form-data; boundary=" + boundary,
             fullBody
         );
