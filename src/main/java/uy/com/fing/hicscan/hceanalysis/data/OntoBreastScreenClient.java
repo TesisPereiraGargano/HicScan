@@ -11,10 +11,15 @@ import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntoBreastScreenClient {
     
-    private static final String RECOMMENDATION_BASE_URL = "http://localhost:8080/breast-cancer-recommendation-api/v1/";
+    @Value("${ontoBreastScreen.client.url}")
+    private String recommendationBaseUrl;
+    
     private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     
@@ -41,7 +46,7 @@ public class OntoBreastScreenClient {
     public String getBreastCancerRecommendation(String womanId, String guidelineUri) throws IOException, InterruptedException {
         String encodedWomanId = URLEncoder.encode(womanId, StandardCharsets.UTF_8);
         String encodedGuidelineUri = URLEncoder.encode(guidelineUri, StandardCharsets.UTF_8);
-        String url = RECOMMENDATION_BASE_URL + "recommendation?womanId=" + 
+        String url = recommendationBaseUrl + "recommendation?womanId=" + 
                      encodedWomanId + "&guidelineUri=" + encodedGuidelineUri;
         
         return executeGetRequest(url);
@@ -92,7 +97,7 @@ public class OntoBreastScreenClient {
     
     public String getRecommendationGuideUri(String riskLevel) throws IOException, InterruptedException {
         String encodedRiskValue = URLEncoder.encode(riskLevel, StandardCharsets.UTF_8);
-        String url = RECOMMENDATION_BASE_URL + "recommendation_guides?risk=" + encodedRiskValue;
+        String url = recommendationBaseUrl + "recommendation_guides?risk=" + encodedRiskValue;
         
         String responseBody = executeGetRequest(url);
         if (responseBody == null || responseBody.trim().isEmpty()) {
