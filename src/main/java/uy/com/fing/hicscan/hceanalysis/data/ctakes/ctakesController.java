@@ -54,7 +54,7 @@ public class ctakesController {
 
             List<String> comandoEjecucionCtakes = new ArrayList<>();
             comandoEjecucionCtakes.add("/bin/bash"); // ejecuta bash en Linux
-            comandoEjecucionCtakes.add("./prueba.sh");
+            comandoEjecucionCtakes.add("./ejecutarCtakes.sh");
 
             comandoEjecucionCtakes.add(pipelinePath);
             comandoEjecucionCtakes.add(inputFile.getAbsolutePath());
