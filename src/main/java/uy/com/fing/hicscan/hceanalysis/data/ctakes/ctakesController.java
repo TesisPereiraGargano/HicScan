@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,17 +45,27 @@ public class ctakesController {
                 System.out.println("File already exists.");
             }
             Files.write(inputFile.toPath(), inputText.getBytes());
-
+            // Para ejecutarlo en windows
             //genero el comando para poder ejecutar el .bat (que ejecuta a ctakes con esos inputs)
+            //List<String> comandoEjecucionCtakes = new ArrayList<>();
+            //comandoEjecucionCtakes.add("cmd.exe"); //ejecuta el interprete de comandos de Windows
+            //comandoEjecucionCtakes.add("/c"); //indica a cmd que finalice despues de ejecutar el comando
+            //comandoEjecucionCtakes.add("D:\\prueba.bat"); // O la ruta absoluta si no está en el mismo directorio
+
             List<String> comandoEjecucionCtakes = new ArrayList<>();
-            comandoEjecucionCtakes.add("cmd.exe"); //ejecuta el interprete de comandos de Windows
-            comandoEjecucionCtakes.add("/c"); //indica a cmd que finalice despues de ejecutar el comando
-            comandoEjecucionCtakes.add("D:\\prueba.bat"); // O la ruta absoluta si no está en el mismo directorio
+            comandoEjecucionCtakes.add("/bin/bash"); // ejecuta bash en Linux
+            comandoEjecucionCtakes.add("./prueba.sh");
 
             comandoEjecucionCtakes.add(pipelinePath);
             comandoEjecucionCtakes.add(inputFile.getAbsolutePath());
             comandoEjecucionCtakes.add(ctakesHome);
             comandoEjecucionCtakes.add(umlskey);
+
+            //Creo archivo temporal donde almacenar la respuesta de ctakes
+            Path tempDir = Files.createTempDirectory("ctakes_output");
+            String outputPath = tempDir.toAbsolutePath().toString();
+            //agrego el argumento a la ejecucion del sh
+            comandoEjecucionCtakes.add(outputPath);
 
             ProcessBuilder builder = new ProcessBuilder(comandoEjecucionCtakes);
             System.out.println("Ejecutando: " + builder.command()); //para ver que va a ejecutar
@@ -76,7 +88,9 @@ public class ctakesController {
 
             Map<String, String> drogas = new HashMap<>(); //hashmap que guarda los medicamentos y su cui
 
-            File archivo = new File("D:\\ctakes_output\\html_table\\entrada_table.HTML");
+            //el nombre del archivo que se genera depende directamente del nombre del archivo que recibe el sh como entrada
+            Path salidaPath = Paths.get(outputPath, "entrada_table.HTML");
+            File archivo = salidaPath.toFile();
             Document doc = Jsoup.parse(archivo, "UTF-8");
 
             //obtengo las columnas
