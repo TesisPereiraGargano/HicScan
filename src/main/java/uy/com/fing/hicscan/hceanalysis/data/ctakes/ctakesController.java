@@ -84,7 +84,7 @@ public class ctakesController {
                 salida.append(linea).append("\n");
             }
 
-            //logueo la ejecucion del script con errores incluidos en caso de que surjan 
+            //logueo la ejecucion del script con errores incluidos en caso de que surjan
             System.out.println(salida.toString());
 
             //busco en la respuesta de ctakes los medicamentos
@@ -92,7 +92,7 @@ public class ctakesController {
             Map<String, String> drogas = new HashMap<>(); //hashmap que guarda los medicamentos y su cui
 
             //el nombre del archivo que se genera depende directamente del nombre del archivo que recibe el sh como entrada
-            Path salidaPath = Paths.get(outputPath, "entrada_table.HTML");
+            Path salidaPath = Paths.get(outputPath, "html_table/entrada_table.HTML");
             File archivo = salidaPath.toFile();
             Document doc = Jsoup.parse(archivo, "UTF-8");
 
