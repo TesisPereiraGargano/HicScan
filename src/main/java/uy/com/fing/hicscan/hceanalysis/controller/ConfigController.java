@@ -24,11 +24,18 @@ public class ConfigController {
         this.configurationUseCase = configurationUseCase;
     }
 
-    public record OntologyCreateResponse(String id) {};
+    public record OntologyCreateResponse(String id, String ontologyName) {};
     public record AppMappingResponse(String mapping) {};
 
+    @GetMapping("/ontologies")
+    public String[] getOntologies() {
+        return configurationUseCase.getOntologies();
+    }
+
     @PostMapping("/ontology")
-    public OntologyCreateResponse createOntology(@RequestParam("file") MultipartFile multipartFile) {
+    public OntologyCreateResponse createOntology(
+            @RequestParam("file") MultipartFile multipartFile,
+            @RequestParam("ontologyName") String ontologyName) {
 
         String fileName = multipartFile.getOriginalFilename();
 
@@ -40,6 +47,10 @@ public class ConfigController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo no debe ser vacío");
         }
 
+        if (ontologyName == null || ontologyName.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre de la ontología es requerido");
+        }
+
         byte[] fileContent;
         try {
             fileContent = multipartFile.getBytes();
@@ -47,7 +58,7 @@ public class ConfigController {
             throw new RuntimeException("No se pudo obtener el contenido de la ontologìa", e);
         }
 
-        String ontologyId = configurationUseCase.createOntology(fileName, fileContent);
-        return new OntologyCreateResponse(ontologyId);
+        String ontologyId = configurationUseCase.createOntology(fileName, fileContent, ontologyName);
+        return new OntologyCreateResponse(ontologyId, ontologyName);
     }
 }

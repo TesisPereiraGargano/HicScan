@@ -16,16 +16,32 @@ public class ConfigurationUseCase {
         this.ontoForms = ontoForms;
     }
     
-    public String createOntology(String fileName, byte[] fileContent) {
+    public String[] getOntologies() {
         try {
-            // Create a temporary file to pass to OntoForms
-            File tempFile = createTempFile(fileName, fileContent);
+            return ontoForms.getOntologyNames();
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException("Error retrieving ontologies", e);
+        }
+    }
+    
+    public String createOntology(String fileName, byte[] fileContent, String ontologyName) {
+        try {
+            // Replace spaces with underscores in ontology name
+            String sanitizedOntologyName = ontologyName.replace(" ", "_");
+            
+            // Create a temporary file to pass to OntoForms using sanitized ontology name
+            File tempFile = createTempFile(fileName, fileContent, sanitizedOntologyName);
             
             // Upload the ontology using OntoForms and get the returned URL
             String ontologyUrl = ontoForms.uploadOntology(tempFile);
             
             // Clean up the temporary file
             tempFile.delete();
+            
+            // Create app mapping after successful upload using sanitized ontologyName with file extension
+            String extension = getFileExtension(fileName);
+            String ontologyNameWithExtension = sanitizedOntologyName + extension;
+            ontoForms.postAppMapping(ontologyNameWithExtension, sanitizedOntologyName);
             
             // Return the ontology URL from the upload
             return ontologyUrl;
@@ -35,10 +51,12 @@ public class ConfigurationUseCase {
         }
     }
     
-    private File createTempFile(String fileName, byte[] fileContent) throws IOException {
-        // Create a temporary file with the original filename extension
+    private File createTempFile(String fileName, byte[] fileContent, String sanitizedOntologyName) throws IOException {
+        // Create a temporary file with the sanitized ontology name and original filename extension
         String extension = getFileExtension(fileName);
-        File tempFile = File.createTempFile("ontology_", extension);
+        // Note: sanitizedOntologyName is already sanitized by the caller
+        File tempDir = new File(System.getProperty("java.io.tmpdir"));
+        File tempFile = new File(tempDir, sanitizedOntologyName + extension);
         
         // Write the content to the temporary file
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {

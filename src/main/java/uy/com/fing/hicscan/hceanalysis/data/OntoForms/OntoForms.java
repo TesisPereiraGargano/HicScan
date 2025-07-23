@@ -9,6 +9,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.ArrayList;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +18,6 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OntoForms {
-    
-    private static final String UPLOAD_FILENAME = "Breast_cancer_recommendation_drugs_08_04_2025.rdf";
     
     @Value("${ontoforms.client.url}")
     private String ontoformsBaseUrl;
@@ -66,6 +66,54 @@ public class OntoForms {
         return response.body();
     }
     
+    public String[] getOntologyNames() throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies";
+        String responseBody = executeGetRequest(url);
+        
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        
+        try {
+            JsonNode root = OBJECT_MAPPER.readTree(responseBody);
+            
+            if (!root.isArray()) {
+                throw new IOException("Invalid response format: expected JSON array");
+            }
+            
+            List<String> names = new ArrayList<>();
+            for (JsonNode ontologyNode : root) {
+                JsonNode nameNode = ontologyNode.get("name");
+                if (nameNode != null && nameNode.isTextual()) {
+                    names.add(nameNode.asText());
+                }
+            }
+            
+            return names.toArray(new String[0]);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+    
+    public void postAppMapping(String ontologyName, String appName) throws IOException, InterruptedException {
+        if (ontologyName == null || ontologyName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Ontology name cannot be null or empty");
+        }
+        
+        if (appName == null || appName.trim().isEmpty()) {
+            throw new IllegalArgumentException("App name cannot be null or empty");
+        }
+        
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontologyName, StandardCharsets.UTF_8) + "/configurations/app-mapping";
+        
+        // Create JSON body with appName
+        String jsonBody = "{\"appName\": \"" + appName.replace("\"", "\\\"") + "\"}";
+        byte[] bodyBytes = jsonBody.getBytes(StandardCharsets.UTF_8);
+        
+        // Execute POST request - any errors will be thrown by executePostRequest
+        executePostRequest(url, "application/json", bodyBytes);
+    }
+    
     public String uploadOntology(File file) throws IOException, InterruptedException {
         // Create multipart boundary
         String boundary = "----WebFormBoundary" + System.currentTimeMillis();
@@ -74,7 +122,7 @@ public class OntoForms {
         byte[] fileContent = Files.readAllBytes(file.toPath());
         
         // Create multipart body
-        String encodedFilename = URLEncoder.encode(UPLOAD_FILENAME, StandardCharsets.UTF_8);
+        String encodedFilename = URLEncoder.encode(file.getName(), StandardCharsets.UTF_8);
         String multipartBody = "--" + boundary + "\r\n" +
                 "Content-Disposition: form-data; name=\"file\"; filename=\"" + encodedFilename + "\"\r\n" +
                 "Content-Type: application/octet-stream\r\n\r\n";
