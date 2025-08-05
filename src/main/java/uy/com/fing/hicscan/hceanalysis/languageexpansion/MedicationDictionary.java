@@ -48,16 +48,16 @@ public class MedicationDictionary {
             // Ruta definida por el usuario
             diccionario = new File(diccionarioMedicamentosFilePath);
             if (!diccionario.exists() || !diccionario.isFile()) {
-                throw new FileNotFoundException("Diccionario de medicamentos no se encontró en la ruta: " + diccionarioMedicamentosFilePath);
+                throw new FileNotFoundException("Diccionario de medicamentos no se encontro en la ruta: " + diccionarioMedicamentosFilePath);
             }
         } else {
             // Si no se definió ningún archivo de medicamentos en el properties
             diccionario = new File("src/main/java/uy/com/fing/hicscan/hceanalysis/languageexpansion/resources/DiccionarioMedicamentos_38b0e1.xml");
             if (!diccionario.exists()) {
-                throw new FileNotFoundException("No se encontró el diccionario de medicamentos por defecto del proyecto");
+                throw new FileNotFoundException("No se encontro el diccionario de medicamentos por defecto del proyecto");
             }
         }
-        log.info("Se cargó el archivo que estaba en la ruta: {}", diccionario.getAbsolutePath());
+        log.info("Se cargo el archivo que estaba en la ruta: {}", diccionario.getAbsolutePath());
 
         //Proceso el archivo para cargar las palabras en un arreglo
         // el archivo se espera que esté en formato xml
@@ -120,8 +120,8 @@ public class MedicationDictionary {
             }
 
         }
-        log.info("El listado de medicamentos obtenido es: {}", listaNombresMedicamentos);
-        log.info("El listado de principios activos es: {}", listaVMPid);
+        log.info("El listado de medicamentos se cargo y tiene tamaño: {}", listaNombresMedicamentos.size());
+        log.info("El listado de principios activos se cargo y tiene tamaño: {}", listaVMPid.size());
     }
 
 }
