@@ -2,8 +2,9 @@ package uy.com.fing.hicscan.hceanalysis.languageexpansion;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class MedicationDictionary {
     //En el properties puedo definir si quiero utilizar otra versión del diccionario de medicmanetos de AGESIC
@@ -55,6 +57,7 @@ public class MedicationDictionary {
                 throw new FileNotFoundException("No se encontró el diccionario de medicamentos por defecto del proyecto");
             }
         }
+        log.info("Se cargó el archivo que estaba en la ruta: {}", diccionario.getAbsolutePath());
 
         //Proceso el archivo para cargar las palabras en un arreglo
         // el archivo se espera que esté en formato xml
@@ -112,8 +115,10 @@ public class MedicationDictionary {
                         .collect(Collectors.joining(" "));
                 //Agrego el nombre comercial a la lista
                 listaNombresMedicamentos.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), medicamento));
+                log.info("El listado de medicamentos obtenido es: {}", listaNombresMedicamentos);
                 //Agrego la relación AMP_id con VMP_id
                 listaVMPid.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), vmp_id.getTextContent()));
+                log.info("El listado de principios activos es: {}", listaVMPid);
             }
 
         }
