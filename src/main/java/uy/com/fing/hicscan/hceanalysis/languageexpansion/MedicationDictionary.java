@@ -18,6 +18,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,11 +31,11 @@ public class MedicationDictionary {
 
     @Getter
     //lista con <AMP_id, nombre comercial>
-    private List<AbstractMap.SimpleEntry<String, String>> listaNombresMedicamentos;
+    private List<AbstractMap.SimpleEntry<String, String>> listaNombresMedicamentos = new ArrayList<>();
 
     @Getter
     //lista con <AMP_id, VMP_id>
-    private List<AbstractMap.SimpleEntry<String, String>> listaVMPid;
+    private List<AbstractMap.SimpleEntry<String, String>> listaVMPid = new ArrayList<>();
 
     @PostConstruct
     public void initMedicationDictionary() throws FileNotFoundException {
