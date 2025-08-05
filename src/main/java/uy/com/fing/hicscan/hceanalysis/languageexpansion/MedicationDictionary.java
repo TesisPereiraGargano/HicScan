@@ -86,7 +86,7 @@ public class MedicationDictionary {
         //Genero una lista con cada AMP
         NodeList amp = ampsXML.getElementsByTagNameNS(namespace, "AMP");
 
-        for (int i = 0; i < amps.getLength(); i++) {
+        for (int i = 0; i < amp.getLength(); i++) {
             Element amp_i = (Element) amp.item(i);
             //Obtengo el AMP_ID
             Node amp_id = amp_i.getElementsByTagNameNS(namespace, "AMP_Id").item(0);
