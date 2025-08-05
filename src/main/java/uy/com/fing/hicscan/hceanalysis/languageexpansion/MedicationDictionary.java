@@ -115,13 +115,13 @@ public class MedicationDictionary {
                         .collect(Collectors.joining(" "));
                 //Agrego el nombre comercial a la lista
                 listaNombresMedicamentos.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), medicamento));
-                log.info("El listado de medicamentos obtenido es: {}", listaNombresMedicamentos);
                 //Agrego la relación AMP_id con VMP_id
                 listaVMPid.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), vmp_id.getTextContent()));
-                log.info("El listado de principios activos es: {}", listaVMPid);
             }
 
         }
+        log.info("El listado de medicamentos obtenido es: {}", listaNombresMedicamentos);
+        log.info("El listado de principios activos es: {}", listaVMPid);
     }
 
 }
