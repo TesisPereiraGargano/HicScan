@@ -1,5 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.languageexpansion;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.ahocorasick.trie.Trie;
 import org.springframework.stereotype.Component;
 import javax.xml.parsers.ParserConfigurationException;
@@ -7,6 +8,7 @@ import java.io.*;
 import java.util.AbstractMap;
 import java.util.List;
 
+@Slf4j
 @Component
 public class AhoCorasick {
 
@@ -20,7 +22,11 @@ public class AhoCorasick {
         for (AbstractMap.SimpleEntry<String, String> med : medicamentos) {
             builder.addKeyword(med.getKey());
         }
-
         arbolMedicamentos = builder.build();
+
+        // Log de las keywords agregadas
+        log.info("Se cargaron {} medicamentos en el trie: {}", medicamentos.size(),
+                medicamentos.stream().map(AbstractMap.SimpleEntry::getValue).toList());
+    }
     }
 }
