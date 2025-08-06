@@ -37,7 +37,13 @@ public class MedicationExpander {
             }
             //Busco el principio activo
             //lo casteo sólo para probar
-            ApiResponse respuesta = new ApiResponse("success", "Los medicamentos y su traduccion a principios activos es", (Map<String, String>) encontrados);
+            Map<String,String> res = new HashMap<>();
+
+            for (String med : encontrados){
+                res.put(med,"dummy");
+            }
+
+            ApiResponse respuesta = new ApiResponse("success", "Los medicamentos y su traduccion a principios activos es", res);
             return ResponseEntity.status(200).body(respuesta);
         } catch (Exception e) {
             e.printStackTrace();
