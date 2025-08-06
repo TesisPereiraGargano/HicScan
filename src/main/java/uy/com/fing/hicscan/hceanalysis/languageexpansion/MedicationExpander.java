@@ -1,5 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.languageexpansion;
 
+import lombok.extern.slf4j.Slf4j;
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import java.util.*;
 /*Este módulo provee un API que va a permitir utilizar el diccionario de medicamentos disponible en la web de AGESIC
 * para poder obtener aquellos medicamentos que se le recetaron al paciente con su nombre comercial
 * y no escribiendo o describiendo la droga del mismo.*/
+@Slf4j
 @RestController
 @RequestMapping("/medExpander")
 public class MedicationExpander {
@@ -29,12 +31,14 @@ public class MedicationExpander {
     ){
         try {
             Trie arbolMedicamentos = this.ahoCorasick.getArbolMedicamentos();
+            log.info("El arbolMedicamentos es: {}", arbolMedicamentos);
             Set<String> encontrados = new HashSet<>();
 
             // parsea el texto y obtiene coincidencias
             for (Emit emit : arbolMedicamentos.parseText(inputText.toLowerCase())) {
                 encontrados.add(emit.getKeyword());
             }
+            log.info("Se obtuvieron las siguientes coincidencias: {}", encontrados);
             //Busco el principio activo
             //lo casteo sólo para probar
             Map<String,String> res = new HashMap<>();
