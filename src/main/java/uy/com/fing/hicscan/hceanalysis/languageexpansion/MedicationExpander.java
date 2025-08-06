@@ -36,6 +36,7 @@ public class MedicationExpander {
 
             // parsea el texto y obtiene coincidencias
             for (Emit emit : arbolMedicamentos.parseText(inputText.toLowerCase())) {
+                log.info(emit.getKeyword());
                 encontrados.add(emit.getKeyword());
             }
 
