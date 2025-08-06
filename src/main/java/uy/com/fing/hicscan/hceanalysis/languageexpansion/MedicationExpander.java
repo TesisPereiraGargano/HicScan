@@ -23,7 +23,7 @@ public class MedicationExpander {
         this.ahoCorasick = ahoCorasick;
     }
 
-    @PostMapping("getDrugsFromComercialName")
+    @PostMapping("/getDrugsFromComercialName")
     public ResponseEntity<ApiResponse> obtenerPrincipiosActivos(
             @RequestParam String inputText
     ){
