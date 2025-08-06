@@ -31,11 +31,18 @@ public class MedicationExpander {
     ){
         try {
             Trie arbolMedicamentos = this.ahoCorasick.getArbolMedicamentos();
-            log.info("El arbolMedicamentos es: {}", arbolMedicamentos);
+            log.info("El arbolMedicamentos es: {}", arbolMedicamentos.toString());
             Set<String> encontrados = new HashSet<>();
 
+            String textoNormalizado = inputText
+                    .toLowerCase()
+                    .replaceAll("[^a-z0-9áéíóúñü\\s]", " ") // reemplaza comas, puntos, etc. por espacios
+                    .replaceAll("\\s+", " "); // unifica espacios múltiples
+
+            log.info("El texto normalizado es {}",textoNormalizado);
+
             // parsea el texto y obtiene coincidencias
-            for (Emit emit : arbolMedicamentos.parseText(inputText.toLowerCase())) {
+            for (Emit emit : arbolMedicamentos.parseText(textoNormalizado)) {
                 log.info(emit.getKeyword());
                 encontrados.add(emit.getKeyword());
             }
