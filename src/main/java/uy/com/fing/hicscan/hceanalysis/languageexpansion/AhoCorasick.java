@@ -20,12 +20,14 @@ public class AhoCorasick {
 
         Trie.TrieBuilder builder = Trie.builder().onlyWholeWords();
         for (AbstractMap.SimpleEntry<String, String> med : medicamentos) {
-            builder.addKeyword(med.getKey().toLowerCase());
+            builder.addKeyword(med.getValue().toLowerCase());
         }
         arbolMedicamentos = builder.build();
 
         // Log de las keywords agregadas
         log.info("Se cargaron {} medicamentos en el trie: {}", medicamentos.size(),medicamentos.stream().map(AbstractMap.SimpleEntry::getValue).toList());
+        log.info("Se cargaron {} medicamentos en el trie KEY: {}", medicamentos.size(),medicamentos.stream().map(AbstractMap.SimpleEntry::getKey).toList());
+
         log.info("Se cargaron {} medicamentos en el trie", medicamentos.size());
     }
     }
