@@ -25,7 +25,7 @@ public class AhoCorasick {
         arbolMedicamentos = builder.build();
 
         // Log de las keywords agregadas
-        //log.info("Se cargaron {} medicamentos en el trie: {}", medicamentos.size(),medicamentos.stream().map(AbstractMap.SimpleEntry::getValue).toList());
+        log.info("Se cargaron {} medicamentos en el trie: {}", medicamentos.size(),medicamentos.stream().map(AbstractMap.SimpleEntry::getValue).toList());
         log.info("Se cargaron {} medicamentos en el trie", medicamentos.size());
     }
     }
