@@ -18,7 +18,7 @@ public class AhoCorasick {
 
         Trie.TrieBuilder builder = Trie.builder().onlyWholeWords();
         for (AbstractMap.SimpleEntry<String, String> med : medicamentos) {
-            builder.addKeyword(med.getValue());
+            builder.addKeyword(med.getKey());
         }
 
         arbolMedicamentos = builder.build();
