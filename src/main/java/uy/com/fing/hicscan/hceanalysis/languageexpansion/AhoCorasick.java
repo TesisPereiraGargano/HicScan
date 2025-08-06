@@ -29,4 +29,3 @@ public class AhoCorasick {
                 medicamentos.stream().map(AbstractMap.SimpleEntry::getValue).toList());
     }
     }
-}
