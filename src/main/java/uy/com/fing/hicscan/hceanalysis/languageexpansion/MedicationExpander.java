@@ -35,7 +35,7 @@ public class MedicationExpander {
             Set<String> encontrados = new HashSet<>();
 
             // parsea el texto y obtiene coincidencias
-            for (Emit emit : arbolMedicamentos.parseText(inputText.trim().toLowerCase())) {
+            for (Emit emit : arbolMedicamentos.parseText(inputText.toLowerCase())) {
                 encontrados.add(emit.getKeyword());
             }
 
