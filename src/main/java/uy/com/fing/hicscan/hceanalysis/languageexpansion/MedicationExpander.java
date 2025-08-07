@@ -67,10 +67,13 @@ public class MedicationExpander {
             for (String med : encontrados){
                 //AMP_id
                 String amp_id = listaNombresMedicamentos.inverse().get(med);
+                log.info("amp_id {}: {}", med, amp_id);
                 //VMP_id
                 String vmp_id = listaVMPid.get(amp_id);
+                log.info("vmp_id {}", vmp_id);
                 //Nombre del principio activo
                 String nomPrincActivo = listaPrincipiosActivos.get(vmp_id);
+                log.info("nomPrincActivo {}", nomPrincActivo);
                 res.put(med,nomPrincActivo);
             }
 
