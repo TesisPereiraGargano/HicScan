@@ -145,8 +145,9 @@ public class MedicationDictionary {
 
 
 
-        log.info("El listado de medicamentos se cargo y tiene tamaño: {}", listaNombresMedicamentos.size());
-        log.info("El listado de principios activos se cargo y tiene tamaño: {}", listaPrincipiosActivos.size());
+        log.info("El listado de medicamentos se cargo y tiene tamaño: {}", listaNombresMedicamentos);
+        log.info("El listado de vmps se cargo y tiene tamaño: {}", listaVMPid);
+        log.info("El listado de principios activos se cargo y tiene tamaño: {}", listaPrincipiosActivos);
     }
 
 }
