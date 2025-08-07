@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uy.com.fing.hicscan.hceanalysis.data.ctakes.dto.ApiResponse;
 
+import java.text.Normalizer;
 import java.util.*;
 
 /*Este módulo provee un API que va a permitir utilizar el diccionario de medicamentos disponible en la web de AGESIC
@@ -34,10 +35,18 @@ public class MedicationExpander {
             log.info("El arbolMedicamentos es: {}", arbolMedicamentos.toString());
             Set<String> encontrados = new HashSet<>();
 
-            String textoNormalizado = inputText
+            /*String textoNormalizado = inputText
                     .toLowerCase()
-                    .replaceAll("[^a-z0-9áéíóúñü\\s]", " ") // reemplaza comas, puntos, etc. por espacios
+                    .replaceAll("[^a-z0-9áéíóúñü\\s]", " ") // cualquier cosa que no sea letra o numero por un espacio
                     .replaceAll("\\s+", " "); // unifica espacios múltiples
+            */
+            String textoNormalizado = Normalizer.normalize(inputText, Normalizer.Form.NFD) //me separa las comillas si venia "ó" se convierte en "o´"
+                    .replaceAll("\\p{M}", "") //elimina cualquier carácter Unicode que sea una marca (diacrítico) entran los tildes aca
+                    .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")  //elimino cualquier cosa que no sea letra o numero
+                    .replaceAll("\\s+", " ") //unifico espacios múltiples
+                    .toLowerCase()
+                    .trim(); //borro espacios al incicio o final
+
 
             log.info("El texto normalizado es {}",textoNormalizado);
 

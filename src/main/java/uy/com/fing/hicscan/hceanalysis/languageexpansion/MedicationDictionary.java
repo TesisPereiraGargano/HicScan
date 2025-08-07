@@ -39,6 +39,10 @@ public class MedicationDictionary {
     //lista con <AMP_id, VMP_id>
     private List<AbstractMap.SimpleEntry<String, String>> listaVMPid = new ArrayList<>();
 
+    @Getter
+    //lista con <VMP_id, nombre del principio activo>
+    private List<AbstractMap.SimpleEntry<String, String>> listaPrincipiosActivos = new ArrayList<>();
+
     @PostConstruct
     public void initMedicationDictionary() throws FileNotFoundException {
         //Proceso el archivo xml una sóla vez -- Singleton
