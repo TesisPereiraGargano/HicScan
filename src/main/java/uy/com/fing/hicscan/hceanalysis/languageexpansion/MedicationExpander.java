@@ -34,7 +34,7 @@ public class MedicationExpander {
             Trie arbolMedicamentos = this.ahoCorasick.getArbolMedicamentos();
             log.info("El arbolMedicamentos es: {}", arbolMedicamentos.toString());
             Set<String> encontrados = new HashSet<>();
-            
+
             String textoNormalizado = Normalizer.normalize(inputText, Normalizer.Form.NFD) //me separa las comillas si venia "ó" se convierte en "o´"
                     .replaceAll("\\p{M}", "") //elimina cualquier carácter Unicode que sea una marca (diacrítico) entran los tildes aca
                     .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")  //elimino cualquier cosa que no sea letra o numero

@@ -120,8 +120,11 @@ public class MedicationDictionary {
                 medicamento = Arrays.stream(medicamento.split("\\s+"))
                         .limit(6)
                         .collect(Collectors.joining(" "));
-                //Agrego el nombre comercial a la lista
-                listaNombresMedicamentos.put(amp_id.getTextContent(), medicamento);
+                //Si ya no está, agrego el nombre comercial a la lista
+                if (!listaNombresMedicamentos.containsValue(medicamento)) {
+                    listaNombresMedicamentos.put(amp_id.getTextContent(), medicamento);
+                }
+
                 //Agrego la relación AMP_id con VMP_id
                 listaVMPid.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), vmp_id.getTextContent()));
             }
