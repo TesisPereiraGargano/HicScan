@@ -20,10 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,11 +37,11 @@ public class MedicationDictionary {
 
     @Getter
     //lista con <AMP_id, VMP_id>
-    private List<AbstractMap.SimpleEntry<String, String>> listaVMPid = new ArrayList<>();
+    private HashMap<String, String> listaVMPid = new HashMap<>();
 
     @Getter
     //lista con <VMP_id, nombre del principio activo>
-    private List<AbstractMap.SimpleEntry<String, String>> listaPrincipiosActivos = new ArrayList<>();
+    private HashMap<String, String> listaPrincipiosActivos = new HashMap<>();
 
     @PostConstruct
     public void initMedicationDictionary() throws FileNotFoundException {
@@ -126,10 +123,28 @@ public class MedicationDictionary {
                 }
 
                 //Agrego la relación AMP_id con VMP_id
-                listaVMPid.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), vmp_id.getTextContent()));
+                listaVMPid.put(amp_id.getTextContent(), vmp_id.getTextContent());
             }
 
         }
+
+        //Recorro los VMPs y me voy guardando los nombres
+        //Como sólo hay un tag <VMPS> en el archivo quedan todos los VMP dentro del primer item de vmps
+        NodeList vmps = doc.getElementsByTagNameNS(namespace, "VMPS");
+        Element vmpsXML = (Element) vmps.item(0);
+        //Genero una lista con cada VMP
+        NodeList listaVMP = vmpsXML.getElementsByTagNameNS(namespace, "VMP");
+        for(int i = 0; i < listaVMP.getLength(); i++){
+            Element vmp_i = (Element) listaVMP.item(i);
+            //Obtengo el elemento con la etiqueta <VMP_id>
+            Node vmpId = vmp_i.getElementsByTagNameNS(namespace, "VMP_Id").item(0);
+            //Obtengo el elemento con la etiqueta <VMP_DSC>
+            Node textoVmpDsc = vmp_i.getElementsByTagNameNS(namespace, "VMP_DSC").item(0);
+            listaPrincipiosActivos.put(vmpId.getNodeValue(), textoVmpDsc.getNodeValue());
+        }
+
+
+
         log.info("El listado de medicamentos se cargo y tiene tamaño: {}", listaNombresMedicamentos.size());
         log.info("El listado de principios activos se cargo y tiene tamaño: {}", listaVMPid.size());
     }

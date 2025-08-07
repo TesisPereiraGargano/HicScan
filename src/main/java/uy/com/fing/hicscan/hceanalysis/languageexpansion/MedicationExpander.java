@@ -1,5 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.languageexpansion;
 
+import com.google.common.collect.BiMap;
 import lombok.extern.slf4j.Slf4j;
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
@@ -21,10 +22,14 @@ import java.util.*;
 @RequestMapping("/medExpander")
 public class MedicationExpander {
     private final AhoCorasick ahoCorasick;
+    private final MedicationDictionary medicationDictionary;
 
-    public MedicationExpander(AhoCorasick ahoCorasick) {
+
+    public MedicationExpander(AhoCorasick ahoCorasick, MedicationDictionary medicationDictionary) {
         this.ahoCorasick = ahoCorasick;
+        this.medicationDictionary = medicationDictionary;
     }
+
 
     @PostMapping("/getDrugsFromComercialName")
     public ResponseEntity<ApiResponse> obtenerPrincipiosActivos(
@@ -51,11 +56,22 @@ public class MedicationExpander {
 
             log.info("Se obtuvieron las siguientes coincidencias: {}", encontrados);
             //Busco el principio activo
+
             //lo casteo sólo para probar
             Map<String,String> res = new HashMap<>();
 
+            BiMap<String, String> listaNombresMedicamentos = medicationDictionary.getListaNombresMedicamentos();
+            HashMap<String, String> listaVMPid = medicationDictionary.getListaVMPid();
+            HashMap<String, String> listaPrincipiosActivos = medicationDictionary.getListaPrincipiosActivos();
+
             for (String med : encontrados){
-                res.put(med,"dummy");
+                //AMP_id
+                String amp_id = listaNombresMedicamentos.inverse().get(med);
+                //VMP_id
+                String vmp_id = listaVMPid.get(amp_id);
+                //Nombre del principio activo
+                String nomPrincActivo = listaPrincipiosActivos.get(vmp_id);
+                res.put(med,nomPrincActivo);
             }
 
             ApiResponse respuesta = new ApiResponse("success", "Los medicamentos y su traduccion a principios activos es", res);
