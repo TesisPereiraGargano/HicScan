@@ -34,12 +34,7 @@ public class MedicationExpander {
             Trie arbolMedicamentos = this.ahoCorasick.getArbolMedicamentos();
             log.info("El arbolMedicamentos es: {}", arbolMedicamentos.toString());
             Set<String> encontrados = new HashSet<>();
-
-            /*String textoNormalizado = inputText
-                    .toLowerCase()
-                    .replaceAll("[^a-z0-9áéíóúñü\\s]", " ") // cualquier cosa que no sea letra o numero por un espacio
-                    .replaceAll("\\s+", " "); // unifica espacios múltiples
-            */
+            
             String textoNormalizado = Normalizer.normalize(inputText, Normalizer.Form.NFD) //me separa las comillas si venia "ó" se convierte en "o´"
                     .replaceAll("\\p{M}", "") //elimina cualquier carácter Unicode que sea una marca (diacrítico) entran los tildes aca
                     .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")  //elimino cualquier cosa que no sea letra o numero
@@ -47,12 +42,10 @@ public class MedicationExpander {
                     .toLowerCase()
                     .trim(); //borro espacios al incicio o final
 
-
             log.info("El texto normalizado es {}",textoNormalizado);
 
             // parsea el texto y obtiene coincidencias
             for (Emit emit : arbolMedicamentos.parseText(textoNormalizado)) {
-                log.info(emit.getKeyword());
                 encontrados.add(emit.getKeyword());
             }
 

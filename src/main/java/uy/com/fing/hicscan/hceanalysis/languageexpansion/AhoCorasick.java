@@ -1,4 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.languageexpansion;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.ahocorasick.trie.Trie;
@@ -6,8 +8,7 @@ import org.springframework.stereotype.Component;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.text.Normalizer;
-import java.util.AbstractMap;
-import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -17,10 +18,10 @@ public class AhoCorasick {
     private final Trie arbolMedicamentos;
 
     public AhoCorasick(MedicationDictionary medicationDictionary) throws IOException, ParserConfigurationException {
-        List<AbstractMap.SimpleEntry<String, String>> medicamentos = medicationDictionary.getListaNombresMedicamentos();
+        BiMap<String, String> medicamentos = medicationDictionary.getListaNombresMedicamentos();
 
         Trie.TrieBuilder builder = Trie.builder().onlyWholeWords();
-        for (AbstractMap.SimpleEntry<String, String> med : medicamentos) {
+        for (Map.Entry<String, String> med : medicamentos.entrySet()) {
             String keyword = Normalizer.normalize(med.getValue(), Normalizer.Form.NFD)
                     .replaceAll("\\p{M}", "")
                     .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")

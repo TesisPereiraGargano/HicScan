@@ -1,5 +1,7 @@
 package uy.com.fing.hicscan.hceanalysis.languageexpansion;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +34,9 @@ public class MedicationDictionary {
     private String diccionarioMedicamentosFilePath;
 
     @Getter
-    //lista con <AMP_id, nombre comercial>
-    private List<AbstractMap.SimpleEntry<String, String>> listaNombresMedicamentos = new ArrayList<>();
+    //bidireccional map con <AMP_id, nombre comercial>
+    //private List<AbstractMap.SimpleEntry<String, String>> listaNombresMedicamentos = new ArrayList<>();
+    private BiMap<String, String> listaNombresMedicamentos = HashBiMap.create();
 
     @Getter
     //lista con <AMP_id, VMP_id>
@@ -118,7 +121,7 @@ public class MedicationDictionary {
                         .limit(6)
                         .collect(Collectors.joining(" "));
                 //Agrego el nombre comercial a la lista
-                listaNombresMedicamentos.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), medicamento));
+                listaNombresMedicamentos.put(amp_id.getTextContent(), medicamento);
                 //Agrego la relación AMP_id con VMP_id
                 listaVMPid.add(new AbstractMap.SimpleEntry<>(amp_id.getTextContent(), vmp_id.getTextContent()));
             }
