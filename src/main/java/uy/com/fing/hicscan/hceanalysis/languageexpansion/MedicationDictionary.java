@@ -140,7 +140,7 @@ public class MedicationDictionary {
             Node vmpId = vmp_i.getElementsByTagNameNS(namespace, "VMP_Id").item(0);
             //Obtengo el elemento con la etiqueta <VMP_DSC>
             Node textoVmpDsc = vmp_i.getElementsByTagNameNS(namespace, "VMP_DSC").item(0);
-            listaPrincipiosActivos.put(vmpId.getNodeValue(), textoVmpDsc.getNodeValue());
+            listaPrincipiosActivos.put(vmpId.getTextContent(), textoVmpDsc.getTextContent());
         }
 
 
