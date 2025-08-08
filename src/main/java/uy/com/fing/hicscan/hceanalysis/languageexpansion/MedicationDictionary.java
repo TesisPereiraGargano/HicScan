@@ -126,7 +126,7 @@ public class MedicationDictionary {
                             .replaceAll("\\s+", " ")
                             .toLowerCase()
                             .trim();
-                    listaNombresMedicamentos.put(amp_id.getTextContent(), medicamento);
+                    listaNombresMedicamentos.put(amp_id.getTextContent(), med);
                 }
 
                 //Agrego la relación AMP_id con VMP_id
