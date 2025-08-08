@@ -120,6 +120,12 @@ public class MedicationDictionary {
                         .collect(Collectors.joining(" "));
                 //Si ya no está, agrego el nombre comercial a la lista
                 if (!listaNombresMedicamentos.containsValue(medicamento)) {
+                    String med = Normalizer.normalize(medicamento, Normalizer.Form.NFD)
+                            .replaceAll("\\p{M}", "")
+                            .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
+                            .replaceAll("\\s+", " ")
+                            .toLowerCase()
+                            .trim();
                     listaNombresMedicamentos.put(amp_id.getTextContent(), medicamento);
                 }
 

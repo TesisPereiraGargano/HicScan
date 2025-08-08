@@ -22,13 +22,7 @@ public class AhoCorasick {
 
         Trie.TrieBuilder builder = Trie.builder().onlyWholeWords();
         for (Map.Entry<String, String> med : medicamentos.entrySet()) {
-            String keyword = Normalizer.normalize(med.getValue(), Normalizer.Form.NFD)
-                    .replaceAll("\\p{M}", "")
-                    .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
-                    .replaceAll("\\s+", " ")
-                    .toLowerCase()
-                    .trim();
-            builder.addKeyword(keyword);
+            builder.addKeyword(med.getValue());
         }
         arbolMedicamentos = builder.build();
 
