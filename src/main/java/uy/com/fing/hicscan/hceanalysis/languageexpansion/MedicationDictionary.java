@@ -20,6 +20,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.Normalizer;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -140,7 +141,13 @@ public class MedicationDictionary {
             Node vmpId = vmp_i.getElementsByTagNameNS(namespace, "VMP_Id").item(0);
             //Obtengo el elemento con la etiqueta <VMP_DSC>
             Node textoVmpDsc = vmp_i.getElementsByTagNameNS(namespace, "VMP_DSC").item(0);
-            listaPrincipiosActivos.put(vmpId.getTextContent(), textoVmpDsc.getTextContent());
+            String principio = Normalizer.normalize(textoVmpDsc.getTextContent(), Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}", "")
+                    .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
+                    .replaceAll("\\s+", " ")
+                    .toLowerCase()
+                    .trim();
+            listaPrincipiosActivos.put(vmpId.getTextContent(), principio);
         }
 
 
