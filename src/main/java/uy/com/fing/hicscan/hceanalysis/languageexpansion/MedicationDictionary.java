@@ -118,14 +118,14 @@ public class MedicationDictionary {
                 medicamento = Arrays.stream(medicamento.split("\\s+"))
                         .limit(6)
                         .collect(Collectors.joining(" "));
+                String med = Normalizer.normalize(medicamento, Normalizer.Form.NFD)
+                        .replaceAll("\\p{M}", "")
+                        .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
+                        .replaceAll("\\s+", " ")
+                        .toLowerCase()
+                        .trim();
                 //Si ya no está, agrego el nombre comercial a la lista
-                if (!listaNombresMedicamentos.containsValue(medicamento)) {
-                    String med = Normalizer.normalize(medicamento, Normalizer.Form.NFD)
-                            .replaceAll("\\p{M}", "")
-                            .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
-                            .replaceAll("\\s+", " ")
-                            .toLowerCase()
-                            .trim();
+                if (!listaNombresMedicamentos.containsValue(med)) {
                     listaNombresMedicamentos.put(amp_id.getTextContent(), med);
                 }
 
@@ -147,6 +147,7 @@ public class MedicationDictionary {
             Node vmpId = vmp_i.getElementsByTagNameNS(namespace, "VMP_Id").item(0);
             //Obtengo el elemento con la etiqueta <VMP_DSC>
             Node textoVmpDsc = vmp_i.getElementsByTagNameNS(namespace, "VMP_DSC").item(0);
+
             String principio = Normalizer.normalize(textoVmpDsc.getTextContent(), Normalizer.Form.NFD)
                     .replaceAll("\\p{M}", "")
                     .replaceAll("[^\\p{L}\\p{Nd}\\s]", " ")
