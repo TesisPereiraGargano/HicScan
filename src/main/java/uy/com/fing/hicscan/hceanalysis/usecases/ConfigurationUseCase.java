@@ -178,7 +178,7 @@ public class ConfigurationUseCase {
                     }
                 }
                 
-                result.add(new PropertyDescriptorWithFormStatus(property, isShown, options, subForm));
+                result.add(new PropertyDescriptorWithFormStatus(property, isShown, options, subForm, canBeTransparented));
             }
             
             // Cache the result to avoid infinite recursion and improve performance
