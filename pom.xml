@@ -103,6 +103,14 @@
 			<version>6.0.0</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.ctakes</groupId>
+			<artifactId>ctakes-dictionary-lookup-fast</artifactId>
+			<version>6.0.0</version>
+		</dependency>
+
+
+
 		<!-- https://mvnrepository.com/artifact/org.apache.ctakes/ctakes-core -->
 		<dependency>
 			<groupId>org.apache.ctakes</groupId>
