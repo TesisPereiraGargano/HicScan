@@ -46,10 +46,12 @@ public class ctakesController {
 
     public ctakesController() throws IOException, UIMAException {
         System.setProperty("umlsKey", "9acb4127-e18e-4a0c-a53d-6555dd08fb32");
-
         PiperFileReader reader = new PiperFileReader("/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/BigPipeline.piper");
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
+        // Setear parámetro OutputDirectory en el pipeline (en el AE principal)
+        pipeline.getAnalysisEngineMetaData().getConfigurationParameterSettings().setParameterValue("OutputDirectory", "/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/");
+        //pipeline.getAnalysisEngineMetaData().getConfigurationParameterSettings().commit();
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
 
     }
