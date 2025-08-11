@@ -68,7 +68,7 @@ add SemanticTableFileWriter SubDirectory=html_table TableType=HTML
 //add FileTreeXmiWriter SubDirectory=xmi
 
 // Temporal Events and Times in Anafora format, write to subdirectory.
-add EventTimeAnaforaWriter SubDirectory=anafora
+//add EventTimeAnaforaWriter SubDirectory=anafora
 
 // Write some information about the run.
 addLast org.apache.ctakes.core.util.log.FinishedLogger
