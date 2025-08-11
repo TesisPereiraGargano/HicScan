@@ -41,8 +41,8 @@ add DefaultJCasTermAnnotator
 //load CorefSubPipe
 // Constituency Parser adds Terminal Treebank Nodes, needed to create Markables
 add ConstituencyParser
+ADD_COMPONENT DeterministicMarkableAnnotator
 
-add DeterministicMarkableAnnotator
 addDescription MarkableSalienceAnnotator /org/apache/ctakes/temporal/models/salience/model.jar
 addDescription MentionClusterCoreferenceAnnotator /org/apache/ctakes/coreference/models/mention-cluster/model.jar
 
