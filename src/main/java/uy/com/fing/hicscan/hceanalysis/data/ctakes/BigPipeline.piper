@@ -4,32 +4,47 @@
 set WriteBanner=yes
 
 // Advanced Tokenization: Regex sectionization, BIO Sentence Detector (lumper), Paragraphs, Lists.
-load FullTokenizerPipeline
-// OR use the standard tokenizer pipeline:
-//load DefaultTokenizerPipeline
+//load FullTokenizerPipeline
+add SimpleSegmentAnnotator
+add SentenceDetector
+add TokenizerAnnotatorPTB
 
 // Refined tokens, Parts of Speech.
 add ContextDependentTokenizerAnnotator
 add POSTagger
 
 // Chunkers
-load ChunkerSubPipe
+add Chunker
+addDescription adjuster.ChunkAdjuster NP,NP 1
+addDescription adjuster.ChunkAdjuster NP,PP,NP 2
 
 // Default fast dictionary lookup.
 set minimumSpan=2
-load DictionarySubPipe
+// path to the xml file containing information for dictionary lookup configuration.
+cli LookupXml=l
+// umls credentials
+cli umlsKey=key
+
+// Default fast dictionary lookup
+add DefaultJCasTermAnnotator
 
 // Cleartk Entity Attributes (negation, uncertainty, etc.).
 // load AttributeCleartkSubPipe
 
 // Entity Relations (degree/severity, anatomical location).
-load RelationSubPipe
+//load RelationSubPipe -- TO DO: revisar si es necesario
 
 // Temporal (event, time, dtr, tlink).
-load TemporalSubPipe
+//load TemporalSubPipe -- TO DO: revisar si es necesario
 
 // Coreferences (e.g. patient = he).
-load CorefSubPipe
+//load CorefSubPipe
+// Constituency Parser adds Terminal Treebank Nodes, needed to create Markables
+add ConstituencyParser
+
+add DeterministicMarkableAnnotator
+addDescription MarkableSalienceAnnotator /org/apache/ctakes/temporal/models/salience/model.jar
+addDescription MentionClusterCoreferenceAnnotator /org/apache/ctakes/coreference/models/mention-cluster/model.jar
 
 // Token covered text and token span offsets.  Write bev (default) and html styles.
 add TokenTableFileWriter SubDirectory=bsv_tokens
