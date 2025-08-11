@@ -49,9 +49,6 @@ public class ctakesController {
         PiperFileReader reader = new PiperFileReader("/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/BigPipeline.piper");
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
-        // Setear parámetro OutputDirectory en el pipeline (en el AE principal)
-        pipeline.getAnalysisEngineMetaData().getConfigurationParameterSettings().setParameterValue("OutputDirectory", "/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/");
-        //pipeline.getAnalysisEngineMetaData().getConfigurationParameterSettings().commit();
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
 
     }
