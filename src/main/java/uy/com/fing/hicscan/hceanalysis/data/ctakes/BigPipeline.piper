@@ -57,15 +57,15 @@ add pretty.html.HtmlTextWriter SubDirectory=html
 add pretty.plaintext.PrettyTextWriterFit SubDirectory=text
 
 // primitive FHIR output, write to subdirectory
-add org.apache.ctakes.fhir.cc.FhirJsonFileWriter WriteNlpFhir=true SubDirectory=fhir
+//add org.apache.ctakes.fhir.cc.FhirJsonFileWriter WriteNlpFhir=true SubDirectory=fhir
 
 // Table output, write to subdirectory.  Write bsv (default), csv and html styles.
-add SemanticTableFileWriter SubDirectory=bsv_table
-add SemanticTableFileWriter SubDirectory=csv_table TableType=CSV
+//add SemanticTableFileWriter SubDirectory=bsv_table
+//add SemanticTableFileWriter SubDirectory=csv_table TableType=CSV
 add SemanticTableFileWriter SubDirectory=html_table TableType=HTML
 
 // XMI output, write to subdirectory.  Warning: these can be very large.
-add FileTreeXmiWriter SubDirectory=xmi
+//add FileTreeXmiWriter SubDirectory=xmi
 
 // Temporal Events and Times in Anafora format, write to subdirectory.
 add EventTimeAnaforaWriter SubDirectory=anafora
