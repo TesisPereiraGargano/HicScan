@@ -42,9 +42,9 @@ add DefaultJCasTermAnnotator
 // Constituency Parser adds Terminal Treebank Nodes, needed to create Markables
 add ConstituencyParser
 
-add DeterministicMarkableAnnotator
-addDescription MarkableSalienceAnnotator /org/apache/ctakes/temporal/models/salience/model.jar
-addDescription MentionClusterCoreferenceAnnotator /org/apache/ctakes/coreference/models/mention-cluster/model.jar
+//add DeterministicMarkableAnnotator
+//addDescription MarkableSalienceAnnotator /org/apache/ctakes/temporal/models/salience/model.jar
+//addDescription MentionClusterCoreferenceAnnotator /org/apache/ctakes/coreference/models/mention-cluster/model.jar
 
 // Token covered text and token span offsets.  Write bev (default) and html styles.
 add TokenTableFileWriter SubDirectory=bsv_tokens
