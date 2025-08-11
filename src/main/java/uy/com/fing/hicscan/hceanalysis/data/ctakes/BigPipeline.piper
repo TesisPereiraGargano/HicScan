@@ -47,8 +47,8 @@ add ConstituencyParser
 //addDescription MentionClusterCoreferenceAnnotator /org/apache/ctakes/coreference/models/mention-cluster/model.jar
 
 // Token covered text and token span offsets.  Write bev (default) and html styles.
-add TokenTableFileWriter SubDirectory=bsv_tokens
-add TokenTableFileWriter SubDirectory=html_tokens TableType=HTML
+//add TokenTableFileWriter SubDirectory=bsv_tokens
+//add TokenTableFileWriter SubDirectory=html_tokens TableType=HTML
 
 // Html output, write to subdirectory.
 //add pretty.html.HtmlTextWriter SubDirectory=html
