@@ -1,10 +1,27 @@
 package uy.com.fing.hicscan.hceanalysis.data.ctakes;
 
+import jakarta.annotation.PostConstruct;
+import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
+import org.apache.ctakes.core.pipeline.PipelineBuilder;
+import org.apache.ctakes.core.pipeline.PiperFileReader;
+import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.uima.UIMAException;
+import org.apache.uima.UIMAFramework;
+import org.apache.uima.analysis_engine.AnalysisEngine;
+
+import org.apache.uima.analysis_engine.AnalysisEngineDescription;
+import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
+import org.apache.uima.fit.factory.AnalysisEngineFactory;
+import org.apache.uima.fit.util.JCasUtil;
+import org.apache.uima.jcas.JCas;
+import org.apache.uima.resource.ResourceInitializationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 // para manipular archivos
 import java.io.File;
-import java.io.FileReader;
 //para procesar el html generado por ctakes
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -26,6 +42,42 @@ import uy.com.fing.hicscan.hceanalysis.data.ctakes.dto.ApiResponse;
 @RestController
 @RequestMapping("/ctakes")
 public class ctakesController {
+    private final AnalysisEngine engine;
+
+    public ctakesController() throws IOException, UIMAException {
+        System.setProperty("umlsKey", "9acb4127-e18e-4a0c-a53d-6555dd08fb32");
+
+        PiperFileReader reader = new PiperFileReader("/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/BigPipeline.piper");
+        PipelineBuilder builder = reader.getBuilder();
+        AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
+        engine = UIMAFramework.produceAnalysisEngine(pipeline);
+
+    }
+
+    @PostMapping("/getDrugsFromTextV2")
+    //Operacion que permite analizar texto plano utilizando la aplicacion Apache ctakes
+    //retornando como respuesta el conjunto de medicamentos extraidos de la misma
+    //public ResponseEntity<ApiResponse> ejecutarPipeline(
+    public String ejecutarPipeline(
+            @RequestParam String inputText
+    ) throws ResourceInitializationException, AnalysisEngineProcessException {
+            JCas jCas = engine.newJCas();
+            jCas.setDocumentText(inputText);
+            engine.process(jCas);
+
+            jCas.getAnnotationIndex().forEach(System.out::println);
+
+            for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
+                String concepto = ia.getCoveredText();
+                String cui = ia.getOntologyConceptArr(0) != null
+                        ? ia.getOntologyConceptArr(0).toString() //corregir
+                        : "N/A";
+                System.out.printf("Entidad: %-20s  CUI: %s%n", concepto, cui);
+            }
+
+            return "ejecute";
+        }
+
 
     @PostMapping("/getDrugsFromText")
 //Operacion que permite analizar texto plano utilizando la aplicacion Apache ctakes
