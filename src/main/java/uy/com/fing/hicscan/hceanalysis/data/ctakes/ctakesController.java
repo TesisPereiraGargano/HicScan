@@ -58,43 +58,30 @@ public class ctakesController {
     @PostMapping("/getDrugsFromTextV2")
     //Operacion que permite analizar texto plano utilizando la aplicacion Apache ctakes
     //retornando como respuesta el conjunto de medicamentos extraidos de la misma
-    //public ResponseEntity<ApiResponse> ejecutarPipeline(
-    public String ejecutarPipeline(
+    public ResponseEntity<ApiResponse> ejecutarPipeline(
             @RequestParam String inputText
     ) throws ResourceInitializationException, AnalysisEngineProcessException {
-            JCas jCas = engine.newJCas();
-            jCas.setDocumentText(inputText);
-            engine.process(jCas);
+        JCas jCas = engine.newJCas();
+        jCas.setDocumentText(inputText);
+        engine.process(jCas);
 
-            //jCas.getAnnotationIndex().forEach(System.out::println);
-/*
-            for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
-                if (ia != null) {
-                    String concepto = ia.getCoveredText();
-                    if (concepto != null) {
-                        String cui = ia.getOntologyConceptArr(0) != null
-                                ? ia.getOntologyConceptArr(0).toString() //corregir
-                                : "N/A";
-                        System.out.printf("Entidad: %-20s  CUI: %s%n",concepto, cui);
-                    }
-                }
-            }
-*/
+        Map<String, String> drogas = new HashMap<>(); //hashmap que guarda los medicamentos y su cui
         for (MedicationMention med : JCasUtil.select(jCas, MedicationMention.class)) {
             if (med != null) {
-                String concepto = med.getCoveredText();
+                String nombre = med.getCoveredText();
                 String cui = "N/A";
 
                 if (med.getOntologyConceptArr() != null && !med.getOntologyConceptArr().isEmpty()) {
                     cui = med.getOntologyConceptArr(0).getCode();
                 }
-
-                System.out.printf("Entidad: %-20s  CUI: %s%n", concepto, cui);
+                drogas.putIfAbsent(cui, nombre); // no sobreescribo si ya estaba el CUI
+                System.out.printf("Entidad: %-20s  CUI: %s%n", nombre, cui);
             }
         }
 
-
-        return "ejecute";
+        //retorno la respuesta
+        ApiResponse respuesta = new ApiResponse("success", "Datos extraídos correctamente.", drogas);
+        return ResponseEntity.ok(respuesta);
         }
 
 
