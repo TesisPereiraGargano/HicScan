@@ -6,6 +6,7 @@ import org.apache.ctakes.core.pipeline.PipelineBuilder;
 import org.apache.ctakes.core.pipeline.PiperFileReader;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
+import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
 import org.apache.uima.UIMAException;
 import org.apache.uima.UIMAFramework;
 import org.apache.uima.analysis_engine.AnalysisEngine;
@@ -79,14 +80,13 @@ public class ctakesController {
                 }
             }
 */
-        for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
-            if (ia != null) {
-                String concepto = ia.getCoveredText();
+        for (MedicationMention med : JCasUtil.select(jCas, MedicationMention.class)) {
+            if (med != null) {
+                String concepto = med.getCoveredText();
                 String cui = "N/A";
 
-                if (ia.getOntologyConceptArr() != null && ia.getOntologyConceptArr(0) != null) {
-                    UmlsConcept umlsConcept = (UmlsConcept) ia.getOntologyConceptArr(0);
-                    cui = umlsConcept.getCui();
+                if (med.getOntologyConceptArr() != null && !med.getOntologyConceptArr().isEmpty()) {
+                    cui = med.getOntologyConceptArr(0).getCode();
                 }
 
                 System.out.printf("Entidad: %-20s  CUI: %s%n", concepto, cui);
