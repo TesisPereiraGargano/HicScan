@@ -64,14 +64,18 @@ public class ctakesController {
             jCas.setDocumentText(inputText);
             engine.process(jCas);
 
-            jCas.getAnnotationIndex().forEach(System.out::println);
+            //jCas.getAnnotationIndex().forEach(System.out::println);
 
             for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
-                String concepto = ia.getCoveredText();
-                String cui = ia.getOntologyConceptArr(0) != null
-                        ? ia.getOntologyConceptArr(0).toString() //corregir
-                        : "N/A";
-                System.out.printf("Entidad: %-20s  CUI: %s%n", concepto, cui);
+                if (ia != null) {
+                    String concepto = ia.getCoveredText();
+                    if (concepto != null) {
+                        String cui = ia.getOntologyConceptArr(0) != null
+                                ? ia.getOntologyConceptArr(0).toString() //corregir
+                                : "N/A";
+                        System.out.printf("Entidad: %-20s  CUI: %s%n",concepto, cui);
+                    }
+                }
             }
 
             return "ejecute";
