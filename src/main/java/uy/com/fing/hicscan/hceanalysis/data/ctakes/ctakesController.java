@@ -24,14 +24,12 @@ import org.springframework.web.bind.annotation.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 // para manipular archivos
 import java.io.File;
 //para procesar el html generado por ctakes
@@ -80,13 +78,27 @@ public class ctakesController {
             }
         }
 
+        // Lista de TUIs que te interesan
+        String[] tuisDrugs = {
+                "T116", "T195", "T123", "T122", "T103", "T120", "T104", "T200",
+                "T196", "T126", "T131", "T125", "T129", "T130", "T197", "T114",
+                "T109", "T121", "T192", "T127"
+        };
+
+
         for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
             if (ia.getOntologyConceptArr() != null) {
                 for (int i = 0; i < ia.getOntologyConceptArr().size(); i++) {
                     OntologyConcept oc = ia.getOntologyConceptArr(i);
                     if (oc instanceof UmlsConcept umls) {
                         String tui = umls.getTui();
-                        if (tui != null && tui.startsWith("T12")) { // T121, T122, etc.
+                        boolean esMedicamento = false;
+                        int k = 0;
+                        while (k < tuisDrugs.length && !esMedicamento) {
+                            esMedicamento = tui.startsWith(tuisDrugs[k]);
+                            k++;
+                        }
+                        if (tui != null && esMedicamento) { // T121, T122, etc.
                             System.out.printf("Droga: %-20s  CUI: %s  TUI: %s%n",
                                     ia.getCoveredText(), umls.getCui(), tui);
                         }
