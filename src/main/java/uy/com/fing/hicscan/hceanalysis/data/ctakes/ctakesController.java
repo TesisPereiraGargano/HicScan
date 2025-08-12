@@ -65,18 +65,6 @@ public class ctakesController {
         engine.process(jCas);
 
         Map<String, String> drogas = new HashMap<>(); //hashmap que guarda los medicamentos y su cui
-        for (MedicationMention med : JCasUtil.select(jCas, MedicationMention.class)) {
-            if (med != null) {
-                String nombre = med.getCoveredText();
-                String cui = "N/A";
-
-                if (med.getOntologyConceptArr() != null && !med.getOntologyConceptArr().isEmpty()) {
-                    cui = med.getOntologyConceptArr(0).getCode();
-                }
-                drogas.putIfAbsent(cui, nombre); // no sobreescribo si ya estaba el CUI
-                System.out.printf("Entidad: %-20s  CUI: %s%n", nombre, cui);
-            }
-        }
 
         // Lista de TUIs que te interesan
         String[] tuisDrugs = {
@@ -99,8 +87,11 @@ public class ctakesController {
                             k++;
                         }
                         if (tui != null && esMedicamento) { // T121, T122, etc.
-                            System.out.printf("Droga: %-20s  CUI: %s  TUI: %s%n",
-                                    ia.getCoveredText(), umls.getCui(), tui);
+                            String nombre = ia.getCoveredText();
+                            String cui = umls.getCui();
+                            System.out.printf("Medicamento: %-20s  CUI: %s  TUI: %s%n",
+                                    nombre, cui, tui);
+                            drogas.putIfAbsent(cui, nombre); // no sobreescribo si ya estaba el CUI;
                         }
                     }
                 }
