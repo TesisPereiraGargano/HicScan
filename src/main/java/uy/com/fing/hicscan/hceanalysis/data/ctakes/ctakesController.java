@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import org.apache.ctakes.clinicalpipeline.ClinicalPipelineFactory;
 import org.apache.ctakes.core.pipeline.PipelineBuilder;
 import org.apache.ctakes.core.pipeline.PiperFileReader;
+import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.ctakes.typesystem.type.textsem.MedicationMention;
@@ -78,6 +79,22 @@ public class ctakesController {
                 System.out.printf("Entidad: %-20s  CUI: %s%n", nombre, cui);
             }
         }
+
+        for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
+            if (ia.getOntologyConceptArr() != null) {
+                for (int i = 0; i < ia.getOntologyConceptArr().size(); i++) {
+                    OntologyConcept oc = ia.getOntologyConceptArr(i);
+                    if (oc instanceof UmlsConcept umls) {
+                        String tui = umls.getTui();
+                        if (tui != null && tui.startsWith("T12")) { // T121, T122, etc.
+                            System.out.printf("Droga: %-20s  CUI: %s  TUI: %s%n",
+                                    ia.getCoveredText(), umls.getCui(), tui);
+                        }
+                    }
+                }
+            }
+        }
+
 
         //retorno la respuesta
         ApiResponse respuesta = new ApiResponse("success", "Datos extraídos correctamente.", drogas);
