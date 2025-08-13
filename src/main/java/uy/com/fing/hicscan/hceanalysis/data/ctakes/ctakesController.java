@@ -54,7 +54,7 @@ public class ctakesController {
 
     }
 
-    @PostMapping("/getDrugsFromTextV2")
+    @PostMapping("/getDrugsFromText")
     //Operacion que permite analizar texto plano utilizando la aplicacion Apache ctakes
     //retornando como respuesta el conjunto de medicamentos extraidos de la misma
     public ResponseEntity<ApiResponse> ejecutarPipeline(
@@ -104,8 +104,8 @@ public class ctakesController {
         return ResponseEntity.ok(respuesta);
         }
 
-
-    @PostMapping("/getDrugsFromText")
+//No se utiliza dado que ejecuta ctakes y lo inicializa cada vez.
+    @PostMapping("/getDrugsFromTextV2")
 //Operacion que permite analizar texto plano utilizando la aplicacion Apache ctakes
 //retornando como respuesta el conjunto de medicamentos extraidos de la misma
     public ResponseEntity<ApiResponse> ejecutarPipeline(
