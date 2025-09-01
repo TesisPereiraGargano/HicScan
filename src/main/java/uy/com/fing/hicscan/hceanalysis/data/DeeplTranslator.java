@@ -1,6 +1,7 @@
 package uy.com.fing.hicscan.hceanalysis.data;
 import com.deepl.api.TextResult;
 import com.deepl.api.Translator;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -8,8 +9,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/deepl")
 public class DeeplTranslator {
 
-    //@Value("${deepl.api.key}") si queremos colocar la API KEY DEEPL en APPLICATION.PROPERTIES
-    private String authKey = "528bdd79-3a4c-45ef-95e6-29175c5bc4aa:fx";
+    @Value("${deepl.api.key}") //se define en el archivo application.properties
+    private String authKey;
 
     @GetMapping("/translateText")
     public ResponseEntity<String> translateText(@RequestParam String text) {
