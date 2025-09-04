@@ -1,15 +1,22 @@
 package uy.com.fing.hicscan.hceanalysis.data.translator;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import uy.com.fing.hicscan.hceanalysis.data.translator.impl.DeeplTranslator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @TestPropertySource(properties = {
         "deepl.api.key=528bdd79-3a4c-45ef-95e6-29175c5bc4aa:fx"
 })
 class DeeplTranslatorTest {
+
+    @Autowired
+    private DeeplTranslator deeplTranslator;
+
 
     private final Translator translator = new DeeplTranslator(); // Usa tu implementación real
 
@@ -22,3 +29,5 @@ class DeeplTranslatorTest {
         assertEquals("Hello world", translated);
     }
 }
+
+
