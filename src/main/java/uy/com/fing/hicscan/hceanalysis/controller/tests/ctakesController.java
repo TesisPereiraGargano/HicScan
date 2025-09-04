@@ -1,4 +1,4 @@
-package uy.com.fing.hicscan.hceanalysis.data.ctakes;
+package uy.com.fing.hicscan.hceanalysis.controller.tests;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +25,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-// para manipular archivos
-//para procesar el html generado por ctakes
-//importo la clase ApiResponse para el formateo de la respuesta en json
-import uy.com.fing.hicscan.hceanalysis.data.ctakes.dto.ApiResponse;
+import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.impl.ctakes.dto.ApiResponse;
 @Slf4j
 @RestController
 @RequestMapping("/ctakes")
