@@ -20,7 +20,7 @@ class DeeplTranslatorTest {
     @Test
     void testTranslation() {
         String input = "Hola mundo";
-        String translated = deeplTranslator.translate(input, "ES", "EN");
+        String translated = deeplTranslator.translate(input, "ES", "en-US");
         assertNotNull(translated, "La traducción no debe ser nula");
         assertFalse(translated.isEmpty(), "La traducción no debe estar vacía");
         assertEquals("Hello world", translated);
