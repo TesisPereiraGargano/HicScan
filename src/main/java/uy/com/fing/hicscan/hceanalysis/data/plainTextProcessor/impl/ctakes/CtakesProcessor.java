@@ -73,7 +73,7 @@ public class CtakesProcessor implements PlainTextProcessor {
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
 
         }
-        
+
 
     @Override
     public Map<String, String> extractDrugs(String inputText) {

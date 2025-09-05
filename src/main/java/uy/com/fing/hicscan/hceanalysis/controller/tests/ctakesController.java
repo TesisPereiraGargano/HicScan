@@ -32,7 +32,9 @@ import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.impl.ctakes.dto.A
 @RestController
 @RequestMapping("/ctakes")
 public class ctakesController {
+  /*
     @Value("${ctakes.dictionary.path}")
+
     private String dictionaryPath;
 
     @Value("${ctakes.piper.file.path}")
@@ -122,4 +124,6 @@ public class ctakesController {
         ApiResponse respuesta = new ApiResponse("success", "Datos extraídos correctamente.", drogas);
         return ResponseEntity.ok(respuesta);
     }
+*/
 }
+   
