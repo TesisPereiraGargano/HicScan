@@ -16,6 +16,8 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -50,17 +52,17 @@ public class ctakesController {
         if (!Files.exists(targetPath)) {
             Files.createDirectories(targetPath);
         }
-
-        String[] files = { "sno_rx_16ab.script", "sno_rx_16ab.properties" };
         ClassLoader classLoader = getClass().getClassLoader();
 
+        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
+        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
+
         for (String file : files) {
-            InputStream is = classLoader.getResourceAsStream(dictionaryPath + file);
-            if (is == null) {
-                throw new RuntimeException("No se encontró el recurso: " + dictionaryPath + file);
+            Resource resource = new ClassPathResource(baseResourcePath + file);
+            try (InputStream is = resource.getInputStream()) {
+                Files.copy(is, Paths.get(dictionaryPath, file), StandardCopyOption.REPLACE_EXISTING);
+                log.info("Copiado {} a {}", file, dictionaryPath);
             }
-            Files.copy(is, targetPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-            log.info("Se copio correctamente el archivo {} a la ruta {}",file, dictionaryPath);
         }
 
         System.setProperty("umlsKey", umlsKey);
