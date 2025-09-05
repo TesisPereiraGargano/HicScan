@@ -42,7 +42,7 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     private AnalysisEngine engine;
 
-    private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
+    private static final String rutaEnProyecto = "src/main/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
@@ -55,9 +55,9 @@ public class CtakesProcessor implements PlainTextProcessor {
         ClassLoader classLoader = getClass().getClassLoader();
 
         for (String file : files) {
-            InputStream is = classLoader.getResourceAsStream(dictionaryPath + file);
+            InputStream is = classLoader.getResourceAsStream(targetPath + file);
             if (is == null) {
-                throw new RuntimeException("No se encontró el recurso: " + dictionaryPath + file);
+                throw new RuntimeException("No se encontró el recurso: " + targetPath + file);
             }
             Files.copy(is, targetPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
             log.info("Se copió correctamente el archivo {} a la ruta {}", file, dictionaryPath);
