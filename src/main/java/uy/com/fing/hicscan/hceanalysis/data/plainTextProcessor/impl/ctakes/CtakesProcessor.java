@@ -61,8 +61,8 @@ public class CtakesProcessor implements PlainTextProcessor {
         for (String file : files) {
             Resource resource = new ClassPathResource(baseResourcePath + file);
             try (InputStream is = resource.getInputStream()) {
-                Files.copy(is, Paths.get(dictionaryPath, file), StandardCopyOption.REPLACE_EXISTING);
-                log.info("Copiado {} a {}", file, dictionaryPath);
+                Files.copy(is, Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/", file), StandardCopyOption.REPLACE_EXISTING);
+                log.info("Copiado {} a {}", file, "resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/");
             }
         }
 
