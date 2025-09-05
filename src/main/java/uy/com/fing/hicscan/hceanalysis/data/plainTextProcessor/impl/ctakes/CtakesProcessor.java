@@ -46,25 +46,26 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        try (InputStream is = getClass().getResourceAsStream("/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/sno_rx_16ab.script")) {
-            System.out.println(is != null ? "Encontrado" : "No encontrado");
-        }
+        // Verificar que los recursos están dentro del jar
+        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
+        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
 
-        Path targetPath = Paths.get(rutaEnProyecto);
+        Path targetPath = Paths.get(dictionaryPath);
+
         if (!Files.exists(targetPath)) {
             Files.createDirectories(targetPath);
         }
 
-        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
         ClassLoader classLoader = getClass().getClassLoader();
 
         for (String file : files) {
-            InputStream is = classLoader.getResourceAsStream("org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/" + file);
-            if (is == null) {
-                throw new RuntimeException("No se encontró el recurso: " + targetPath + file);
+            try (InputStream is = classLoader.getResourceAsStream(baseResourcePath + file)) {
+                if (is == null) {
+                    throw new RuntimeException("No se encontró el recurso: " + baseResourcePath + file);
+                }
+                Files.copy(is, targetPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+                log.info("Se copió correctamente el archivo {} a {}", file, targetPath);
             }
-            Files.copy(is, targetPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-            log.info("Se copió correctamente el archivo {} a la ruta {}", file, dictionaryPath);
         }
 
         System.setProperty("umlsKey", umlsKey);
