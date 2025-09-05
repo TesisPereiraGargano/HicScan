@@ -50,8 +50,8 @@ public class CtakesProcessor implements PlainTextProcessor {
     @PostConstruct
     public void init() throws IOException, UIMAException {
         Path targetPath = Paths.get(rutaEnProyecto);
-        if (!Files.exists(targetPath)) {
-            Files.createDirectories(targetPath);
+        if (!Files.exists(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"))) {
+            Files.createDirectories(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"));
         }
         ClassLoader classLoader = getClass().getClassLoader();
 
