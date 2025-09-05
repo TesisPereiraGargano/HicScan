@@ -1,5 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.impl.ctakes;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ctakes.core.pipeline.PipelineBuilder;
 import org.apache.ctakes.core.pipeline.PiperFileReader;
@@ -39,11 +40,12 @@ public class CtakesProcessor implements PlainTextProcessor {
     @Value("${umls.key}")
     private String umlsKey;
 
-    private final AnalysisEngine engine;
-
+    private AnalysisEngine engine;
+    
     private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
-    public CtakesProcessor() throws IOException, UIMAException {
+    @PostConstruct
+    public void init() throws IOException, UIMAException {
         Path targetPath = Paths.get(rutaEnProyecto);
         if (!Files.exists(targetPath)) {
             Files.createDirectories(targetPath);
