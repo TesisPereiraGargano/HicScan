@@ -55,7 +55,7 @@ public class CtakesProcessor implements PlainTextProcessor {
         ClassLoader classLoader = getClass().getClassLoader();
 
         for (String file : files) {
-            InputStream is = classLoader.getResourceAsStream(targetPath + file);
+            InputStream is = classLoader.getResourceAsStream("org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/" + file);
             if (is == null) {
                 throw new RuntimeException("No se encontró el recurso: " + targetPath + file);
             }
