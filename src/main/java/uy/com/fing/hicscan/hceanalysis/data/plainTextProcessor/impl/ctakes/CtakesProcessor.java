@@ -8,6 +8,7 @@ import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
 import org.apache.ctakes.typesystem.type.refsem.UmlsConcept;
 import org.apache.ctakes.typesystem.type.textsem.IdentifiedAnnotation;
 import org.apache.uima.UIMAException;
+import org.apache.uima.UIMAFramework;
 import org.apache.uima.analysis_engine.AnalysisEngine;
 import org.apache.uima.analysis_engine.AnalysisEngineDescription;
 import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
@@ -15,6 +16,8 @@ import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.PlainTextProcessor;
 
@@ -42,29 +45,24 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     private AnalysisEngine engine;
 
-    private static final String rutaEnProyecto = "src/main/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
+    private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        // Verificar que los recursos están dentro del jar
-        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
-        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
-
-        Path targetPath = Paths.get(dictionaryPath);
-
+        Path targetPath = Paths.get(rutaEnProyecto);
         if (!Files.exists(targetPath)) {
             Files.createDirectories(targetPath);
         }
-
         ClassLoader classLoader = getClass().getClassLoader();
 
+        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
+        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
+
         for (String file : files) {
-            try (InputStream is = classLoader.getResourceAsStream(baseResourcePath + file)) {
-                if (is == null) {
-                    throw new RuntimeException("No se encontró el recurso: " + baseResourcePath + file);
-                }
-                Files.copy(is, targetPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-                log.info("Se copió correctamente el archivo {} a {}", file, targetPath);
+            Resource resource = new ClassPathResource(baseResourcePath + file);
+            try (InputStream is = resource.getInputStream()) {
+                Files.copy(is, Paths.get(dictionaryPath, file), StandardCopyOption.REPLACE_EXISTING);
+                log.info("Copiado {} a {}", file, dictionaryPath);
             }
         }
 
@@ -72,8 +70,10 @@ public class CtakesProcessor implements PlainTextProcessor {
         PiperFileReader reader = new PiperFileReader(piperFilePath);
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
-        engine = org.apache.uima.UIMAFramework.produceAnalysisEngine(pipeline);
-    }
+        engine = UIMAFramework.produceAnalysisEngine(pipeline);
+
+        }
+        
 
     @Override
     public Map<String, String> extractDrugs(String inputText) {
