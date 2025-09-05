@@ -41,7 +41,7 @@ public class CtakesProcessor implements PlainTextProcessor {
     private String umlsKey;
 
     private AnalysisEngine engine;
-    
+
     private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
     @PostConstruct
