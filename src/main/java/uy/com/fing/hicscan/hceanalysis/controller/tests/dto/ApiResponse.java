@@ -1,4 +1,4 @@
-package uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.impl.ctakes.dto;
+package uy.com.fing.hicscan.hceanalysis.controller.tests.dto;
 import java.util.Map;
 
 public class ApiResponse {

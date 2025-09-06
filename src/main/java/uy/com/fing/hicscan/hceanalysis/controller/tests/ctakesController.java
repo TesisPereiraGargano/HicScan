@@ -1,7 +1,5 @@
 package uy.com.fing.hicscan.hceanalysis.controller.tests;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.apache.ctakes.core.pipeline.PipelineBuilder;
 import org.apache.ctakes.core.pipeline.PiperFileReader;
 import org.apache.ctakes.typesystem.type.refsem.OntologyConcept;
@@ -16,59 +14,21 @@ import org.apache.uima.analysis_engine.AnalysisEngineProcessException;
 import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.io.IOException;
 import java.util.*;
-import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.impl.ctakes.dto.ApiResponse;
-@Slf4j
+
+import uy.com.fing.hicscan.hceanalysis.controller.tests.dto.ApiResponse;
+
 @RestController
 @RequestMapping("/ctakes")
 public class ctakesController {
-  /*
-    @Value("${ctakes.dictionary.path}")
-
-    private String dictionaryPath;
-
-    @Value("${ctakes.piper.file.path}")
-    private String piperFilePath;
-
-    @Value("${umls.key}")
-    private String umlsKey;
-
     private final AnalysisEngine engine;
 
-    private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
-
-
-
     public ctakesController() throws IOException, UIMAException {
-        Path targetPath = Paths.get(rutaEnProyecto);
-        if (!Files.exists(targetPath)) {
-            Files.createDirectories(targetPath);
-        }
-        ClassLoader classLoader = getClass().getClassLoader();
-
-        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
-        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
-
-        for (String file : files) {
-            Resource resource = new ClassPathResource(baseResourcePath + file);
-            try (InputStream is = resource.getInputStream()) {
-                Files.copy(is, Paths.get(dictionaryPath, file), StandardCopyOption.REPLACE_EXISTING);
-                log.info("Copiado {} a {}", file, dictionaryPath);
-            }
-        }
-
-        System.setProperty("umlsKey", umlsKey);
-        PiperFileReader reader = new PiperFileReader(piperFilePath);
+        System.setProperty("umlsKey", "9acb4127-e18e-4a0c-a53d-6555dd08fb32");
+        PiperFileReader reader = new PiperFileReader("/root/HicScan/src/main/java/uy/com/fing/hicscan/hceanalysis/data/ctakes/BigPipeline.piper");
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
@@ -124,6 +84,4 @@ public class ctakesController {
         ApiResponse respuesta = new ApiResponse("success", "Datos extraídos correctamente.", drogas);
         return ResponseEntity.ok(respuesta);
     }
-*/
 }
-
