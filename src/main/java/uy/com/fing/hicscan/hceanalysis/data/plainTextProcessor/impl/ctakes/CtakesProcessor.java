@@ -50,34 +50,38 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        // Ruta física donde cTAKES buscará los diccionarios
-        // Puede ser relativa al working directory o absoluta
-        Path dictRootPath = Paths.get("ctakes-dictionary"); // carpeta física en el disco
-        Path dictPath = dictRootPath.resolve("org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab");
+        // Ruta absoluta en disco donde cTAKES espera los diccionarios
+        String userHome = System.getProperty("user.home");
+        Path dictionaryDir = Paths.get(userHome, "ctakes-dictionary", "sno_rx_16ab");
 
-        // Crear carpetas si no existen
-        if (!Files.exists(dictPath)) {
-            Files.createDirectories(dictPath);
-            log.info("Carpeta creada en {}", dictPath.toAbsolutePath());
+        // Crear directorio si no existe
+        if (!Files.exists(dictionaryDir)) {
+            Files.createDirectories(dictionaryDir);
+            log.info("Directorio creado: {}", dictionaryDir.toAbsolutePath());
         }
 
-        // Archivos del diccionario que necesita cTAKES
+        // Archivos a copiar
         String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
         String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
-        // Copiar archivos desde resources (dentro del JAR) al disco
+        // Copiar cada archivo desde resources hacia la ruta absoluta
         ClassLoader classLoader = getClass().getClassLoader();
         for (String file : files) {
             try (InputStream is = classLoader.getResourceAsStream(baseResourcePath + file)) {
                 if (is == null) {
-                    throw new FileNotFoundException("No se encontró el recurso en el JAR: " + baseResourcePath + file);
+                    throw new RuntimeException("No se encontró el recurso en resources: " + baseResourcePath + file);
                 }
-                Files.copy(is, dictPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
-                log.info("Copiado {} a {}", file, dictPath.toAbsolutePath());
+                Path targetFile = dictionaryDir.resolve(file);
+                Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                log.info("Archivo copiado: {} -> {}", file, targetFile.toAbsolutePath());
             }
         }
 
-        // Setear la propiedad del UMLS si la usás
+        // Configurar propiedad de sistema para cTAKES
+        System.setProperty("ctakes.dictionary.path", dictionaryDir.getParent().toString());
+        log.info("ctakes.dictionary.path configurado a {}", dictionaryDir.getParent().toAbsolutePath());
+
+        // Configurar UMLS key si la necesitas
         System.setProperty("umlsKey", umlsKey);
 
         // Inicializar cTAKES
@@ -86,7 +90,7 @@ public class CtakesProcessor implements PlainTextProcessor {
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
 
-        log.info("cTAKES inicializado correctamente con diccionarios en {}", dictPath.toAbsolutePath());
+        log.info("cTAKES inicializado correctamente");
     }
 
 
