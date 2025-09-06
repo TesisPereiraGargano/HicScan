@@ -49,7 +49,7 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        Path targetPath = Paths.get(rutaEnProyecto);
+        /*Path targetPath = Paths.get(rutaEnProyecto);
         if (!Files.exists(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"))) {
             Files.createDirectories(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"));
         }
@@ -65,6 +65,8 @@ public class CtakesProcessor implements PlainTextProcessor {
                 log.info("Copiado {} a {}", file, "resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/");
             }
         }
+        
+         */
 
         System.setProperty("umlsKey", umlsKey);
         PiperFileReader reader = new PiperFileReader(piperFilePath);
