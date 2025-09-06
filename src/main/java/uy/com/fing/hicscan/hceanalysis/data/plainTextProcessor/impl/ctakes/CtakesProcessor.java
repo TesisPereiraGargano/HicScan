@@ -21,6 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.PlainTextProcessor;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -49,32 +50,44 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        /*Path targetPath = Paths.get(rutaEnProyecto);
-        if (!Files.exists(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"))) {
-            Files.createDirectories(Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/"));
-        }
-        ClassLoader classLoader = getClass().getClassLoader();
+        // Ruta física donde cTAKES buscará los diccionarios
+        // Puede ser relativa al working directory o absoluta
+        Path dictRootPath = Paths.get("ctakes-dictionary"); // carpeta física en el disco
+        Path dictPath = dictRootPath.resolve("org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab");
 
+        // Crear carpetas si no existen
+        if (!Files.exists(dictPath)) {
+            Files.createDirectories(dictPath);
+            log.info("Carpeta creada en {}", dictPath.toAbsolutePath());
+        }
+
+        // Archivos del diccionario que necesita cTAKES
         String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
         String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
 
+        // Copiar archivos desde resources (dentro del JAR) al disco
+        ClassLoader classLoader = getClass().getClassLoader();
         for (String file : files) {
-            Resource resource = new ClassPathResource(baseResourcePath + file);
-            try (InputStream is = resource.getInputStream()) {
-                Files.copy(is, Paths.get("/resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/", file), StandardCopyOption.REPLACE_EXISTING);
-                log.info("Copiado {} a {}", file, "resources/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/");
+            try (InputStream is = classLoader.getResourceAsStream(baseResourcePath + file)) {
+                if (is == null) {
+                    throw new FileNotFoundException("No se encontró el recurso en el JAR: " + baseResourcePath + file);
+                }
+                Files.copy(is, dictPath.resolve(file), StandardCopyOption.REPLACE_EXISTING);
+                log.info("Copiado {} a {}", file, dictPath.toAbsolutePath());
             }
         }
-        
-         */
 
+        // Setear la propiedad del UMLS si la usás
         System.setProperty("umlsKey", umlsKey);
+
+        // Inicializar cTAKES
         PiperFileReader reader = new PiperFileReader(piperFilePath);
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();
         engine = UIMAFramework.produceAnalysisEngine(pipeline);
 
-        }
+        log.info("cTAKES inicializado correctamente con diccionarios en {}", dictPath.toAbsolutePath());
+    }
 
 
     @Override
