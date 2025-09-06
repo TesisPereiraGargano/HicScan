@@ -35,9 +35,6 @@ import java.util.Map;
 @Service
 public class CtakesProcessor implements PlainTextProcessor {
 
-    @Value("${ctakes.dictionary.path}")
-    private String dictionaryPath;
-
     @Value("${ctakes.piper.file.path}")
     private String piperFilePath;
 
@@ -46,45 +43,12 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     private AnalysisEngine engine;
 
-    private static final String rutaEnProyecto = "/org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
-
     @PostConstruct
     public void init() throws IOException, UIMAException {
-        // Ruta absoluta en disco donde cTAKES espera los diccionarios
-        String userHome = System.getProperty("user.home");
-        Path dictionaryDir = Paths.get(userHome, "ctakes-dictionary", "sno_rx_16ab");
-
-        // Crear directorio si no existe
-        if (!Files.exists(dictionaryDir)) {
-            Files.createDirectories(dictionaryDir);
-            log.info("Directorio creado: {}", dictionaryDir.toAbsolutePath());
-        }
-
-        // Archivos a copiar
-        String[] files = {"sno_rx_16ab.script", "sno_rx_16ab.properties"};
-        String baseResourcePath = "org/apache/ctakes/dictionary/lookup/fast/sno_rx_16ab/";
-
-        // Copiar cada archivo desde resources hacia la ruta absoluta
-        ClassLoader classLoader = getClass().getClassLoader();
-        for (String file : files) {
-            try (InputStream is = classLoader.getResourceAsStream(baseResourcePath + file)) {
-                if (is == null) {
-                    throw new RuntimeException("No se encontró el recurso en resources: " + baseResourcePath + file);
-                }
-                Path targetFile = dictionaryDir.resolve(file);
-                Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                log.info("Archivo copiado: {} -> {}", file, targetFile.toAbsolutePath());
-            }
-        }
-
-        // Configurar propiedad de sistema para cTAKES
-        System.setProperty("ctakes.dictionary.path", dictionaryDir.getParent().toString());
-        log.info("ctakes.dictionary.path configurado a {}", dictionaryDir.getParent().toAbsolutePath());
-
-        // Configurar UMLS key si la necesitas
+        //UMLS key si la necesitas
         System.setProperty("umlsKey", umlsKey);
 
-        // Inicializar cTAKES
+        //Inicializar cTAKES
         PiperFileReader reader = new PiperFileReader(piperFilePath);
         PipelineBuilder builder = reader.getBuilder();
         AnalysisEngineDescription pipeline = builder.getAnalysisEngineDesc();

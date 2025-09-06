@@ -21,7 +21,7 @@ addDescription adjuster.ChunkAdjuster NP,PP,NP 2
 // Default fast dictionary lookup.
 set minimumSpan=2
 // path to the xml file containing information for dictionary lookup configuration.
-cli LookupXml=lookup.xml
+cli LookupXml=l
 // umls credentials
 cli umlsKey=key
 
