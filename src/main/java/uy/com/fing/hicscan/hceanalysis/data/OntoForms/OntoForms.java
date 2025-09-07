@@ -15,6 +15,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.OntoTree;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.PropertyDescriptor;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.IndividualDescriptor;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.CalculatedPropertyConfigDescriptor;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.ArtificeClassConfigDescriptor;
+import uy.com.fing.hicscan.hceanalysis.data.OntoForms.datatypes.Form;
 
 @Component
 public class OntoForms {
@@ -158,6 +164,136 @@ public class OntoForms {
             }
             return ontologyUrl;
         } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public OntoTree getOntologyClasses(String ontoId) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/classes";
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        try {
+            return OBJECT_MAPPER.readValue(responseBody, OntoTree.class);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public List<PropertyDescriptor> getOntologyClassProperties(String ontoId, String classUri) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/properties?domainClassUri=" + URLEncoder.encode(classUri, StandardCharsets.UTF_8);
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        try {
+            PropertyDescriptor[] array = OBJECT_MAPPER.readValue(responseBody, PropertyDescriptor[].class);
+            return java.util.Arrays.asList(array);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public List<IndividualDescriptor> getOntologyClassIndividuals(String ontoId, String classUri) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/individuals?classUri=" + URLEncoder.encode(classUri, StandardCharsets.UTF_8);
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        try {
+            IndividualDescriptor[] array = OBJECT_MAPPER.readValue(responseBody, IndividualDescriptor[].class);
+            return java.util.Arrays.asList(array);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public List<CalculatedPropertyConfigDescriptor> getOntologyCalculatedPropertiesConfig(String ontoId) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/calculated-properties";
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        try {
+            CalculatedPropertyConfigDescriptor[] array = OBJECT_MAPPER.readValue(responseBody, CalculatedPropertyConfigDescriptor[].class);
+            return java.util.Arrays.asList(array);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public void postOntologyCalculatedPropertyConfig(String ontoId, CalculatedPropertyConfigDescriptor calculatedPropertyConfigDescriptor) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/calculated-properties";
+        byte[] bodyBytes = OBJECT_MAPPER.writeValueAsBytes(calculatedPropertyConfigDescriptor);
+        executePostRequest(url, "application/json", bodyBytes);
+    }
+
+    public void deleteOntologyCalculatedPropertyConfig(String ontoId, CalculatedPropertyConfigDescriptor calculatedPropertyConfigDescriptor) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/calculated-properties";
+        byte[] bodyBytes = OBJECT_MAPPER.writeValueAsBytes(calculatedPropertyConfigDescriptor);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .method("DELETE", HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
+                .build();
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("Response status: " + response.statusCode());
+        if (response.statusCode() != 200) {
+            throw new IOException("HTTP DELETE request failed with status code: " + response.statusCode() + ", response: " + response.body());
+        }
+    }
+
+    public List<ArtificeClassConfigDescriptor> getOntologyArtificeClassesConfig(String ontoId) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/artifice-classes";
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            throw new IOException("Empty response body received from server");
+        }
+        try {
+            ArtificeClassConfigDescriptor[] array = OBJECT_MAPPER.readValue(responseBody, ArtificeClassConfigDescriptor[].class);
+            return java.util.Arrays.asList(array);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+
+    public void postOntologyArtificeClassConfig(String ontoId, ArtificeClassConfigDescriptor artificeClassConfigDescriptor) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/artifice-classes";
+        byte[] bodyBytes = OBJECT_MAPPER.writeValueAsBytes(artificeClassConfigDescriptor);
+        executePostRequest(url, "application/json", bodyBytes);
+    }
+
+    public void deleteOntologyArtificeClassConfig(String ontoId, ArtificeClassConfigDescriptor artificeClassConfigDescriptor) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/configurations/artifice-classes";
+        byte[] bodyBytes = OBJECT_MAPPER.writeValueAsBytes(artificeClassConfigDescriptor);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .method("DELETE", HttpRequest.BodyPublishers.ofByteArray(bodyBytes))
+                .build();
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("Response status: " + response.statusCode());
+        if (response.statusCode() != 200) {
+            throw new IOException("HTTP DELETE request failed with status code: " + response.statusCode() + ", response: " + response.body());
+        }
+    }
+
+    public Form getOntologyClassForm(String ontoId, String classUri) throws IOException, InterruptedException {
+        String url = ontoformsBaseUrl + "ontologies/" + URLEncoder.encode(ontoId, StandardCharsets.UTF_8) + "/forms?classUri=" + URLEncoder.encode(classUri, StandardCharsets.UTF_8);
+        System.out.println("URL: " + url);
+        String responseBody = executeGetRequest(url);
+        if (responseBody == null || responseBody.trim().isEmpty()) {
+            // Return an empty Form instead of throwing an error when no form exists
+            System.out.println("No form found for class " + classUri + ", returning empty Form");
+            return new Form(classUri, null);
+        }
+        System.out.println("Response body: " + responseBody);
+        try {
+            return OBJECT_MAPPER.readValue(responseBody, Form.class);
+        } catch (IOException e) {
+            System.err.println("JSON parsing error: " + e.getMessage());
+            System.err.println("Response body that failed to parse: " + responseBody);
             throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
         }
     }
