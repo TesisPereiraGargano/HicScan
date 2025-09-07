@@ -1,4 +1,4 @@
-package uy.com.fing.hicscan.hceanalysis.controller.tests.dto;
+package uy.com.fing.hicscan.hceanalysis.dto;
 import java.util.Map;
 
 public class ApiResponse {

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.*;
 
-import uy.com.fing.hicscan.hceanalysis.controller.tests.dto.ApiResponse;
+import uy.com.fing.hicscan.hceanalysis.dto.ApiResponse;
 
 @RestController
 @RequestMapping("/ctakes")
