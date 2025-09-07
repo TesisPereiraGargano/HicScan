@@ -46,9 +46,6 @@ public class MedicationExpander implements LanguageExpansion {
             log.info("Se obtuvieron las siguientes coincidencias: {}", encontrados);
             //Busco el principio activo
 
-            //lo casteo sólo para probar
-
-
             BiMap<String, String> listaNombresMedicamentos = medicationDictionary.getListaNombresMedicamentos();
             HashMap<String, String> listaVMPid = medicationDictionary.getListaVMPid();
             HashMap<String, String> listaPrincipiosActivos = medicationDictionary.getListaPrincipiosActivos();
