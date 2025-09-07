@@ -30,6 +30,13 @@
 ├── README.md            <-- Este archivo
 └── pom.xml              <-- Archivo de Maven (si es un proyecto Java)
 ```
+## Diccionario de medicamentos
+El diccionario de medicamentos que se utiliza se puede obtener en la web de AGESIC, a través del link https://archivos.agesic.gub.uy/nextcloud/index.php/s/kMe8mgrR7f6F8CQ .
+
+En el proyecto se encuentra en la ruta:
+.../src/main/java/uy/com/fing/hicscan/hceanalysis/languageexpansion/resources
+
+De querer actualizarlo debe de sobreescribirlo en la ruta descrita anteriormente, asegurandose de que se mantenga el nombre DiccionarioMedicamentos_38b0e1.xml .
 
 ## Errores comunes
 ### Error: org.apache.ctakes.dictionary.lookup.exception.LookupException: File not found
