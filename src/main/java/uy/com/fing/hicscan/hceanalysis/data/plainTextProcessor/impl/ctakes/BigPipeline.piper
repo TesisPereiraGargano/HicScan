@@ -1,0 +1,35 @@
+//     An example pipeline that does a lot of stuff.
+
+// Write big "Welcome", "Starting", "Finished" Banners in log.
+set WriteBanner=yes
+
+// Advanced Tokenization: Regex sectionization, BIO Sentence Detector (lumper), Paragraphs, Lists.
+//load FullTokenizerPipeline
+add SimpleSegmentAnnotator
+add SentenceDetector
+add TokenizerAnnotatorPTB
+
+// Refined tokens, Parts of Speech.
+add ContextDependentTokenizerAnnotator
+add POSTagger
+
+// Chunkers
+add Chunker
+addDescription adjuster.ChunkAdjuster NP,NP 1
+addDescription adjuster.ChunkAdjuster NP,PP,NP 2
+
+// Default fast dictionary lookup.
+set minimumSpan=2
+// path to the xml file containing information for dictionary lookup configuration.
+cli LookupXml=l
+// umls credentials
+cli umlsKey=key
+
+// Default fast dictionary lookup
+add DefaultJCasTermAnnotator
+
+// Constituency Parser adds Terminal Treebank Nodes, needed to create Markables
+add ConstituencyParser
+
+// Write some information about the run.
+addLast org.apache.ctakes.core.util.log.FinishedLogger
