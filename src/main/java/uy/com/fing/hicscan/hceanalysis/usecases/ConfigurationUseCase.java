@@ -313,19 +313,40 @@ public class ConfigurationUseCase {
                 result.add(new PropertyDescriptorWithFormStatus(property, isShown, options, subForm, canBeTransparented));
             }
             
-            // After processing all properties, also process all available subforms as general subforms
+            // After processing all properties, also process all available subforms maintaining their structure
             if (form.getSubForms() != null && !form.getSubForms().isEmpty()) {
-                System.out.println("Processing all available subforms as general subforms...");
+                System.out.println("Processing all available subforms maintaining structure...");
                 System.out.println("Total subforms available: " + form.getSubForms().size());
                 
-                List<PropertyDescriptorWithFormStatus> allSubForms = new ArrayList<>();
                 for (Form subFormItem : form.getSubForms()) {
                     System.out.println("Processing subform: " + subFormItem.getSectionName() + " (classUri: " + subFormItem.getClassUri() + ")");
                     try {
+                        // Create a property descriptor for this subform section
+                        PropertyDescriptor subFormProperty = new PropertyDescriptor();
+                        subFormProperty.setPropLabel(subFormItem.getSectionName()); // Use sectionName as propLabel
+                        subFormProperty.setPropUri(subFormItem.getClassUri()); // Use classUri as propUri
+                        subFormProperty.setDomain(form.getClassUri());
+                        subFormProperty.setRange(subFormItem.getSectionName());
+                        subFormProperty.setPropType("object");
+                        subFormProperty.setFunctional(false);
+                        subFormProperty.setInverseFunctional(false);
+                        
+                        // Convert the subform recursively
                         List<PropertyDescriptorWithFormStatus> convertedSubForm = convertFormToPropertyDescriptorWithFormStatus(ontoId, subFormItem, new HashSet<>(processedClassUris));
+                        
                         if (convertedSubForm != null && !convertedSubForm.isEmpty()) {
-                            allSubForms.addAll(convertedSubForm);
                             System.out.println("Added " + convertedSubForm.size() + " properties from subform " + subFormItem.getSectionName());
+                            
+                            // Create PropertyDescriptorWithFormStatus for this subform section
+                            PropertyDescriptorWithFormStatus subFormPropertyWithStatus = new PropertyDescriptorWithFormStatus(
+                                subFormProperty, 
+                                true, // isShown
+                                null, // options
+                                convertedSubForm, // subForm - this maintains the hierarchical structure
+                                true // canBeTransparented
+                            );
+                            
+                            result.add(subFormPropertyWithStatus);
                         }
                     } catch (Exception e) {
                         System.out.println("Warning: Could not process subform " + subFormItem.getSectionName() + ": " + e.getMessage());
@@ -333,12 +354,7 @@ public class ConfigurationUseCase {
                     }
                 }
                 
-                if (!allSubForms.isEmpty()) {
-                    System.out.println("Total subforms processed: " + allSubForms.size() + " properties from " + form.getSubForms().size() + " subforms");
-                    // Add all subforms as a special property or append to result
-                    // For now, let's append them to the result
-                    result.addAll(allSubForms);
-                }
+                System.out.println("Total subforms processed: " + form.getSubForms().size() + " subform sections");
             }
             
             System.out.println("Converted form to " + result.size() + " PropertyDescriptorWithFormStatus objects");
