@@ -288,7 +288,6 @@ public class OntoForms {
             System.out.println("No form found for class " + classUri + ", returning empty Form");
             return new Form(classUri, null);
         }
-        System.out.println("Response body: " + responseBody);
         try {
             return OBJECT_MAPPER.readValue(responseBody, Form.class);
         } catch (IOException e) {
