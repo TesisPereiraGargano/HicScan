@@ -45,6 +45,19 @@ public class CtakesProcessor implements PlainTextProcessor {
 
     @PostConstruct
     public void init() throws IOException, UIMAException {
+        if (piperFilePath == null || piperFilePath.isBlank()) {
+            //Genero un archivo temporal con el contenido del BigPiper
+            try (InputStream in = getClass().getResourceAsStream("/BigPipeline.piper")) {
+                if (in == null) {
+                    throw new FileNotFoundException("No se encontró el archivo interno: BigPipeline.piper, ni se encuentra definida la ruta como propiedad");
+                }
+                //Copio la ruta física y se la asigno al path
+                Path tempFile = Files.createTempFile("pipeline", ".piper");
+                Files.copy(in, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                piperFilePath = tempFile.toAbsolutePath().toString();
+            }
+        }
+        log.info("El piper ejecutado esta en la ruta: {}", piperFilePath);
         //UMLS key si la necesitas
         System.setProperty("umlsKey", umlsKey);
 
