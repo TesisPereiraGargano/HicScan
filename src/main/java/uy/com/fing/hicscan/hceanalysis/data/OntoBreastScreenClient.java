@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.http.MediaType;
 
 @Component
 public class OntoBreastScreenClient {
@@ -43,13 +44,23 @@ public class OntoBreastScreenClient {
         return response.body();
     }
     
-    public String getBreastCancerRecommendation(String womanId, String guidelineUri) throws IOException, InterruptedException {
+    public Map<String, Object> getBreastCancerRecommendation(String womanId, String guidelineUri) throws IOException, InterruptedException {
         String encodedWomanId = URLEncoder.encode(womanId, StandardCharsets.UTF_8);
         String encodedGuidelineUri = URLEncoder.encode(guidelineUri, StandardCharsets.UTF_8);
         String url = recommendationBaseUrl + "recommendation?womanId=" + 
                      encodedWomanId + "&guidelineUri=" + encodedGuidelineUri;
         
-        return executeGetRequest(url);
+        String responseBody = executeGetRequest(url);
+        
+        // Parse JSON response to Map
+        try {
+            JsonNode root = OBJECT_MAPPER.readTree(responseBody);
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = OBJECT_MAPPER.convertValue(root, Map.class);
+            return result;
+        } catch (IOException e) {
+            throw new IOException("Failed to parse recommendation response JSON: " + e.getMessage(), e);
+        }
     }
     
     public RecommendationResult processRecommendationResponse(String responseBody) throws IOException {
@@ -128,6 +139,63 @@ public class OntoBreastScreenClient {
             return OBJECT_MAPPER.writeValueAsString(uriObject);
         } catch (IOException e) {
             throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+    
+    public WomanRiskResult createWomanAndCalculateRisk(Map<String, Object> womanHistory) throws IOException, InterruptedException {
+        // Create the request body
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("womanHistory", womanHistory);
+        requestBody.put("riskModelUri", "http://purl.org/ontology/breast_cancer_recommendation#UY_model");
+        
+        // Convert to JSON
+        String jsonBody = OBJECT_MAPPER.writeValueAsString(requestBody);
+        
+        // Create HTTP request
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(recommendationBaseUrl + "woman"))
+                .header("Content-Type", MediaType.APPLICATION_JSON_VALUE)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+        
+        // Execute request
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+        
+        // Log the response status
+        System.out.println("Response status: " + response.statusCode());
+        
+        // Check if the request was successful
+        if (response.statusCode() != 200) {
+            throw new IOException("HTTP request failed with status code: " + response.statusCode() + 
+                                ", response: " + response.body());
+        }
+        
+        // Parse response
+        try {
+            JsonNode root = OBJECT_MAPPER.readTree(response.body());
+            
+            String womanUri = root.get("womanUri").asText();
+            String riskLevelUri = root.get("riskLevelUri").asText();
+            
+            return new WomanRiskResult(womanUri, riskLevelUri);
+        } catch (IOException e) {
+            throw new IOException("Failed to parse response JSON: " + e.getMessage(), e);
+        }
+    }
+    
+    // Inner class to represent the woman risk result
+    public static class WomanRiskResult {
+        public final String womanUri;
+        public final String riskLevelUri;
+        
+        public WomanRiskResult(String womanUri, String riskLevelUri) {
+            this.womanUri = womanUri;
+            this.riskLevelUri = riskLevelUri;
+        }
+        
+        @Override
+        public String toString() {
+            return "{womanUri: \"" + womanUri + "\", riskLevelUri: \"" + riskLevelUri + "\"}";
         }
     }
     
