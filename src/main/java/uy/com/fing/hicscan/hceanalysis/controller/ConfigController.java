@@ -68,6 +68,27 @@ public class ConfigController {
         return configurationUseCase.getFormToModify(ontoId, classUri);
     }
 
+    @GetMapping("/ontologies/{ontoId}/risk-model/form")
+    public List<PropertyDescriptorWithFormStatus> getRiskModelFilteredForm(
+            @PathVariable String ontoId,
+            @RequestParam String classUri,
+            @RequestParam String riskModelUri) {
+        
+        if (ontoId == null || ontoId.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El ID de la ontología es requerido");
+        }
+        
+        if (classUri == null || classUri.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El URI de la clase es requerido");
+        }
+        
+        if (riskModelUri == null || riskModelUri.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El URI del modelo de riesgo es requerido");
+        }
+        
+        return configurationUseCase.getRiskModelFilteredForm(ontoId, classUri, riskModelUri);
+    }
+
     @PostMapping("/ontology")
     public OntologyCreateResponse createOntology(
             @RequestParam("file") MultipartFile multipartFile,

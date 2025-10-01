@@ -498,4 +498,55 @@ public class ConfigurationUseCase {
             throw new RuntimeException("Error deleting artifice class configuration", e);
         }
     }
+    
+    /**
+     * Gets a form filtered by risk model questions and their options
+     * @param ontoId The ontology ID
+     * @param classUri The URI of the class
+     * @param riskModelUri The URI of the risk model
+     * @return List of property descriptors with filtered form status
+     */
+    public List<PropertyDescriptorWithFormStatus> getRiskModelFilteredForm(String ontoId, String classUri, String riskModelUri) {
+        try {
+            // Get the base form for the specified class (same as getFormToModify)
+            List<PropertyDescriptorWithFormStatus> baseForm = getFormToModify(ontoId, classUri);
+            
+            // Filter the form based on risk model questions and their options
+            return filterFormByRiskModelQuestions(baseForm, ontoId, riskModelUri);
+            
+        } catch (Exception e) {
+            throw new RuntimeException("Error getting risk model filtered form", e);
+        }
+    }
+    
+    /**
+     * Filters the form based on risk model questions and their options
+     * @param baseForm The base form to filter
+     * @param ontoId The ontology ID
+     * @param riskModelUri The URI of the risk model
+     * @return Filtered form
+     */
+    private List<PropertyDescriptorWithFormStatus> filterFormByRiskModelQuestions(
+            List<PropertyDescriptorWithFormStatus> baseForm, 
+            String ontoId, 
+            String riskModelUri) {
+        
+        // For each property in the form, filter its options
+        for (PropertyDescriptorWithFormStatus property : baseForm) {
+            if (property.getOptions() != null) {
+                // Filter OUT options that start with ACS, Gail, or IBIS (remove them)
+                List<Form.FieldOption> filteredOptions = property.getOptions().stream()
+                        .filter(option -> {
+                            String label = option.getLabel();
+                            return label != null && !(label.startsWith("ACS") || label.startsWith("Gail") || label.startsWith("IBIS"));
+                        })
+                        .toList();
+                
+                // Update the property with filtered options
+                property.setOptions(filteredOptions);
+            }
+        }
+        
+        return baseForm;
+    }
 }
