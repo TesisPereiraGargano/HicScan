@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Element;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapter;
 import uy.com.fing.hicscan.hceanalysis.dto.Autor;
+import uy.com.fing.hicscan.hceanalysis.dto.Observacion;
 import uy.com.fing.hicscan.hceanalysis.dto.Paciente;
 import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
 import org.w3c.dom.*;
@@ -26,6 +27,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
     Autor autor;
     String textoLibre;
     List<SustanciaAdministrada> medicamentos;
+    List<Observacion> observaciones;
 
     @Override
     public void parse(File file) throws IOException {
@@ -42,14 +44,23 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         //Extraigo los valores mas importantes del CDA
         try {
             this.paciente = extraerInformacionPaciente(pathXML);
+            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Paciente");
+
             this.autor = extraerInformacionAutor(pathXML);
-            this.textoLibre = extraerTextoLibre(pathXML);
+            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Autor");
+
             this.medicamentos = extraerMedicamentos(pathXML);
+            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Medicamentos");
 
-            log.info("[Adaptador HL7v3CDAR2] Extraccion finalizada");
+            this.observaciones = extraerObervaciones(pathXML);
+            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Observaciones");
 
+            this.textoLibre = extraerTextoLibre(pathXML);
+            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Texto Libre");
 
+            log.info("[Adaptador HL7v3CDAR2] HCE PROCESADA CORRECTAMENTE");
         } catch (Exception e) {
+            log.error("[Adaptador HL7v3CDAR2] ERROR al realizar extraccion de informacion de HCE");
             throw new RuntimeException(e);
         }
 
@@ -143,5 +154,23 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
     return sustancias;
     }
 
+    public static List<Observacion> extraerObervaciones(String XMLPath) throws Exception {
+        List<Observacion> observaciones = new ArrayList<>();
+        List<Element> entries = extraerInfoByXPath(XMLPath, "//entry/observation");
+
+         for (Element observacion : entries){
+             String codeSystem = extraerValorDeElemento(observacion, "code", "codeSystem");
+             String code = extraerValorDeElemento(observacion, "code", "code");
+             String statusCode = extraerValorDeElemento(observacion, "statusCode", "code");
+             String effectiveTime = extraerValorDeElemento(observacion, "effectiveTime", "value");
+             String medicionValue = extraerValorDeElemento(observacion, "value", "value");
+             String medicionUnit = extraerValorDeElemento(observacion, "value", "unit");
+
+            Observacion obs = new Observacion(code, codeSystem, statusCode, effectiveTime, medicionValue, medicionUnit);
+            observaciones.add(obs);
+         }
+
+        return observaciones;
+    }
 
 }

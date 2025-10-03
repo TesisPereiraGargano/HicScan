@@ -1,6 +1,7 @@
 package uy.com.fing.hicscan.hceanalysis.adapters.impl;
 
 import org.junit.jupiter.api.Test;
+import uy.com.fing.hicscan.hceanalysis.dto.Observacion;
 import uy.com.fing.hicscan.hceanalysis.dto.Paciente;
 import uy.com.fing.hicscan.hceanalysis.dto.Autor;
 import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
@@ -94,6 +95,34 @@ import static org.junit.jupiter.api.Assertions.*;
                 "          <text>Se puede concatenar todo.</text>\n" +
                 "        </section>\n" +
                 "      </component>\n" +
+                "     <component>\n" +
+                "        <section>\n" +
+                "            <code code=\"11384-5\" codeSystem=\"2.16.840.1.113883.6.1\" codeSystemName=\"LOINC\"/>\n" +
+                "            <title>Examen Fisico</title>\n" +
+                "            <component>\n" +
+                "                <section>\n" +
+                "                    <code code=\"8716-3\" codeSystem=\"2.16.840.1.113883.6.1\" codeSystemName=\"LOINC\"/>\n" +
+                "                    <title>Vital Signs</title>\n" +
+                "                    <entry>\n" +
+                "                        <observation classCode=\"OBS\" moodCode=\"EVN\">\n" +
+                "                            <code code=\"50373000\" codeSystem=\"2.16.840.1.113883.6.96\" codeSystemName=\"SNOMED CT\" displayName=\"Medicion de altura\"/>\n" +
+                "                            <statusCode code=\"completed\"/>\n" +
+                "                            <effectiveTime value=\"200004071430\"/>\n" +
+                "                            <value xsi:type=\"PQ\" value=\"1.77\" unit=\"m\"></value>\n" +
+                "                        </observation>\n" +
+                "                    </entry>\n" +
+                "                    <entry>\n" +
+                "                        <observation classCode=\"OBS\" moodCode=\"EVN\">\n" +
+                "                            <code code=\"363808001\" codeSystem=\"2.16.840.1.113883.6.96\" codeSystemName=\"SNOMED CT\" displayName=\"Body weight measure\"/>\n" +
+                "                            <statusCode code=\"completed\"/>\n" +
+                "                            <effectiveTime value=\"200004071430\"/>\n" +
+                "                            <value xsi:type=\"PQ\" value=\"88.0\" unit=\"kg\"></value>\n" +
+                "                        </observation>\n" +
+                "                    </entry>\n" +
+                "                </section>\n" +
+                "            </component>\n" +
+                "        </section>\n" +
+                "      </component>\n" +
                 "    </structuredBody>\n" +
                 "  </component>\n" +
                 "</ClinicalDocument>";
@@ -114,6 +143,7 @@ import static org.junit.jupiter.api.Assertions.*;
             Autor autor = adapter.autor;
             String textoLibre = adapter.textoLibre;
             List<SustanciaAdministrada> medicamentos = adapter.medicamentos;
+            List<Observacion> observaciones = adapter.observaciones;
 
             assertNotNull(paciente);
             assertEquals("RodríguezMartínezJuan", paciente.getNombre().replaceAll("\\s+", ""));
@@ -141,6 +171,25 @@ import static org.junit.jupiter.api.Assertions.*;
             assertEquals("h", medicamentos.get(0).getPeriodAdministrationUnit());
             assertEquals("66493003", medicamentos.get(0).getDrugsCodes().get(0).getKey());
             assertEquals("SNOMED CT", medicamentos.get(0).getDrugsCodes().get(0).getValue());
+
+            //hay dos observaciones
+            assertEquals(2, observaciones.size());
+            //el primero
+            Observacion obs1 = observaciones.get(0);
+            assertEquals("50373000", obs1.getCode());
+            assertEquals("2.16.840.1.113883.6.96", obs1.getCodeSystem());
+            assertEquals("completed", obs1.getStatus());
+            assertEquals("200004071430", obs1.getEffectiveTime());
+            assertEquals("1.77", obs1.getMeditionValue());
+            assertEquals("m", obs1.getMeditionUnit());
+            //la 2da
+            Observacion obs2 = observaciones.get(1);
+            assertEquals("363808001", obs2.getCode());
+            assertEquals("2.16.840.1.113883.6.96", obs2.getCodeSystem());
+            assertEquals("completed", obs2.getStatus());
+            assertEquals("200004071430", obs2.getEffectiveTime());
+            assertEquals("88.0", obs2.getMeditionValue());
+            assertEquals("kg", obs2.getMeditionUnit());
 
 
             Files.delete(tempFile.toPath());
