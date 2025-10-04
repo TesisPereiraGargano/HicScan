@@ -131,6 +131,14 @@
 			<artifactId>guava</artifactId>
 			<version>33.0.0-jre</version>
 		</dependency>
+		
+		<!-- Apache Jena dependencies for ontology processing -->
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>apache-jena-libs</artifactId>
+			<version>4.9.0</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 
 
