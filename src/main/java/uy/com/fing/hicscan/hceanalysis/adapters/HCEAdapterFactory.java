@@ -6,17 +6,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import uy.com.fing.hicscan.hceanalysis.adapters.impl.FHIR_Adapter;
 import uy.com.fing.hicscan.hceanalysis.adapters.impl.HL7v3_CDAr2_Adapter;
 
+@Component
 public class HCEAdapterFactory {
 
     public static HCEAdapter getAdapter(File file) throws IOException {
         String extension = getFileExtension(file);
 
         return switch (extension) {
-            case "xsd" -> getXmlAdapter(file); // analizo los distintos tipos que pueden ser FHIR, CCDA, CDA, etc
+            case "xml" -> getXmlAdapter(file); // analizo los distintos tipos que pueden ser FHIR, CCDA, CDA, etc
             //case "csv" -> new CSV_Adapter(); si se quisieran agregar mas formatos
             //case "json" -> new Json_Adapter();
             default -> throw new IllegalArgumentException("Extension no soportada: " + extension);

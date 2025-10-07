@@ -99,7 +99,17 @@ public class CtakesProcessor implements PlainTextProcessor {
                                 if (tui != null && esMedicamento) {
                                     String nombre = ia.getCoveredText();
                                     String cui = umls.getCui();
-                                    drogas.putIfAbsent(cui, nombre);
+
+                                    // Busco SNOMED CT en otras OntologyConcepts asociadas (puedes tener más de una)
+                                    String cod_snomed = null;
+                                    for (int j = 0; j < ia.getOntologyConceptArr().size(); j++) {
+                                        OntologyConcept oc2 = ia.getOntologyConceptArr(j);
+                                        if("SNOMEDCT".equalsIgnoreCase(oc2.getCodingScheme())) {
+                                            cod_snomed = oc2.getCode();
+                                            break;
+                                        }
+                                    }
+                                    drogas.putIfAbsent(cod_snomed, nombre); //código en SNOMED CT y nombre del medicamento
                                 }
                             }
                         }

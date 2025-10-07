@@ -139,11 +139,11 @@ import static org.junit.jupiter.api.Assertions.*;
             HL7v3_CDAr2_Adapter adapter = new HL7v3_CDAr2_Adapter();
             adapter.parse(tempFile);
 
-            Paciente paciente = adapter.paciente;
-            Autor autor = adapter.autor;
-            String textoLibre = adapter.textoLibre;
-            List<SustanciaAdministrada> medicamentos = adapter.medicamentos;
-            List<Observacion> observaciones = adapter.observaciones;
+            Paciente paciente = adapter.getPaciente();
+            Autor autor = adapter.getAutor();
+            String textoLibre = adapter.getTextoLibre();
+            List<SustanciaAdministrada> medicamentos = adapter.getMedicamentos();
+            List<Observacion> observaciones = adapter.getObservaciones();
 
             assertNotNull(paciente);
             assertEquals("RodríguezMartínezJuan", paciente.getNombre().replaceAll("\\s+", ""));

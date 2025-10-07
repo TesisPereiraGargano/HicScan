@@ -2,6 +2,7 @@ package uy.com.fing.hicscan.hceanalysis.adapters.impl;
 
 import ch.qos.logback.core.joran.sanity.Pair;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Element;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapter;
@@ -20,14 +21,14 @@ import java.util.Map;
 
 
 import static uy.com.fing.hicscan.hceanalysis.utils.XmlUtils.*;
-
+@Getter
 @Slf4j
 public class HL7v3_CDAr2_Adapter implements HCEAdapter {
-    Paciente paciente;
-    Autor autor;
-    String textoLibre;
-    List<SustanciaAdministrada> medicamentos;
-    List<Observacion> observaciones;
+    private Paciente paciente;
+    private Autor autor;
+    private String textoLibre;
+    private List<SustanciaAdministrada> medicamentos;
+    private List<Observacion> observaciones;
 
     @Override
     public void parse(File file) throws IOException {
@@ -109,6 +110,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         }
         return sb.toString().trim();
     }
+
 
     public static List<SustanciaAdministrada> extraerMedicamentos(String XMLPath) throws Exception {
         //voy a las sustancias administradas

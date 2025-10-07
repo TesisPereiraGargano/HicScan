@@ -13,7 +13,7 @@ public class SustanciaAdministrada {
     String periodAdministrationValue;
     String periodAdministrationUnit;
     //entiendo que podría tener referenciada mas de una droga
-    List<Map.Entry<String,String>> drugsCodes; //es pareja de codido y diccionario (ej <5, SNOMED CT>);
+    List<Map.Entry<String,String>> drugsCodes; //es pareja de codigo y diccionario (ej <5, SNOMED CT>);
 
     public SustanciaAdministrada (String doseQuantityUnit, String doseQuantityValue, String periodAdministrationValue, String periodAdministrationUnit, List<Map.Entry<String,String>> drugs){
         this.doseQuantityValue = doseQuantityValue;
