@@ -1,8 +1,9 @@
 package uy.com.fing.hicscan.hceanalysis.data.Recommendation;
 
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.recommend.WomanRecommendation;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
 import uy.com.fing.hicscan.hceanalysis.usecases.BreastCancerStudiesUseCase;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.WomanRisk;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.recommend.WomanRecommendation;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

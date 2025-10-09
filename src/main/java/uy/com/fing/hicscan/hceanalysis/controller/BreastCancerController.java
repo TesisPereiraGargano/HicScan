@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.web.bind.annotation.*;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.recommend.WomanRecommendation;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.WomanRisk;
+
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.recommend.WomanRecommendation;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
 import uy.com.fing.hicscan.hceanalysis.usecases.BreastCancerStudiesUseCase;
 
 import java.util.List;

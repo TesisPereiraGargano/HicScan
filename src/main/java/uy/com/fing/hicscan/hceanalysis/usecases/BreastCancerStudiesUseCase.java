@@ -2,36 +2,37 @@ package uy.com.fing.hicscan.hceanalysis.usecases;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontoforms.OntoFormsClient;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRPropsEnum;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.OntologyRepository;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.persistence.WomanIndividualsRepository;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.recommend.WomanRecommendation;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.RiskCalculationOutputDTO;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.RiskCalculatorService;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskCalculation;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskLevel;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel;
+
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.springframework.stereotype.Service;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRPropsEnum;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.OntologyRepository;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontoforms.OntoFormsClient;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.persistence.WomanIndividualsRepository;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.recommend.WomanRecommendation;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.RiskCalculationOutputDTO;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.RiskCalculatorService;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.WomanRisk;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.dtos.RiskCalculation;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.dtos.RiskLevel;
-import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.dtos.RiskModel;
+
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.GUIDELINE_CLASS;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.WOMAN_CLASS;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRPropsEnum.*;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRQuestionInstancesEnum.*;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.utils.IndividualMappingUtils.getAgeIndividual;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.utils.IndividualMappingUtils.getRiskIndividual;
+import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.utils.LanguageLabelUtils.getLabelInLanguageOrDefault;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRClassesEnum.GUIDELINE_CLASS;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRClassesEnum.WOMAN_CLASS;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRPropsEnum.*;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRQuestionInstancesEnum.*;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.utils.IndividualMappingUtils.getAgeIndividual;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.utils.IndividualMappingUtils.getRiskIndividual;
-import static uy.com.fing.hicscan.hceanalysis.data.breastcancer.utils.LanguageLabelUtils.getLabelInLanguageOrDefault;
 
 @Service
 @AllArgsConstructor
@@ -50,7 +51,7 @@ public class BreastCancerStudiesUseCase {
     public List<IndividualDescriptor> getModels(String language) {
         OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
 
-        return ontoModel.listIndividuals(ResourceFactory.createResource(uy.com.fing.hicscan.hceanalysis.data.breastcancer.ontology.BCRClassesEnum.MODEL_CLASS.getUri()))
+        return ontoModel.listIndividuals(ResourceFactory.createResource(uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.MODEL_CLASS.getUri()))
                 .mapWith(in -> new IndividualDescriptor(in.getURI(),
                         getLabelInLanguageOrDefault(in, language))).toList();
     }
