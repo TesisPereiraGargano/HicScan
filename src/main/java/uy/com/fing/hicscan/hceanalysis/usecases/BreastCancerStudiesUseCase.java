@@ -1,3 +1,8 @@
+/*
+ * FILE FROM ONTOBREASTSCREEN PROJECT
+ * IT HAS SOME MODIFICATIONS TO BE ABLE TO ADD MEDICATIONS TO THE WOMAN INDIVIDUAL IN THE SAME ONTOLOGY MODEL
+ */
+
 package uy.com.fing.hicscan.hceanalysis.usecases;
 
 import lombok.AllArgsConstructor;
@@ -64,14 +69,17 @@ public class BreastCancerStudiesUseCase {
      * @return representación riesgo mujer e identificador individuo.
      */
     public WomanRisk calculateRiskAndCreateWoman(String riskModelUri, Map<String, String> womanHistoryProps, String language) {
+        OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
+        return calculateRiskAndCreateWoman(ontoModel, riskModelUri, womanHistoryProps, language);
+    }
+
+    public WomanRisk calculateRiskAndCreateWoman(OntModel ontoModel, String riskModelUri, Map<String, String> womanHistoryProps, String language) {
 
         RiskCalculation calculatedRisk = riskCalculatorService.calculateRiskForModelAndData(riskModelUri, womanHistoryProps);
 
-
-        OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
         Individual womanRisk = ontoModel.getIndividual(calculatedRisk.getRiskLevel().getUri());
 
-        String womanUri = createNewWomanIndividual(calculatedRisk.getRiskModel(), calculatedRisk.getRiskLevel(), womanHistoryProps);
+        String womanUri = createNewWomanIndividual(ontoModel, calculatedRisk.getRiskModel(), calculatedRisk.getRiskLevel(), womanHistoryProps);
 
         return WomanRisk.builder()
                 .womanUri(womanUri)
@@ -88,20 +96,19 @@ public class BreastCancerStudiesUseCase {
 
 
     /**
-     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de hasRisk y hasAge.
+     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de hasRisk y hasAge. - MODIFICADA PARA RECIBIR ONTOMODEL Y NO CREAR UNO NUEVO
+     * @param ontoModel modelo de la ontología
      * @param riskModel modelo de riesgo
      * @param riskLevel riesgo calculado para el individuo.
      * @param womanHistoryData datos de la mujer.
      * @return individuo mujer construido.
      */
-    public String createNewWomanIndividual(RiskModel riskModel, RiskLevel riskLevel, Map<String, String> womanHistoryData) {
-        OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
-
+    public String createNewWomanIndividual(OntModel ontoModel, RiskModel riskModel, RiskLevel riskLevel, Map<String, String> womanHistoryData) {
         if(ontoModel == null) {
             throw new IllegalStateException("No existe la ontología de Breast Cancer Recommendation");
         }
 
-        Individual patient = ontoModel.getOntClass(WOMAN_CLASS.getUri()).createIndividual();
+        Individual patient = ontoModel.getOntClass(WOMAN_CLASS.getUri()).createIndividual("http://purl.org/ontology/breast_cancer_recommendation#NewWoman");
 
         try {
             addRiskRelationship(patient, riskModel, riskLevel);

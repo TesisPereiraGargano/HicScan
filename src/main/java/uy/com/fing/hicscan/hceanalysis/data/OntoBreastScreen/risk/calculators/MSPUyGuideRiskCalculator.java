@@ -1,5 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.calculators;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskCalculation;
@@ -16,10 +17,19 @@ import java.util.Map;
  * Calculadora de MSP UY siguiendo reglas de la guìa.
  */
 @Component
+@Slf4j
 public class MSPUyGuideRiskCalculator extends RiskCalculator {
 
     @Override
     public RiskCalculation doRiskCalculation(Map<String, String> womanFormData) {
+        log.info("MSPUyGuideRiskCalculator received womanFormData: {}", womanFormData);
+        log.info("womanFormData is null: {}", womanFormData == null);
+        
+        if (womanFormData == null) {
+            log.error("womanFormData is null, cannot calculate risk");
+            throw new IllegalArgumentException("womanFormData cannot be null");
+        }
+        
         RiskLevel resultRisk = RiskLevel.MEDIUM;
 
         if(UY_HEREDITARY_RISK_YES.getUri().equals(womanFormData.get(UY_HEREDITARY_RISK_QUESTION.getUri())) ||

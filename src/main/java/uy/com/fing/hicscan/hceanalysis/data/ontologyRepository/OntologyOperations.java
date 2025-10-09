@@ -7,6 +7,8 @@ import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,27 +23,28 @@ import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.enums.MedicationP
 public class OntologyOperations {
 
     private final uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.OntologyRepository ontologyRepository;
-    private final uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.persistence.BreastCancerFusekiClient breastCancerFusekiClient;
     private final uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.persistence.WomanIndividualsRepository womanIndividualsRepository;
 
     /**
      * Creates a new individual instance of a class in memory.
      * 
-     * @param ontologyId the ID of the ontology to use
+     * @param ontoModel the ontology model to use
      * @param classUri the URI of the class to instantiate
      * @return the created individual, or null if the class doesn't exist
      */
-    public Individual createIndividual(String ontologyId, String classUri) {
-        log.info("Creating individual of class {} in ontology {}", classUri, ontologyId);
+    public Individual createIndividual(OntModel ontoModel, String classUri) {
+        log.info("Creating individual of class {} using provided ontology model", classUri);
         
         try {
-            // Get the reasoned ontology model
-            OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontologyId);
+            if (ontoModel == null) {
+                log.error("Ontology model is null");
+                return null;
+            }
             
             // Check if the class exists
             OntClass ontClass = ontoModel.getOntClass(classUri);
             if (ontClass == null) {
-                log.error("Class {} does not exist in ontology {}", classUri, ontologyId);
+                log.error("Class {} does not exist in provided ontology model", classUri);
                 return null;
             }
             
@@ -52,8 +55,8 @@ public class OntologyOperations {
             return individual;
             
         } catch (Exception e) {
-            log.error("Error creating individual of class {} in ontology {}: {}", 
-                     classUri, ontologyId, e.getMessage(), e);
+            log.error("Error creating individual of class {}: {}", 
+                     classUri, e.getMessage(), e);
             return null;
         }
     }
@@ -61,22 +64,24 @@ public class OntologyOperations {
     /**
      * Creates a new individual instance of a class with a specific URI in memory.
      * 
-     * @param ontologyId the ID of the ontology to use
+     * @param ontoModel the ontology model to use
      * @param classUri the URI of the class to instantiate
      * @param individualUri the specific URI for the individual
      * @return the created individual, or null if the class doesn't exist
      */
-    public Individual createIndividual(String ontologyId, String classUri, String individualUri) {
-        log.info("Creating individual {} of class {} in ontology {}", individualUri, classUri, ontologyId);
+    public Individual createIndividual(OntModel ontoModel, String classUri, String individualUri) {
+        log.info("Creating individual {} of class {} using provided ontology model", individualUri, classUri);
         
         try {
-            // Get the reasoned ontology model
-            OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontologyId);
+            if (ontoModel == null) {
+                log.error("Ontology model is null");
+                return null;
+            }
             
             // Check if the class exists
             OntClass ontClass = ontoModel.getOntClass(classUri);
             if (ontClass == null) {
-                log.error("Class {} does not exist in ontology {}", classUri, ontologyId);
+                log.error("Class {} does not exist in provided ontology model", classUri);
                 return null;
             }
             
@@ -87,8 +92,8 @@ public class OntologyOperations {
             return individual;
             
         } catch (Exception e) {
-            log.error("Error creating individual {} of class {} in ontology {}: {}", 
-                     individualUri, classUri, ontologyId, e.getMessage(), e);
+            log.error("Error creating individual {} of class {}: {}", 
+                     individualUri, classUri, e.getMessage(), e);
             return null;
         }
     }
@@ -305,7 +310,7 @@ public class OntologyOperations {
      * 
      * Precondición: La mujer debe existir previamente.
      * 
-     * @param ontologyId ID de la ontología a usar
+     * @param ontoModel modelo de la ontología
      * @param womanId ID de la mujer existente
      * @param medicationName Nombre del medicamento
      * @param activeIngredient Ingrediente activo del medicamento
@@ -313,17 +318,13 @@ public class OntologyOperations {
      * @param isDiuretic Si el medicamento es diurético
      * @return true si se creó exitosamente, false en caso contrario
      */
-    public boolean createMedicationForWoman(String ontologyId, String womanId, String medicationName, 
+    public boolean createMedicationForWoman(OntModel ontoModel, String womanId, String medicationName, 
                                           String activeIngredient, String code, boolean isDiuretic) {
-        log.info("Creating medication {} for woman {} in ontology {}", medicationName, womanId, ontologyId);
+        log.info("Creating medication {} for woman {} using provided ontology model", medicationName, womanId);
         
         try {
-            // Verificar que la ontología existe en Fuseki usando BreastCancerFusekiClient
-            try {
-                breastCancerFusekiClient.getOntologyByName(ontologyId);
-                log.info("Ontology {} exists in Fuseki", ontologyId);
-            } catch (Exception e) {
-                log.error("Ontology {} does not exist in Fuseki: {}", ontologyId, e.getMessage());
+            if (ontoModel == null) {
+                log.error("Ontology model is null");
                 return false;
             }
             
@@ -335,11 +336,8 @@ public class OntologyOperations {
             }
             log.info("Found woman individual: {} with URI: {}", womanId, womanIndividual.getURI());
             
-            // Obtener el modelo de la ontología para crear nuevos individuos
-            OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontologyId);
-            
             // 1. Instanciar el medicamento (Medication_History)
-            Individual medicationInstance = createIndividual(ontologyId, MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri());
+            Individual medicationInstance = createIndividual(ontoModel, MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri());
             if (medicationInstance == null) {
                 log.error("Failed to create medication instance");
                 return false;
@@ -352,14 +350,14 @@ public class OntologyOperations {
             // 2. Si es diurético, agregar las propiedades correspondientes
             if (isDiuretic) {
                 // Crear instancia del ingrediente activo
-                Individual activeIngredientInstance = createIndividual(ontologyId, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
+                Individual activeIngredientInstance = createIndividual(ontoModel, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
                 if (activeIngredientInstance == null) {
                     log.error("Failed to create active ingredient instance");
                     return false;
                 }
                 
                 // Crear instancia de diurético
-                Individual diureticInstance = createIndividual(ontologyId, MedicationClassesEnum.DIURETIC_CLASS.getUri());
+                Individual diureticInstance = createIndividual(ontoModel, MedicationClassesEnum.DIURETIC_CLASS.getUri());
                 if (diureticInstance == null) {
                     log.error("Failed to create diuretic instance");
                     return false;
@@ -377,7 +375,7 @@ public class OntologyOperations {
                 addPropertyToIndividual(medicationInstance, MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri(), activeIngredientInstance.getURI());
             } else {
                 // Si no es diurético, solo crear el ingrediente activo
-                Individual activeIngredientInstance = createIndividual(ontologyId, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
+                Individual activeIngredientInstance = createIndividual(ontoModel, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
                 if (activeIngredientInstance == null) {
                     log.error("Failed to create active ingredient instance");
                     return false;
@@ -405,4 +403,64 @@ public class OntologyOperations {
             return false;
         }
     }
+
+    /**
+     * Ejecuta el razonador manualmente sobre un modelo de ontología específico y devuelve los resultados.
+     * Esta función permite ejecutar el razonador cuando se desee, sin que se ejecute automáticamente
+     * al agregar elementos a la ontología.
+     * 
+     * @param ontoModel modelo de la ontología sobre la cual ejecutar el razonador
+     * @return ReasoningResult con los resultados del razonador, incluyendo statements derivados y explicaciones
+     */
+    public ReasoningResult executeReasoner(OntModel ontoModel) {
+        log.info("Executing reasoner manually on provided ontology model");
+        
+        try {
+            if (ontoModel == null) {
+                log.error("Ontology model is null");
+                return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, "Ontology model is null");
+            }
+            
+            // Asegurar que el logging de derivaciones esté habilitado
+            ontoModel.setDerivationLogging(true);
+            
+            // Forzar la ejecución del razonador
+            ontoModel.prepare();
+            
+            // Obtener todos los statements del modelo (incluyendo los derivados)
+            List<String> derivedStatements = new ArrayList<>();
+            List<String> derivations = new ArrayList<>();
+            
+            StmtIterator stmtIterator = ontoModel.listStatements();
+            int totalStatements = 0;
+            
+            while (stmtIterator.hasNext()) {
+                Statement statement = stmtIterator.nextStatement();
+                totalStatements++;
+                
+                // Agregar el statement a la lista
+                derivedStatements.add(statement.toString());
+                
+                // Intentar obtener la derivación para este statement
+                try {
+                    ontoModel.getDerivation(statement).forEachRemaining(derivation -> 
+                        derivations.add(derivation.toString())
+                    );
+                } catch (Exception e) {
+                    // Algunos statements pueden no tener derivaciones
+                    log.debug("No derivation available for statement: {}", statement.toString());
+                }
+            }
+            
+            log.info("Reasoner execution completed. Total statements: {}, Derivations found: {}", 
+                    totalStatements, derivations.size());
+            
+            return new ReasoningResult(derivedStatements, derivations, totalStatements, true, null);
+            
+        } catch (Exception e) {
+            log.error("Error executing reasoner on provided model: {}", e.getMessage(), e);
+            return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, e.getMessage());
+        }
+    }
+
 }

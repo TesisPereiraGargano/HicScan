@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.OntologyOperations;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.persistence.WomanIndividualsRepository;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.OntologyRepository;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum;
@@ -15,7 +14,6 @@ import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontoforms.OntoForms
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntModel;
 
-import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -24,7 +22,6 @@ import java.util.List;
 @RequestMapping("/test/medication")
 public class MedicationTestController {
 
-    private final OntologyOperations ontologyOperations;
     private final WomanIndividualsRepository womanIndividualsRepository;
     private final OntologyRepository ontologyRepository;
     private final FusekiTripleStoreClient fusekiTripleStoreClient;
@@ -161,65 +158,6 @@ public class MedicationTestController {
                 false,
                 "Error creating test woman: " + e.getMessage(),
                 null,
-                null
-            ));
-        }
-    }
-
-    /**
-     * Crea un medicamento y lo asocia al historial de una mujer.
-     * 
-     * @param request la solicitud con los datos del medicamento
-     * @return respuesta con el resultado de la operación
-     */
-    @PostMapping("/create-for-woman")
-    public ResponseEntity<MedicationResponse> createMedicationForWoman(@RequestBody CreateMedicationRequest request) {
-        log.info("Received request to create medication {} for woman {}", 
-                 request.medicationName(), request.womanId());
-        
-        try {
-            // Usar el método correcto para obtener el ID de la ontología
-            String ontologyId = ontoFormsClient.getOntologyFileName();
-            log.info("Using ontology ID: {}", ontologyId);
-            
-            boolean success = ontologyOperations.createMedicationForWoman(
-                ontologyId,
-                request.womanId(),
-                request.medicationName(),
-                request.activeIngredient(),
-                request.code(),
-                request.isDiuretic()
-            );
-            
-            if (success) {
-                return ResponseEntity.ok(new MedicationResponse(
-                    true,
-                    "Medication created and added to woman's history successfully",
-                    Map.of(
-                        "ontologyId", ontologyId,
-                        "womanId", request.womanId(),
-                        "medicationName", request.medicationName(),
-                        "activeIngredient", request.activeIngredient(),
-                        "code", request.code(),
-                        "isDiuretic", request.isDiuretic()
-                    )
-                ));
-            } else {
-                return ResponseEntity.badRequest().body(new MedicationResponse(
-                    false,
-                    "Failed to create medication. Check if woman exists and ontology is valid.",
-                    Map.of(
-                        "ontologyId", ontologyId,
-                        "womanId", request.womanId(),
-                        "medicationName", request.medicationName()
-                    )
-                ));
-            }
-        } catch (Exception e) {
-            log.error("Error creating medication for woman: {}", e.getMessage(), e);
-            return ResponseEntity.internalServerError().body(new MedicationResponse(
-                false,
-                "Internal server error: " + e.getMessage(),
                 null
             ));
         }
