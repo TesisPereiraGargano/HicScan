@@ -1,5 +1,8 @@
 package uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor;
 
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
+
+import java.util.List;
 import java.util.Map;
 
 public interface PlainTextProcessor {
@@ -8,5 +11,5 @@ public interface PlainTextProcessor {
      * @param inputText Texto a analizar
      * @return lista con los medicamentos extraídos
      */
-    Map<String, String> extractDrugs(String inputText);
+    List<SustanciaAdministrada> extractDrugs(String inputText);
 }

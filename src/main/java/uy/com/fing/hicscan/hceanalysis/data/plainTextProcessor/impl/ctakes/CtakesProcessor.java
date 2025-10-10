@@ -16,20 +16,18 @@ import org.apache.uima.fit.util.JCasUtil;
 import org.apache.uima.jcas.JCas;
 import org.apache.uima.resource.ResourceInitializationException;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.PlainTextProcessor;
+import uy.com.fing.hicscan.hceanalysis.dto.CodDiccionario;
+import uy.com.fing.hicscan.hceanalysis.dto.Droga;
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -72,18 +70,18 @@ public class CtakesProcessor implements PlainTextProcessor {
 
 
     @Override
-    public Map<String, String> extractDrugs(String inputText) {
+    public List<SustanciaAdministrada> extractDrugs(String inputText) {
         JCas jCas = null;
         try {
             jCas = engine.newJCas();
             jCas.setDocumentText(inputText);
             try {
                 engine.process(jCas);
-                Map<String, String> drogas = new HashMap<>();
+                List<SustanciaAdministrada> drogas = new ArrayList<>();
                 String[] tuisDrugs = {"T116", "T195", "T123", "T122", "T103", "T120", "T104", "T200",
                         "T196", "T126", "T131", "T125", "T129", "T130", "T197", "T114",
                         "T109", "T121", "T192", "T127"};
-
+                Set<String> cuiSet = new HashSet<>(); //Para no repetir
                 for (IdentifiedAnnotation ia : JCasUtil.select(jCas, IdentifiedAnnotation.class)) {
                     if (ia.getOntologyConceptArr() != null) {
                         for (int i = 0; i < ia.getOntologyConceptArr().size(); i++) {
@@ -99,22 +97,40 @@ public class CtakesProcessor implements PlainTextProcessor {
                                 if (tui != null && esMedicamento) {
                                     String nombre = ia.getCoveredText();
                                     String cui = umls.getCui();
+                                    if (!cuiSet.contains(cui)) {
+                                        cuiSet.add(cui);
+                                        log.info("[CtakesProcessor] extractDrugs - Se extranjo el cui {}", cui);
 
-                                    // Busco SNOMED CT en otras OntologyConcepts asociadas (puedes tener más de una)
-                                    String cod_snomed = null;
-                                    for (int j = 0; j < ia.getOntologyConceptArr().size(); j++) {
-                                        OntologyConcept oc2 = ia.getOntologyConceptArr(j);
-                                        if("SNOMEDCT".equalsIgnoreCase(oc2.getCodingScheme())) {
-                                            cod_snomed = oc2.getCode();
-                                            break;
+                                        // Busco RXNORM en otras OntologyConcepts asociadas (puedes tener más de uno)
+                                        // Esto porque CTAKES los medicamentos los identifica usando RXNORM
+                                        // TO DO: Revisar, no sé si de acá no podría sacar también el de SNOMED CT
+                                        // Ni si está bien quedarme sólo con el primero
+                                        String cod_rxnorm = "";
+                                        for (int j = 0; j < ia.getOntologyConceptArr().size(); j++) {
+                                            OntologyConcept oc2 = ia.getOntologyConceptArr(j);
+                                            if("RXNORM".equalsIgnoreCase(oc2.getCodingScheme())) {
+                                                cod_rxnorm = oc2.getCode();
+                                                break;
+                                            }
                                         }
+
+                                        CodDiccionario cod_drugs = new CodDiccionario();
+                                        cod_drugs.setCui(umls.getCui());
+                                        cod_drugs.setRxnorm(cod_rxnorm);
+
+                                        Droga droga = new Droga(cod_drugs,"" ); //No hay un GetName en el Ontology Concept
+                                        List<Droga> drugs = new ArrayList<>();
+                                        drugs.add(droga);
+                                        SustanciaAdministrada sust = new SustanciaAdministrada(umls.getPreferredText(),"","","","",drugs);
+                                        drogas.add(sust); //código en RXNORM y nombre del medicamento
                                     }
-                                    drogas.putIfAbsent(cod_snomed, nombre); //código en SNOMED CT y nombre del medicamento
+
                                 }
                             }
                         }
                     }
                 }
+                log.info("Los medicamentos extraidos son: {}", drogas);
                 return drogas;
             } catch (AnalysisEngineProcessException e) {
                 throw new RuntimeException("Error al crear nueva engine Ctakes", e);

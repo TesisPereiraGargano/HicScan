@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Element;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapter;
-import uy.com.fing.hicscan.hceanalysis.dto.Autor;
-import uy.com.fing.hicscan.hceanalysis.dto.Observacion;
-import uy.com.fing.hicscan.hceanalysis.dto.Paciente;
-import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
+import uy.com.fing.hicscan.hceanalysis.dto.*;
 import org.w3c.dom.*;
 
 import java.util.AbstractMap;
@@ -52,6 +49,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
 
             this.medicamentos = extraerMedicamentos(pathXML);
             log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Medicamentos");
+            log.info("[Adaptador HL7v3CDAR2] Los medicamentos extraídos son: {}", this.medicamentos);
 
             this.observaciones = extraerObervaciones(pathXML);
             log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Observaciones");
@@ -117,6 +115,8 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         List<SustanciaAdministrada> sustancias = new ArrayList<>();
         List<Element> entries = extraerInfoByXPath(XMLPath, "//entry/substanceAdministration");
         for (Element substAdmin : entries) {
+            // Name
+            String name = extraerValorDeElemento(substAdmin, "text", null);
             // Dose Quantity
             String doseQuantityValue = extraerValorDeElemento(substAdmin, "doseQuantity", "value");
             String doseQuantityUnit = extraerValorDeElemento(substAdmin, "doseQuantity", "unit");
@@ -127,7 +127,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
             String periodAdminUnit = extraerValorDeElemento(effectiveTime, "period", "unit");
 
             // Recorre todos los posibles drugs codes bajo consumable-manufacturedProduct-manufacturedLabeledDrug-code
-            List<Map.Entry<String, String>> drugsCodes = new ArrayList<>();
+            List<Droga> drugs = new ArrayList<>();
             NodeList consumables = substAdmin.getElementsByTagName("consumable");
             for (int i = 0; i < consumables.getLength(); i++) {
                 Element consumable = (Element) consumables.item(i);
@@ -141,15 +141,35 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
                         for (int l = 0; l < codes.getLength(); l++) {
                             Element codeElem = (Element) codes.item(l);
                             String code = codeElem.getAttribute("code");
-                            String codeSystemName = codeElem.getAttribute("codeSystemName");
-                            if (code != null && !code.isEmpty() && codeSystemName != null && !codeSystemName.isEmpty()) {
-                                drugsCodes.add(new AbstractMap.SimpleEntry<>(code, codeSystemName));
+                            String nameDrug = codeElem.getAttribute("displayName");
+                            String codeSystem = codeElem.getAttribute("codeSystem");
+                            if (code != null && !code.isEmpty() && codeSystem != null && !codeSystem.isEmpty()) {
+                                CodDiccionario cods = new CodDiccionario();
+                                switch (codeSystem) {
+                                    case "2.16.840.1.113883.6.96":
+                                        cods.setSnomedCT(code);
+                                    case "2.16.840.1.113883.6.88":
+                                        cods.setRxnorm(code);
+                                    case "2.16.840.1.113883.6.86":
+                                        cods.setCui(code);
+                                        //case "2.16.840.1.113883.6.1":
+                                    //     "LOINC";
+                                    //case "2.16.840.1.113883.6.90":
+                                    //     "CPT";
+                                    //case "2.16.840.1.113883.6.3":
+                                    //     "ICD-10";
+                                    // ...
+                                    default:
+                                        log.error("[HL7v3_CDAr2_Adapter] extraerMedicamentos - El codigo no pertenence a los diccionarios definidos");
+                                }
+                                Droga droga = new Droga(cods, nameDrug);
+                                drugs.add(droga);
                             }
                         }
                     }
                 }
             }
-            sustancias.add(new SustanciaAdministrada(doseQuantityUnit, doseQuantityValue, periodAdminValue, periodAdminUnit, drugsCodes));
+            sustancias.add(new SustanciaAdministrada(name, doseQuantityUnit, doseQuantityValue, periodAdminValue, periodAdminUnit, drugs));
 
         }
 

@@ -4,8 +4,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uy.com.fing.hicscan.hceanalysis.dto.ApiResponse;
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
 import uy.com.fing.hicscan.hceanalysis.usecases.ProcessHceUseCase;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,8 +28,10 @@ public class HceApiController {
     public ApiResponse processHCE(
             @RequestParam String inputText
     ){
-        Map<String,String> meds = processHceUseCase.processPlainTextHCE(inputText);
-        return new ApiResponse("success", "Datos extraídos correctamente.", meds);
+        List<SustanciaAdministrada> meds = processHceUseCase.processPlainTextHCE(inputText);
+        //return new ApiResponse("success", "Datos extraídos correctamente.", meds); --TO DO CORREGIR
+        return new ApiResponse("success", "Datos extraídos correctamente.", new HashMap<>());
+
     }
 
 }
