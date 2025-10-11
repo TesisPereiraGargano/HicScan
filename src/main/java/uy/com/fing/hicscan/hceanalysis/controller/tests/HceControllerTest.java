@@ -22,7 +22,7 @@ public class HceControllerTest {
 
     @Autowired
     private ProcessHceUseCase processHceUseCase;
-
+/**
     @PostMapping(value = "/process/estructurados", consumes = "application/xml")
     public ResponseEntity<String> processEstructurado(@RequestBody String xmlContent) throws IOException {
         // Guarda el XML como archivo temporal
@@ -67,7 +67,7 @@ public class HceControllerTest {
         try {
             // Crear archivo temporal
             tempFile = File.createTempFile("hce-temp", ".xml");
-            try (FileWriter writer = new FileWriter(tempFile)) {
+            try (FileWriter writer =        new FileWriter(tempFile)) {
                 writer.write(xmlContent);
             }
 
@@ -96,4 +96,5 @@ public class HceControllerTest {
             throw new RuntimeException(e);
         }
     }
+    **/
 }

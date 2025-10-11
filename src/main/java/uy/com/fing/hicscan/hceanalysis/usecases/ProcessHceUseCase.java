@@ -9,8 +9,10 @@ import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.PlainTextProcesso
 import uy.com.fing.hicscan.hceanalysis.data.translator.Translator;
 import uy.com.fing.hicscan.hceanalysis.dto.*;
 import uy.com.fing.hicscan.hceanalysis.languageexpansion.LanguageExpansion;
+import uy.com.fing.hicscan.hceanalysis.utils.GestionDocumentosHCE;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -52,31 +54,107 @@ public class ProcessHceUseCase {
         });
     }
 
-    public PacienteExtendido obtenerDatosPaciente(File fileHCE){
-        HCEAdapter adaptador = getOrCreateAdapter(fileHCE);
-        Paciente paciente = adaptador.getPaciente();
-        String alturaValor = "";
-        String alturaUnidad = "";
-        String pesoValor = "";
-        String pesoUnidad = "";
 
-        List<Observacion> observaciones = adaptador.getObservaciones();
-        //Busco la observacion que corresponda a la altura y peso
-        //Codigo SNOMED CT --> 2.16.840.1.113883.6.96 en HL7
-        for (Observacion obs : observaciones){
-            if (Objects.equals(obs.getCodeSystem(), "2.16.840.1.113883.6.96") && Objects.equals(obs.getCode(), "50373000")){
-                alturaValor = obs.getMeditionValue();
-                alturaUnidad = obs.getMeditionUnit();
-            } else {
-                if (Objects.equals(obs.getCodeSystem(), "2.16.840.1.113883.6.96") && Objects.equals(obs.getCode(), "363808001")){
-                    pesoValor = obs.getMeditionValue();
-                    pesoUnidad = obs.getMeditionUnit();
+    public PacienteExtendido obtenerDatosPaciente(String id){
+        if (GestionDocumentosHCE.existeDocumento(id)) {
+            try {
+                File tempFile = File.createTempFile("hce-temp", ".xml");
+                FileWriter writer = new FileWriter(tempFile);
+                String xmlContent = GestionDocumentosHCE.obtenerDocumento(id);
+                writer.write(xmlContent);
+                HCEAdapter adaptador = getOrCreateAdapter(tempFile);
+                Paciente paciente = adaptador.getPaciente();
+                String alturaValor = "";
+                String alturaUnidad = "";
+                String pesoValor = "";
+                String pesoUnidad = "";
+
+                List<Observacion> observaciones = adaptador.getObservaciones();
+                //Busco la observacion que corresponda a la altura y peso
+                //Codigo SNOMED CT --> 2.16.840.1.113883.6.96 en HL7
+                for (Observacion obs : observaciones) {
+                    if (Objects.equals(obs.getCodeSystem(), "2.16.840.1.113883.6.96") && Objects.equals(obs.getCode(), "50373000")) {
+                        alturaValor = obs.getMeditionValue();
+                        alturaUnidad = obs.getMeditionUnit();
+                    } else {
+                        if (Objects.equals(obs.getCodeSystem(), "2.16.840.1.113883.6.96") && Objects.equals(obs.getCode(), "363808001")) {
+                            pesoValor = obs.getMeditionValue();
+                            pesoUnidad = obs.getMeditionUnit();
+                        }
+                    }
                 }
-            }
-        }
+                return new PacienteExtendido(paciente.getNombre(), paciente.getGenero(), paciente.getFechaNacimiento(), paciente.getEstadoCivil(), paciente.getRaza(), paciente.getLugarNacimiento(), alturaValor, alturaUnidad, pesoValor, pesoUnidad);
 
-        return new PacienteExtendido(paciente.getNombre(), paciente.getGenero(), paciente.getFechaNacimiento(), paciente.getEstadoCivil(), paciente.getRaza(), paciente.getLugarNacimiento(), alturaValor, alturaUnidad, pesoValor, pesoUnidad);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }else{
+            return null;
+        }
     }
+
+    public DatosHCE obtenerDatosPacienteExtendido(String id){
+        if (GestionDocumentosHCE.existeDocumento(id)) {
+            try {
+                PacienteExtendido datosPaciente = obtenerDatosPaciente(id);
+                //TO DO: REVISAR (esto se re puede mejorar ahora queda así)
+                //Yo le doy la extensión es al pedo, voy a hacer otro endpoint
+                File tempFile = File.createTempFile("hce-temp", ".xml");
+                FileWriter writer = new FileWriter(tempFile);
+                String xmlContent = GestionDocumentosHCE.obtenerDocumento(id);
+                writer.write(xmlContent);
+                HCEAdapter adaptador = getOrCreateAdapter(tempFile); //Ver si esto está bien o si termina devolviendo siempre los mismos datos
+
+                //ACA COMIENZA EL PROCESAMIENTO
+                List<SustanciaAdministrada> noClasificados = new ArrayList<>();
+                DatosHCE.Medicamentos.Clasificados clasificados = new DatosHCE.Medicamentos.Clasificados();
+                clasificados.setDiureticos(new ArrayList<>());
+                clasificados.setNoDiureticos(new ArrayList<>());
+
+                //Medicamentos parte estructurada de la HCE
+                List<SustanciaAdministrada> medicamentos = adaptador.getMedicamentos();
+
+                String textoLibre = adaptador.getTextoLibre();
+                //Lista con los medicamentos extraídos del texto libre
+                //Por lo general con código RXNORM y CUI
+                List<SustanciaAdministrada> medsTextoLibre = processPlainTextHCE(textoLibre);
+
+                //TO DO: Agregar que compare las listas y no genere repetidos
+                medicamentos.addAll(medsTextoLibre);
+
+                poblarCodigosRxNorm(medicamentos, umlsApiKey);
+
+                for (SustanciaAdministrada sust : medicamentos){
+                    Boolean esDiuretico = esDiuretico(sust);
+                    if (esDiuretico == null){
+                        //Lo agrego a la lista de sin clasificar
+                        noClasificados.add(sust);
+                    } else if(esDiuretico){
+                        //Lo agrego a la lista de diureticos
+                        clasificados.getDiureticos().add(sust);
+                    } else {
+                        //Lo agrego a la lista de NO diureticos
+                        clasificados.getNoDiureticos().add(sust);
+                    }
+                }
+
+                DatosHCE datosHCE = new DatosHCE();
+                datosHCE.setDatosBasicosPaciente(datosPaciente);
+                DatosHCE.Medicamentos meds = new DatosHCE.Medicamentos();
+                meds.setClasificados(clasificados);
+                meds.setNoClasificados(noClasificados);
+                datosHCE.setMedicamentos(meds);
+
+                return datosHCE;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+        }else{
+            return null;
+        }
+    }
+
 
     public Map<String, SustanciaAdministrada> obtenerMedicamentosEstructuradosHCE(File fileHCE) throws IOException {
 
