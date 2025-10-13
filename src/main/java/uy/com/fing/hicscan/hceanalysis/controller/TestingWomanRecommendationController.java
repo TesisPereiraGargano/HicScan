@@ -83,10 +83,10 @@ public class TestingWomanRecommendationController {
             RiskModel riskModel = RiskModel.MSP_UY; // Usar MSP_UY como modelo por defecto
             
             // Valores por defecto para medicamento
-            String medicationName = "Aspirin";
-            String activeIngredient = "Acetylsalicylic acid";
-            String code = "ASP001";
-            boolean isDiuretic = false;
+            String medicationName = "Hydrochlorothiazide";
+            String activeIngredient = "Hydrochlorothiazide";
+            String code = "C0020255";
+            boolean isDiuretic = true;
 
             // Ejecutar el procesamiento completo
             ReasoningResult result = instanciateOntology.processWomanWithMedicationAndReasoning(

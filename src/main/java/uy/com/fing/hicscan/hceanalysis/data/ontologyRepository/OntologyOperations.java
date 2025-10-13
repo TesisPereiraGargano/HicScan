@@ -433,29 +433,40 @@ public class OntologyOperations {
             
             StmtIterator stmtIterator = ontoModel.listStatements();
             int totalStatements = 0;
+            int filteredStatements = 0;
+            
+            // URI del sujeto que queremos filtrar
+            String targetSubject = "http://purl.org/ontology/breast_cancer_recommendation#NewWoman";
             
             while (stmtIterator.hasNext()) {
                 Statement statement = stmtIterator.nextStatement();
                 totalStatements++;
                 
-                // Agregar el statement a la lista
-                derivedStatements.add(statement.toString());
-                
-                // Intentar obtener la derivación para este statement
-                try {
-                    ontoModel.getDerivation(statement).forEachRemaining(derivation -> 
-                        derivations.add(derivation.toString())
-                    );
-                } catch (Exception e) {
-                    // Algunos statements pueden no tener derivaciones
-                    log.debug("No derivation available for statement: {}", statement.toString());
+                // Filtrar solo las triplas donde el sujeto es NewWoman
+                if (statement.getSubject() != null && 
+                    statement.getSubject().getURI() != null && 
+                    statement.getSubject().getURI().equals(targetSubject)) {
+                    
+                    filteredStatements++;
+                    // Agregar el statement a la lista
+                    derivedStatements.add(statement.toString());
+                    
+                    // Intentar obtener la derivación para este statement
+                    try {
+                        ontoModel.getDerivation(statement).forEachRemaining(derivation -> 
+                            derivations.add(derivation.toString())
+                        );
+                    } catch (Exception e) {
+                        // Algunos statements pueden no tener derivaciones
+                        log.debug("No derivation available for statement: {}", statement.toString());
+                    }
                 }
             }
             
-            log.info("Reasoner execution completed. Total statements: {}, Derivations found: {}", 
-                    totalStatements, derivations.size());
+            log.info("Reasoner execution completed. Total statements: {}, Filtered statements: {}, Derivations found: {}", 
+                    totalStatements, filteredStatements, derivations.size());
             
-            return new ReasoningResult(derivedStatements, derivations, totalStatements, true, null);
+            return new ReasoningResult(derivedStatements, derivations, filteredStatements, true, null);
             
         } catch (Exception e) {
             log.error("Error executing reasoner on provided model: {}", e.getMessage(), e);
