@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Collections;
 
 @Service
 public class ConfigurationUseCase {
@@ -151,7 +153,9 @@ public class ConfigurationUseCase {
                 if (property.getRange() != null && canBeTransparented) {
                     // Check if the form has subForms and if any subForm's sectionName matches the range
                     if (form != null && form.getSubForms() != null) {
-                        for (Form subFormItem : form.getSubForms()) {
+                        // Sort subforms for consistent ordering
+                        List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                        for (Form subFormItem : sortedSubForms) {
                             if (subFormItem.getSectionName() != null && subFormItem.getSectionName().equals(property.getRange())) {
                                 try {
                                     // Convert the subForm to List<PropertyDescriptorWithFormStatus>
@@ -308,7 +312,9 @@ public class ConfigurationUseCase {
                     
                     // Check if this property has a range and if it matches a subForm sectionName (only if it can be transparented)
                     if (property.getRange() != null && canBeTransparented && form.getSubForms() != null) {
-                        for (Form subFormItem : form.getSubForms()) {
+                        // Sort subforms for consistent ordering
+                        List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                        for (Form subFormItem : sortedSubForms) {
                             if (subFormItem.getSectionName() != null && subFormItem.getSectionName().equals(property.getRange())) {
                                 try {
                                     // Recursively convert the subForm
@@ -327,7 +333,9 @@ public class ConfigurationUseCase {
 
             // After processing all properties, also process all available subforms maintaining their structure
             if (form.getSubForms() != null && !form.getSubForms().isEmpty()) {
-                for (Form subFormItem : form.getSubForms()) {
+                // Sort subforms for consistent ordering
+                List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                for (Form subFormItem : sortedSubForms) {
                     try {
                         // Create a property descriptor for this subform section
                         PropertyDescriptor subFormProperty = new PropertyDescriptor();
@@ -370,6 +378,38 @@ public class ConfigurationUseCase {
             // Remove current class URI from processed set when done
             processedClassUris.remove(form.getClassUri());
         }
+    }
+    
+    // Helper method to sort subforms consistently by sectionName
+    private List<Form> sortSubForms(List<Form> subForms) {
+        if (subForms == null || subForms.isEmpty()) {
+            return subForms;
+        }
+        
+        List<Form> sortedSubForms = new ArrayList<>(subForms);
+        Collections.sort(sortedSubForms, new Comparator<Form>() {
+            @Override
+            public int compare(Form f1, Form f2) {
+                String sectionName1 = f1.getSectionName();
+                String sectionName2 = f2.getSectionName();
+                
+                // Handle null section names
+                if (sectionName1 == null && sectionName2 == null) {
+                    return 0;
+                }
+                if (sectionName1 == null) {
+                    return 1; // null goes to end
+                }
+                if (sectionName2 == null) {
+                    return -1; // null goes to end
+                }
+                
+                // Sort alphabetically by section name for consistent ordering
+                return sectionName1.compareTo(sectionName2);
+            }
+        });
+        
+        return sortedSubForms;
     }
     
     // Helper method to recursively collect all class names and URIs from the OntoTree
