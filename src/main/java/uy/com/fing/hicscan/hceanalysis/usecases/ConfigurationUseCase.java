@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Comparator;
+import java.util.Collections;
 
 @Service
 public class ConfigurationUseCase {
@@ -82,12 +84,7 @@ public class ConfigurationUseCase {
         try {
             // Get the form for the class
             Form form = ontoForms.getOntologyClassForm(ontoId, classUri);
-            System.out.println("Form retrieved: " + (form != null ? "not null" : "null"));
             if (form != null) {
-                System.out.println("Form fields count: " + (form.getFields() != null ? form.getFields().size() : "null"));
-                if (form.getFields() != null && form.getFields().isEmpty()) {
-                    System.out.println("Empty form returned for class " + classUri + " - no form configuration exists");
-                }
             }
             
             // Get all properties for the class
@@ -101,8 +98,6 @@ public class ConfigurationUseCase {
                 OntoTree ontoTree = ontoForms.getOntologyClasses(ontoId);
                 if (ontoTree != null) {
                     collectClassNamesAndUris(ontoTree, allClassNames, classNameToUriMap);
-                    System.out.println("Collected class names: " + allClassNames);
-                    System.out.println("Class name to URI map: " + classNameToUriMap);
                 }
             } catch (Exception e) {
                 System.out.println("Warning: Could not retrieve class names for range checking: " + e.getMessage());
@@ -116,7 +111,6 @@ public class ConfigurationUseCase {
                     if (field.getUri() != null) {
                         formFieldMap.put(field.getUri(), field);
                         formPropertyUris.add(field.getUri());
-                        System.out.println("Added form field URI: " + field.getUri());
                     }
                 }
             }
@@ -147,7 +141,6 @@ public class ConfigurationUseCase {
                                 List<PropertyDescriptor> rangeClassProperties = ontoForms.getOntologyClassProperties(ontoId, rangeClassUri);
                                 // If the class has properties, it can be transparented
                                 canBeTransparented = !rangeClassProperties.isEmpty();
-                                System.out.println("Property " + property.getPropLabel() + " canBeTransparented: " + canBeTransparented + " (range class has " + rangeClassProperties.size() + " properties)");
                             } catch (Exception e) {
                                 System.out.println("Warning: Could not retrieve properties for range class " + property.getRange() + ": " + e.getMessage());
                                 canBeTransparented = false;
@@ -158,26 +151,15 @@ public class ConfigurationUseCase {
                 
                 // Check if this property has a range and if it matches a subForm sectionName (only if it can be transparented)
                 if (property.getRange() != null && canBeTransparented) {
-                    System.out.println("Checking property: " + property.getPropLabel() + " with range: " + property.getRange());
-                    System.out.println("Subforms available: " + (form.getSubForms() != null ? form.getSubForms().size() : 0));
-                    
-                    if (form.getSubForms() != null) {
-                        System.out.println("Available subForm sectionNames:");
-                        for (Form subFormItem : form.getSubForms()) {
-                            System.out.println("  - " + subFormItem.getSectionName() + " (classUri: " + subFormItem.getClassUri() + ")");
-                        }
-                    }
-                    
                     // Check if the form has subForms and if any subForm's sectionName matches the range
                     if (form != null && form.getSubForms() != null) {
-                        for (Form subFormItem : form.getSubForms()) {
-                            System.out.println("Comparing subForm sectionName '" + subFormItem.getSectionName() + "' with property range '" + property.getRange() + "'");
+                        // Sort subforms for consistent ordering
+                        List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                        for (Form subFormItem : sortedSubForms) {
                             if (subFormItem.getSectionName() != null && subFormItem.getSectionName().equals(property.getRange())) {
-                                System.out.println("*** MATCH FOUND! *** subForm sectionName: " + subFormItem.getSectionName() + " for property " + property.getPropLabel());
                                 try {
                                     // Convert the subForm to List<PropertyDescriptorWithFormStatus>
                                     subForm = convertFormToPropertyDescriptorWithFormStatus(ontoId, subFormItem);
-                                    System.out.println("Successfully converted subForm for property " + property.getPropLabel() + " with " + (subForm != null ? subForm.size() : 0) + " properties");
                                     break; // Found the matching subForm, no need to continue searching
                                 } catch (Exception e) {
                                     System.out.println("Warning: Could not retrieve subForm for property " + property.getPropLabel() + ": " + e.getMessage());
@@ -218,7 +200,6 @@ public class ConfigurationUseCase {
         
         // Prevent infinite loops by checking if we've already processed this class URI
         if (processedClassUris.contains(form.getClassUri())) {
-            System.out.println("Warning: Detected cycle for class URI: " + form.getClassUri() + ", skipping to prevent infinite loop");
             return new ArrayList<>();
         }
         
@@ -229,18 +210,12 @@ public class ConfigurationUseCase {
             // Create the result list
             List<PropertyDescriptorWithFormStatus> result = new ArrayList<>();
             
-            // NEW LOGIC: Check if the form has subForms (not a final class)
             if (form.getSubForms() != null && !form.getSubForms().isEmpty()) {
-                System.out.println("Form has subForms (not final class), fetching form for class directly...");
-                System.out.println("Available subforms: " + form.getSubForms().size());
-                
                 // Instead of processing the current form, go directly to fetch the form for this class
                 Form actualForm = ontoForms.getOntologyClassForm(ontoId, form.getClassUri());
-                System.out.println("Fetched actual form for class " + form.getClassUri() + ": " + (actualForm != null ? "not null" : "null"));
                 
                 if (actualForm != null) {
                     // Process the actual form directly and add it to the result
-                    System.out.println("Processing actual form with " + actualForm.getFields().size() + " fields");
                     
                     // Create a map of property URIs to their corresponding form fields for options access
                     Map<String, Form.FormField> actualFormFieldMap = new HashMap<>();
@@ -255,34 +230,30 @@ public class ConfigurationUseCase {
                     }
                     
                     // Get properties for the actual form's class
-                    List<PropertyDescriptor> actualFormProperties = ontoForms.getOntologyClassProperties(ontoId, actualForm.getClassUri());
+                    // List<PropertyDescriptor> actualFormProperties = ontoForms.getOntologyClassProperties(ontoId, actualForm.getClassUri());
                     
                     // Process each property from the actual form
-                    for (PropertyDescriptor property : actualFormProperties) {
-                        boolean isShown = actualFormPropertyUris.contains(property.getPropUri());
-                        List<Form.FieldOption> options = null;
-                        List<PropertyDescriptorWithFormStatus> subForm = null;
-                        boolean canBeTransparented = false;
+                    // for (PropertyDescriptor property : actualFormProperties) {
+                    //     boolean isShown = actualFormPropertyUris.contains(property.getPropUri());
+                    //     List<Form.FieldOption> options = null;
+                    //     List<PropertyDescriptorWithFormStatus> subForm = null;
+                    //     boolean canBeTransparented = false;
                         
-                        // Get options from form field if it exists
-                        Form.FormField formField = actualFormFieldMap.get(property.getPropUri());
-                        if (formField instanceof Form.ObjectField) {
-                            Form.ObjectField objectField = (Form.ObjectField) formField;
-                            options = objectField.getOptions();
-                        }
+                    //     // Get options from form field if it exists
+                    //     Form.FormField formField = actualFormFieldMap.get(property.getPropUri());
+                    //     if (formField instanceof Form.ObjectField) {
+                    //         Form.ObjectField objectField = (Form.ObjectField) formField;
+                    //         options = objectField.getOptions();
+                    //     }
                         
-                        result.add(new PropertyDescriptorWithFormStatus(property, isShown, options, subForm, canBeTransparented));
-                    }
+                    //     result.add(new PropertyDescriptorWithFormStatus(property, isShown, options, subForm, canBeTransparented));
+                    // }
                 } else {
                     System.out.println("No actual form found for class " + form.getClassUri() + ", adding empty result");
                 }
             } else {
-                // ORIGINAL LOGIC: Full processing for final classes (no subForms)
-                System.out.println("Form has no subForms (final class), performing full processing...");
-                
                 // Get all properties for the form's class URI
                 List<PropertyDescriptor> allProperties = ontoForms.getOntologyClassProperties(ontoId, form.getClassUri());
-                System.out.println("Converting form with classUri: " + form.getClassUri() + ", found " + allProperties.size() + " properties");
                 
                 // Create a map of property URIs to their corresponding form fields for options access
                 Map<String, Form.FormField> formFieldMap = new HashMap<>();
@@ -295,7 +266,6 @@ public class ConfigurationUseCase {
                         }
                     }
                 }
-                System.out.println("Form has " + formPropertyUris.size() + " fields with URIs");
                 
                 // Get all classes from the ontology to check if ranges match class names
                 Set<String> allClassNames = new HashSet<>();
@@ -334,7 +304,6 @@ public class ConfigurationUseCase {
                                     // If the class has properties, it can be transparented
                                     canBeTransparented = !rangeClassProperties.isEmpty();
                                 } catch (Exception e) {
-                                    System.out.println("Warning: Could not retrieve properties for range class " + property.getRange() + ": " + e.getMessage());
                                     canBeTransparented = false;
                                 }
                             }
@@ -343,19 +312,15 @@ public class ConfigurationUseCase {
                     
                     // Check if this property has a range and if it matches a subForm sectionName (only if it can be transparented)
                     if (property.getRange() != null && canBeTransparented && form.getSubForms() != null) {
-                        System.out.println("Checking subforms for property: " + property.getPropLabel() + " with range: " + property.getRange());
-                        System.out.println("Available subforms in this form: " + form.getSubForms().size());
-                        for (Form subFormItem : form.getSubForms()) {
-                            System.out.println("  - subForm sectionName: " + subFormItem.getSectionName() + " (classUri: " + subFormItem.getClassUri() + ")");
+                        // Sort subforms for consistent ordering
+                        List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                        for (Form subFormItem : sortedSubForms) {
                             if (subFormItem.getSectionName() != null && subFormItem.getSectionName().equals(property.getRange())) {
-                                System.out.println("*** MATCH FOUND in subform! *** subForm sectionName: " + subFormItem.getSectionName() + " for property " + property.getPropLabel());
                                 try {
                                     // Recursively convert the subForm
                                     subForm = convertFormToPropertyDescriptorWithFormStatus(ontoId, subFormItem, new HashSet<>(processedClassUris));
-                                    System.out.println("Successfully converted subForm for property " + property.getPropLabel() + " with " + (subForm != null ? subForm.size() : 0) + " properties");
                                     break; // Found the matching subForm, no need to continue searching
                                 } catch (Exception e) {
-                                    System.out.println("Warning: Could not retrieve subForm for property " + property.getPropLabel() + ": " + e.getMessage());
                                     e.printStackTrace();
                                 }
                             }
@@ -368,11 +333,9 @@ public class ConfigurationUseCase {
 
             // After processing all properties, also process all available subforms maintaining their structure
             if (form.getSubForms() != null && !form.getSubForms().isEmpty()) {
-                System.out.println("Processing all available subforms maintaining structure...");
-                System.out.println("Total subforms available: " + form.getSubForms().size());
-                
-                for (Form subFormItem : form.getSubForms()) {
-                    System.out.println("Processing subform: " + subFormItem.getSectionName() + " (classUri: " + subFormItem.getClassUri() + ")");
+                // Sort subforms for consistent ordering
+                List<Form> sortedSubForms = sortSubForms(form.getSubForms());
+                for (Form subFormItem : sortedSubForms) {
                     try {
                         // Create a property descriptor for this subform section
                         PropertyDescriptor subFormProperty = new PropertyDescriptor();
@@ -388,7 +351,6 @@ public class ConfigurationUseCase {
                         List<PropertyDescriptorWithFormStatus> convertedSubForm = convertFormToPropertyDescriptorWithFormStatus(ontoId, subFormItem, new HashSet<>(processedClassUris));
                         
                         if (convertedSubForm != null && !convertedSubForm.isEmpty()) {
-                            System.out.println("Added " + convertedSubForm.size() + " properties from subform " + subFormItem.getSectionName());
                             
                             // Create PropertyDescriptorWithFormStatus for this subform section
                             PropertyDescriptorWithFormStatus subFormPropertyWithStatus = new PropertyDescriptorWithFormStatus(
@@ -407,20 +369,47 @@ public class ConfigurationUseCase {
                     }
                 }
                 
-                System.out.println("Total subforms processed: " + form.getSubForms().size() + " subform sections");
             }
             
-            System.out.println("Converted form to " + result.size() + " PropertyDescriptorWithFormStatus objects");
-            
-            System.out.println("Converted form to " + result.size() + " PropertyDescriptorWithFormStatus objects");
             return result;
         } catch (IOException | InterruptedException e) {
-            System.out.println("Warning: Could not convert form to PropertyDescriptorWithFormStatus: " + e.getMessage());
             return new ArrayList<>();
         } finally {
             // Remove current class URI from processed set when done
             processedClassUris.remove(form.getClassUri());
         }
+    }
+    
+    // Helper method to sort subforms consistently by sectionName
+    private List<Form> sortSubForms(List<Form> subForms) {
+        if (subForms == null || subForms.isEmpty()) {
+            return subForms;
+        }
+        
+        List<Form> sortedSubForms = new ArrayList<>(subForms);
+        Collections.sort(sortedSubForms, new Comparator<Form>() {
+            @Override
+            public int compare(Form f1, Form f2) {
+                String sectionName1 = f1.getSectionName();
+                String sectionName2 = f2.getSectionName();
+                
+                // Handle null section names
+                if (sectionName1 == null && sectionName2 == null) {
+                    return 0;
+                }
+                if (sectionName1 == null) {
+                    return 1; // null goes to end
+                }
+                if (sectionName2 == null) {
+                    return -1; // null goes to end
+                }
+                
+                // Sort alphabetically by section name for consistent ordering
+                return sectionName1.compareTo(sectionName2);
+            }
+        });
+        
+        return sortedSubForms;
     }
     
     // Helper method to recursively collect all class names and URIs from the OntoTree
