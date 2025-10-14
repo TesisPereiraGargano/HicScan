@@ -131,7 +131,43 @@
 			<artifactId>guava</artifactId>
 			<version>33.0.0-jre</version>
 		</dependency>
-	</dependencies>
+		
+	<!-- Apache Jena dependencies for ontology processing -->
+	<dependency>
+		<groupId>org.apache.jena</groupId>
+		<artifactId>apache-jena-libs</artifactId>
+		<version>4.9.0</version>
+		<type>pom</type>
+	</dependency>
+	
+	<!-- OpenLlet reasoner for ontology reasoning -->
+	<dependency>
+		<groupId>com.github.galigator.openllet</groupId>
+		<artifactId>openllet-jena</artifactId>
+		<version>2.6.5</version>
+		<exclusions>
+			<!-- Exclude OpenLlet's transitive Jena dependencies to avoid version conflicts -->
+			<exclusion>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>*</artifactId>
+			</exclusion>
+		</exclusions>
+	</dependency>
+	
+	<!-- Selenium for web scraping (IBIS risk calculations) -->
+	<dependency>
+		<groupId>org.seleniumhq.selenium</groupId>
+		<artifactId>selenium-java</artifactId>
+		<version>4.24.0</version>
+	</dependency>
+	
+	<!-- WebDriverManager for Selenium -->
+	<dependency>
+		<groupId>io.github.bonigarcia</groupId>
+		<artifactId>webdrivermanager</artifactId>
+		<version>5.9.2</version>
+	</dependency>
+</dependencies>
 
 
 	<build>

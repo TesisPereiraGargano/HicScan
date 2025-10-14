@@ -1,13 +1,14 @@
 package uy.com.fing.hicscan.hceanalysis.data.Recommendation;
 
-import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreenClient;
+import uy.com.fing.hicscan.hceanalysis.usecases.BreastCancerStudiesUseCase;
+import uy.com.fing.hicscan.hceanalysis.data.breastcancer.risk.WomanRisk;
+import uy.com.fing.hicscan.hceanalysis.data.breastcancer.recommend.WomanRecommendation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,63 +18,63 @@ import java.util.Map;
 @Service
 public class WomanRecommendationServiceImpl implements WomanRecommendationService {
     
-    @Autowired
-    private OntoBreastScreenClient ontoBreastScreenClient;
+    private static final String DEFAULT_RISK_MODEL_URI = "http://purl.org/ontology/breast_cancer_recommendation#UY_model";
     
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    @Autowired
+    private BreastCancerStudiesUseCase breastCancerStudiesUseCase;
     
     @Override
     public Map<String, Object> getWomanRecommendation(Map<String, Object> womanHistory) throws IOException, InterruptedException {
         try {
+            // Extract language and riskModelUri from womanHistory
+            String language = (String) womanHistory.getOrDefault("language", "en");
+            String riskModelUri = (String) womanHistory.getOrDefault("riskModelUri", DEFAULT_RISK_MODEL_URI);
+            
+            // Convert Map<String, Object> to Map<String, String>
+            Map<String, String> womanHistoryProps = new HashMap<>();
+            for (Map.Entry<String, Object> entry : womanHistory.entrySet()) {
+                if (entry.getValue() != null) {
+                    womanHistoryProps.put(entry.getKey(), entry.getValue().toString());
+                }
+            }
+            
             // Step 1: Create woman and calculate risk
-            OntoBreastScreenClient.WomanRiskResult womanRiskResult = ontoBreastScreenClient.createWomanAndCalculateRisk(womanHistory);
-            String womanId = womanRiskResult.womanUri;
-            String riskLevelUri = womanRiskResult.riskLevelUri;
+            WomanRisk womanRisk = breastCancerStudiesUseCase.calculateRiskAndCreateWoman(
+                riskModelUri, 
+                womanHistoryProps, 
+                language
+            );
+            String womanId = womanRisk.getWomanUri();
+            String riskLevelUri = womanRisk.getRiskLevelUri();
             
             // Step 2: Get recommendation guide URI based on risk level
-            String recommendationGuideResponse = ontoBreastScreenClient.getRecommendationGuideUri(riskLevelUri);
+            List<BreastCancerStudiesUseCase.IndividualDescriptor> guidelines = 
+                breastCancerStudiesUseCase.getAllGuidelinesFor(riskLevelUri, language);
             
-            // Extract the guideline URI from the response
-            String guidelineUri = extractGuidelineUri(recommendationGuideResponse);
+            if (guidelines.isEmpty()) {
+                throw new IOException("No guidelines found for risk level: " + riskLevelUri);
+            }
+            
+            // Use the first guideline (you may want to add logic to select a specific guideline)
+            String guidelineUri = guidelines.get(0).uri();
             
             // Step 3: Get breast cancer recommendation
-            Map<String, Object> recommendation = ontoBreastScreenClient.getBreastCancerRecommendation(womanId, guidelineUri);
+            WomanRecommendation recommendation = breastCancerStudiesUseCase.getWomanAllRecommendations(
+                womanId, 
+                guidelineUri, 
+                language
+            );
             
-            // Add womanId to the response
-            Map<String, Object> response = new HashMap<>(recommendation);
+            // Build response with only womanId and recommendations (both mid and high)
+            Map<String, Object> response = new HashMap<>();
             response.put("womanId", womanId);
+            response.put("midRecommendation", recommendation != null ? recommendation.getMidRecommendation() : null);
+            response.put("highRecommendation", recommendation != null ? recommendation.getHighRecommendation() : null);
             
             return response;
             
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             throw new IOException("Error getting woman recommendation: " + e.getMessage(), e);
-        }
-    }
-    
-    /**
-     * Extracts the guideline URI from the recommendation guide response
-     * 
-     * @param recommendationGuideResponse JSON response containing the guideline URI
-     * @return String containing the extracted guideline URI
-     * @throws IOException if the response cannot be parsed
-     */
-    private String extractGuidelineUri(String recommendationGuideResponse) throws IOException {
-        try {
-            JsonNode root = OBJECT_MAPPER.readTree(recommendationGuideResponse);
-            JsonNode uriNode = root.get("uri");
-            
-            if (uriNode == null || !uriNode.isTextual()) {
-                throw new IOException("Invalid response format: missing or invalid 'uri' field");
-            }
-            
-            String uri = uriNode.asText();
-            if (uri.isEmpty()) {
-                throw new IOException("Invalid response format: empty URI received");
-            }
-            
-            return uri;
-        } catch (IOException e) {
-            throw new IOException("Failed to parse recommendation guide response: " + e.getMessage(), e);
         }
     }
 }
