@@ -421,11 +421,20 @@ public class OntologyOperations {
                 return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, "Ontology model is null");
             }
             
+            // Verificar que el modelo tenga un razonador configurado
+            if (ontoModel.getReasoner() == null) {
+                log.warn("No reasoner configured on the model, but continuing with prepare()");
+            } else {
+                log.info("Reasoner found: {}", ontoModel.getReasoner().getClass().getSimpleName());
+            }
+            
             // Asegurar que el logging de derivaciones esté habilitado
             ontoModel.setDerivationLogging(true);
             
             // Forzar la ejecución del razonador
+            log.info("Calling ontoModel.prepare() to execute reasoning...");
             ontoModel.prepare();
+            log.info("Reasoning execution completed");
             
             // Obtener todos los statements del modelo (incluyendo los derivados)
             List<String> derivedStatements = new ArrayList<>();
@@ -437,6 +446,8 @@ public class OntologyOperations {
             
             // URI del sujeto que queremos filtrar
             String targetSubject = "http://purl.org/ontology/breast_cancer_recommendation#NewWoman";
+            
+            log.info("Analyzing statements for subject: {}", targetSubject);
             
             while (stmtIterator.hasNext()) {
                 Statement statement = stmtIterator.nextStatement();
@@ -450,12 +461,44 @@ public class OntologyOperations {
                     filteredStatements++;
                     // Agregar el statement a la lista
                     derivedStatements.add(statement.toString());
+                    log.debug("Found statement for NewWoman: {}", statement.toString());
+                    
+                    // Si es una relación hasAge, también capturar las propiedades del individuo de edad
+                    if (statement.getPredicate() != null && 
+                        statement.getPredicate().getURI() != null && 
+                        statement.getPredicate().getURI().equals("http://purl.org/ontology/breast_cancer_recommendation#hasAge")) {
+                        
+                        // Obtener el individuo de edad relacionado
+                        if (statement.getObject() != null && statement.getObject().isResource()) {
+                            String objectUri = statement.getObject().asResource().getURI();
+                            if (objectUri != null) {
+                                Individual ageIndividual = ontoModel.getIndividual(objectUri);
+                                if (ageIndividual != null) {
+                                    // Capturar las propiedades del individuo de edad
+                                    ageIndividual.listProperties().forEachRemaining(prop -> {
+                                        String ageProp = String.format("[AGE_INDIVIDUAL] %s -> %s", 
+                                            prop.getPredicate().getURI(), 
+                                            prop.getObject().toString());
+                                        derivedStatements.add(ageProp);
+                                        log.debug("Found age individual property: {}", ageProp);
+                                    });
+                                } else {
+                                    log.debug("Age individual not found for URI: {}", objectUri);
+                                }
+                            } else {
+                                log.debug("Object URI is null for hasAge statement: {}", statement.toString());
+                            }
+                        } else {
+                            log.debug("Object is not a resource for hasAge statement: {}", statement.toString());
+                        }
+                    }
                     
                     // Intentar obtener la derivación para este statement
                     try {
-                        ontoModel.getDerivation(statement).forEachRemaining(derivation -> 
-                            derivations.add(derivation.toString())
-                        );
+                        ontoModel.getDerivation(statement).forEachRemaining(derivation -> {
+                            derivations.add(derivation.toString());
+                            log.debug("Found derivation: {}", derivation.toString());
+                        });
                     } catch (Exception e) {
                         // Algunos statements pueden no tener derivaciones
                         log.debug("No derivation available for statement: {}", statement.toString());
@@ -465,6 +508,23 @@ public class OntologyOperations {
             
             log.info("Reasoner execution completed. Total statements: {}, Filtered statements: {}, Derivations found: {}", 
                     totalStatements, filteredStatements, derivations.size());
+            
+            // Log de todos los statements encontrados para debugging
+            log.info("=== REASONING RESULTS DEBUG ===");
+            log.info("Total statements found: {}", totalStatements);
+            log.info("Filtered statements for NewWoman: {}", filteredStatements);
+            log.info("Derivations found: {}", derivations.size());
+            
+            // Mostrar algunos ejemplos de statements encontrados
+            log.info("Sample statements found:");
+            derivedStatements.stream().limit(10).forEach(stmt -> log.info("  - {}", stmt));
+            
+            if (log.isDebugEnabled()) {
+                log.debug("All derived statements for NewWoman:");
+                derivedStatements.forEach(stmt -> log.debug("  - {}", stmt));
+                log.debug("All derivations found:");
+                derivations.forEach(deriv -> log.debug("  - {}", deriv));
+            }
             
             return new ReasoningResult(derivedStatements, derivations, filteredStatements, true, null);
             

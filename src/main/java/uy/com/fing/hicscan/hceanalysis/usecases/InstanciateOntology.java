@@ -47,7 +47,7 @@ public class InstanciateOntology {
         log.info("Starting complete woman processing with medication and reasoning");
 
         try {
-            // 1. Crear una instancia de la ontología
+            // 1. Crear una instancia de la ontología CON razonamiento configurado pero no ejecutado automáticamente
             OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
 
             if (ontoModel == null) {
