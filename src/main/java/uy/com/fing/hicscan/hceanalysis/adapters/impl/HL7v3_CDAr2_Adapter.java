@@ -34,32 +34,32 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         String pathXSD = "D:/GitHub/HicScan/src/main/resources/xsd/CDA.xsd"; // ruta absoluta válida
         boolean valido = validarXML(pathXML, pathXSD);
         if (!valido) {
-            log.warn("[Adaptador HL7v3CDAR2] El XML de la HCE NO valido contra el XSD ({})", pathXSD);
+            log.warn("[parse] El XML de la HCE NO valido contra el XSD ({})", pathXSD);
         }
-        log.info("[Adaptador HL7v3CDAR2] Parseando archivo HL7 v3 CDA R2: " + file.getName());
+        log.info("[parse] Parseando archivo HL7 v3 CDA R2: " + file.getName());
 
 
         //Extraigo los valores mas importantes del CDA
         try {
             this.paciente = extraerInformacionPaciente(pathXML);
-            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Paciente");
+            log.info("Finalizada -- Extraccion de información de Paciente");
 
             this.autor = extraerInformacionAutor(pathXML);
-            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Autor");
+            log.info("Finalizada -- Extraccion de información de Autor");
 
             this.medicamentos = extraerMedicamentos(pathXML);
-            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Medicamentos");
-            log.info("[Adaptador HL7v3CDAR2] Los medicamentos extraídos son: {}", this.medicamentos);
+            log.info("Finalizada -- Extraccion de Medicamentos");
+            log.info("Los medicamentos extraídos son: {}", this.medicamentos);
 
             this.observaciones = extraerObervaciones(pathXML);
-            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de Observaciones");
+            log.info("Finalizada -- Extraccion de Observaciones");
 
             this.textoLibre = extraerTextoLibre(pathXML);
-            log.info("[Adaptador HL7v3CDAR2] Finalizada -- Extraccion de información de Texto Libre");
+            log.info("Finalizada -- Extraccion de información de Texto Libre");
 
-            log.info("[Adaptador HL7v3CDAR2] HCE PROCESADA CORRECTAMENTE");
+            log.info("HCE PROCESADA CORRECTAMENTE");
         } catch (Exception e) {
-            log.error("[Adaptador HL7v3CDAR2] ERROR al realizar extraccion de informacion de HCE");
+            log.error("ERROR al realizar extraccion de informacion de HCE");
             throw new RuntimeException(e);
         }
 
@@ -71,7 +71,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         if (patient.isEmpty()) return null;
 
         Element paciente = patient.get(0);
-        String nombre = extraerValorDeElemento(paciente, "name", null);
+        String nombre = extraerValorDeElemento(paciente, "name", null).strip();;
         String genero = extraerValorDeElemento(paciente, "administrativeGenderCode", "code");
         String fechaNacimiento = extraerValorDeElemento(paciente, "birthTime", "value");
         String raza = extraerValorDeElemento(paciente, "raceCode", "code");
@@ -160,7 +160,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
                                     //     "ICD-10";
                                     // ...
                                     default:
-                                        log.error("[HL7v3_CDAr2_Adapter] extraerMedicamentos - El codigo no pertenence a los diccionarios definidos");
+                                        log.error("[extraerMedicamentos] El codigo no pertenence a los diccionarios definidos");
                                 }
                                 Droga droga = new Droga(cods, nameDrug);
                                 drugs.add(droga);

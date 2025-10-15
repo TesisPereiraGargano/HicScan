@@ -99,7 +99,7 @@ public class CtakesProcessor implements PlainTextProcessor {
                                     String cui = umls.getCui();
                                     if (!cuiSet.contains(cui)) {
                                         cuiSet.add(cui);
-                                        log.info("[CtakesProcessor] extractDrugs - Se extranjo el cui {}", cui);
+                                        log.info("[extractDrugs] - Se extranjo el cui {}", cui);
 
                                         // Busco RXNORM en otras OntologyConcepts asociadas (puedes tener más de uno)
                                         // Esto porque CTAKES los medicamentos los identifica usando RXNORM

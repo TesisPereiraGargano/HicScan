@@ -59,10 +59,13 @@ public class ProcessHceUseCase {
         if (GestionDocumentosHCE.existeDocumento(id)) {
             try {
                 File tempFile = File.createTempFile("hce-temp", ".xml");
-                FileWriter writer = new FileWriter(tempFile);
-                String xmlContent = GestionDocumentosHCE.obtenerDocumento(id);
-                writer.write(xmlContent);
+                try (FileWriter writer = new FileWriter(tempFile)) {
+                    writer.write(GestionDocumentosHCE.obtenerDocumento(id));
+                    writer.flush();
+                } // de esta forma se guarda el archivo correctamente
+
                 HCEAdapter adaptador = getOrCreateAdapter(tempFile);
+
                 Paciente paciente = adaptador.getPaciente();
                 String alturaValor = "";
                 String alturaUnidad = "";
@@ -99,11 +102,14 @@ public class ProcessHceUseCase {
                 PacienteExtendido datosPaciente = obtenerDatosPaciente(id);
                 //TO DO: REVISAR (esto se re puede mejorar ahora queda así)
                 //Yo le doy la extensión es al pedo, voy a hacer otro endpoint
+
                 File tempFile = File.createTempFile("hce-temp", ".xml");
-                FileWriter writer = new FileWriter(tempFile);
-                String xmlContent = GestionDocumentosHCE.obtenerDocumento(id);
-                writer.write(xmlContent);
-                HCEAdapter adaptador = getOrCreateAdapter(tempFile); //Ver si esto está bien o si termina devolviendo siempre los mismos datos
+                try (FileWriter writer = new FileWriter(tempFile)) {
+                    writer.write(GestionDocumentosHCE.obtenerDocumento(id));
+                    writer.flush();
+                } // de esta forma se guarda el archivo correctamente
+
+                HCEAdapter adaptador = getOrCreateAdapter(tempFile);
 
                 //ACA COMIENZA EL PROCESAMIENTO
                 List<SustanciaAdministrada> noClasificados = new ArrayList<>();

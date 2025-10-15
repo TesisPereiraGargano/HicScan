@@ -1,9 +1,6 @@
 package uy.com.fing.hicscan.hceanalysis.adapters;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -40,6 +37,8 @@ public class HCEAdapterFactory {
         try (InputStream is = new FileInputStream(file)) {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setNamespaceAware(true);
+            dbFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            dbFactory.setIgnoringElementContentWhitespace(true);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(is);
             return doc.getDocumentElement().getLocalName();
@@ -54,5 +53,6 @@ public class HCEAdapterFactory {
         if (lastIndex == -1) return "";
         return name.substring(lastIndex + 1).toLowerCase();
     }
-}
 
+
+}

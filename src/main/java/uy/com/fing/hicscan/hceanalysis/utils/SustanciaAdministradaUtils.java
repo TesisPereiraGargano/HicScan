@@ -140,7 +140,7 @@ public class SustanciaAdministradaUtils {
                 CodDiccionario codigos = droga.getCodigos();
                 if (codigos.getRxnorm().isBlank()) {
                     if (codigos.getCui().isBlank() && codigos.getSnomedCT().isBlank()) {
-                        log.error("[ProcessHCEUseCase] Error - el medicamento no puede tener todos los códigos vacíos");
+                        log.error("Error - el medicamento no puede tener todos los códigos vacíos");
                     } else if (codigos.getCui().isBlank()) {
                         codigos.setCui(obtenerCUIDesdeSNOMEDCT(codigos.getSnomedCT(), umlsApiKey));
                     }
@@ -160,7 +160,7 @@ public class SustanciaAdministradaUtils {
      * @param medicamento es una sustancia que puede contener una droga con código RxNorm
      * @return booleano que dice si es diuretico o no (o null si no lo pudo clasificar)
      */
-    public static Boolean esDiuretico(SustanciaAdministrada medicamento){
+    public static Boolean esDiuretico33(SustanciaAdministrada medicamento){
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();
         boolean hay_diuretico = false;
@@ -170,6 +170,7 @@ public class SustanciaAdministradaUtils {
             try {
                 if (medicamento.getDrugs().get(i).getCodigos().getRxnorm() != null){
                     String url = "https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui=" + medicamento.getDrugs().get(i).getCodigos().getRxnorm() + "&relaSource=ATC";
+                    log.info(url);
                     String response = restTemplate.getForObject(url, String.class);
 
                     JsonNode root = mapper.readTree(response);
@@ -180,17 +181,17 @@ public class SustanciaAdministradaUtils {
                         String codigoATC = rxclassMinConceptItem.path("classId").asText(null);
                         if (codigoATC != null){
                             hay_diuretico = true;
-                        } else {
-                            i++;
                         }
                     }
                 } else {
                     hay_sust_sinRXNORM = true; //hay al menos una sustancia que no tiene RXNORM cui por lo que nodemos saber si es diretica
                 }
+                i++;
 
             } catch (Exception e) {
                 e.printStackTrace();
                 log.error("Error al tratar de obtener si es diuretico");
+                break;
             }
 
         }
@@ -205,6 +206,55 @@ public class SustanciaAdministradaUtils {
         }
 
     }
+
+    public static Boolean esDiuretico(SustanciaAdministrada medicamento) {
+        RestTemplate restTemplate = new RestTemplate();
+        ObjectMapper mapper = new ObjectMapper();
+        boolean hay_diuretico = false;
+        boolean hay_sust_sinRXNORM = false;
+
+        for (Droga droga : medicamento.getDrugs()) {
+            String rxnorm = droga.getCodigos().getRxnorm();
+            if (rxnorm == null || rxnorm.isBlank()) {
+                hay_sust_sinRXNORM = true;
+                continue;
+            }
+
+            try {
+                String url = "https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json"
+                        + "?rxcui=" + rxnorm
+                        + "&relaSource=ATC";
+
+                log.info("[esDiuretico] Consultando RxNav: {}", url);
+
+                String response = restTemplate.getForObject(url, String.class);
+                JsonNode root = mapper.readTree(response);
+                JsonNode listNode = root.path("rxclassDrugInfoList").path("rxclassDrugInfo");
+
+                if (listNode.isArray() && !listNode.isEmpty()) {
+                    for (JsonNode node : listNode) {
+                        String className = node.path("rxclassMinConceptItem").path("className").asText("");
+                        // match semántico por nombre ATC
+                        if (className.toLowerCase().contains("diuretic")) {
+                            log.info("[esDiuretico] Sustancia {} clasificada como diurético.", rxnorm);
+                            return true;
+                        }
+                    }
+                }
+
+            } catch (HttpClientErrorException e) {
+                log.warn("[esDiuretico] RxCUI {} inválido o rechazado: {}", rxnorm, e.getStatusCode());
+            } catch (Exception e) {
+                log.error("[esDiuretico] Error procesando RxCUI {}", rxnorm, e);
+            }
+        }
+
+        // Resultado final según las banderas
+        if (hay_diuretico) return true;
+        if (hay_sust_sinRXNORM) return null;
+        return false;
+    }
+
 }
 
 
