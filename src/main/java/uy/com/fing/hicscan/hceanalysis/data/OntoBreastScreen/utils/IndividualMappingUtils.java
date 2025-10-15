@@ -32,7 +32,7 @@ public final class IndividualMappingUtils {
     }
 
     /**
-     * Genera un nuevo individuo de la clase age, agregando relación de la edad declarad
+     * Genera un nuevo individuo de la clase age, agregando relación de la edad declarada
      * y generando una relación hasRange para cada intervalo donde la edad pertenezca.
      * @param model ontomodel
      * @param declaredAge edad declarada
@@ -40,7 +40,8 @@ public final class IndividualMappingUtils {
      */
     public static Individual getAgeIndividual(OntModel model, Integer declaredAge) {
 
-        final var ageIndividual = model.getOntClass(AGE_CLASS.getUri()).createIndividual();
+        String ageUri = "http://purl.org/ontology/breast_cancer_recommendation#age_" + declaredAge;
+        final var ageIndividual = model.getOntClass(AGE_CLASS.getUri()).createIndividual(ageUri);
 
         //Agrego la declaredAge en prop "age" al nuevo individuo de la clase AGE
         ageIndividual.addLiteral(AGE_DPROP.prop(), declaredAge);
@@ -54,12 +55,10 @@ public final class IndividualMappingUtils {
         model.listIndividuals(recIntervalClass)
                 .filterKeep(recIndividual ->
                         recIndividual.getPropertyValue(intervalMinProp).asLiteral().getInt() <= declaredAge &&
-                        recIndividual.getPropertyValue(intervalMaxProp).asLiteral().getInt() >= declaredAge)
-                .forEachRemaining( recIndividual -> ageIndividual.addProperty(hasRangeProp, recIndividual));
+                                recIndividual.getPropertyValue(intervalMaxProp).asLiteral().getInt() >= declaredAge)
+                .forEach( recIndividual -> ageIndividual.addProperty(hasRangeProp, recIndividual));
 
         return ageIndividual;
     }
-
-
 }
 

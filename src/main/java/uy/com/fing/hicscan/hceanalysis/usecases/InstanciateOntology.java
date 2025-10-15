@@ -54,11 +54,8 @@ public class InstanciateOntology {
                 throw new IllegalStateException("No existe la ontología de Breast Cancer Recommendation");
             }
 
-            log.info("Created fresh ontology model instance");
-
             // 2. Calcular riesgo y crear mujer
-            // Necesitamos obtener el URI del modelo de riesgo para
-            // calculateRiskAndCreateWoman
+            // Necesitamos obtener el URI del modelo de riesgo para calculateRiskAndCreateWoman
             String riskModelUri = "http://purl.org/ontology/breast_cancer_recommendation#UY_model";
             String language = "en"; // Idioma por defecto
 

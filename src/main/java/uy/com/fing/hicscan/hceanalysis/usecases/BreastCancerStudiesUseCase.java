@@ -226,12 +226,14 @@ public class BreastCancerStudiesUseCase {
 
     private void addHasAgeRelationship(Individual patient, Integer declaredAge) {
         var ontoModel = patient.getOntModel();
-        patient.addProperty(HAS_AGE_PROP.prop(), getAgeIndividual(ontoModel, declaredAge));
+        Individual ageIndividual = getAgeIndividual(ontoModel, declaredAge);
+        patient.addProperty(HAS_AGE_PROP.prop(), ageIndividual);
     }
 
     private void addRiskRelationship(Individual patient, RiskModel riskModel, RiskLevel riskLevel) {
         var ontoModel = patient.getOntModel();
-        patient.addProperty(HAS_RISK_PROP.prop(), getRiskIndividual(ontoModel, riskModel, riskLevel));
+        Individual riskIndividual = getRiskIndividual(ontoModel, riskModel, riskLevel);
+        patient.addProperty(HAS_RISK_PROP.prop(), riskIndividual);
     }
 
     private WomanRecommendation.Recommendation buildRecommendationDTOFromIndividual(Individual recommendation, String language) {
