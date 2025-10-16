@@ -233,13 +233,19 @@ public class SustanciaAdministradaUtils {
 
                 if (listNode.isArray() && !listNode.isEmpty()) {
                     for (JsonNode node : listNode) {
-                        String className = node.path("rxclassMinConceptItem").path("className").asText("");
-                        // match semántico por nombre ATC
-                        if (className.toLowerCase().contains("diuretic")) {
-                            log.info("[esDiuretico] Sustancia {} clasificada como diurético.", rxnorm);
-                            return true;
+                        JsonNode rxclassItem = node.path("rxclassMinConceptItem");
+                        String className = rxclassItem.path("className").asText("").toLowerCase();
+                        String classId = rxclassItem.path("classId").asText("");
+
+                        if (classId.startsWith("C03") || className.contains("diuretic")) {
+                            log.info("[esDiuretico] {} pertenece al grupo ATC de diuréticos o tiene nombre que contiene 'diuretic' ({}).", rxnorm, classId);
+                            hay_diuretico = true;
+                            break;
                         }
                     }
+                } else {
+                    //Response que no tiene código ATC por lo que no está clasificado
+                    hay_sust_sinRXNORM = true;
                 }
 
             } catch (HttpClientErrorException e) {
@@ -250,8 +256,8 @@ public class SustanciaAdministradaUtils {
         }
 
         // Resultado final según las banderas
-        if (hay_diuretico) return true;
-        if (hay_sust_sinRXNORM) return null;
+        if (hay_diuretico) return true; //No importa si hay uno sin RXNORM porque de los que tienen uno es diretico
+        if (hay_sust_sinRXNORM) return null; //Los que se pudieron consultar no están clasificados como diureticos pero hay al menos 1 que no se puede clasficar
         return false;
     }
 

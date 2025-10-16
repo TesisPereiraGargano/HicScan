@@ -86,7 +86,7 @@ public class ProcessHceUseCase {
                         }
                     }
                 }
-                return new PacienteExtendido(paciente.getNombre(), paciente.getGenero(), paciente.getFechaNacimiento(), paciente.getEstadoCivil(), paciente.getRaza(), paciente.getLugarNacimiento(), alturaValor, alturaUnidad, pesoValor, pesoUnidad);
+                return new PacienteExtendido(paciente.getNombre().strip(), paciente.getGenero(), paciente.getFechaNacimiento(), paciente.getEstadoCivil(), paciente.getRaza(), paciente.getLugarNacimiento(), alturaValor, alturaUnidad, pesoValor, pesoUnidad);
 
             } catch (IOException e) {
                 throw new RuntimeException(e);

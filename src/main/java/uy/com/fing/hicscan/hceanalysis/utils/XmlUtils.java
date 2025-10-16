@@ -18,6 +18,8 @@ import java.util.List;
 import java.io.File;
 import java.io.IOException;
 
+import static uy.com.fing.hicscan.hceanalysis.utils.FunctionUtils.limpiarString;
+
 public class XmlUtils {
     //Metodo para validar un XML usando un XSD
     public static boolean validarXML(String xml, String xsd){
@@ -97,10 +99,10 @@ public class XmlUtils {
         Element hijo = (Element) hijos.item(0);
 
         if (atributo == null || atributo.isEmpty()) {
-            return hijo.getTextContent().trim();
+            return limpiarString(hijo.getTextContent());
         } else {
             String val = hijo.getAttribute(atributo);
-            return val.isEmpty() ? null : val;
+            return val.isEmpty() ? null : limpiarString(val);
         }
     }
 

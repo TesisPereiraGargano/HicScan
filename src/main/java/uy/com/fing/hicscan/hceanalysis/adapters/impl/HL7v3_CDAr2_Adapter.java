@@ -71,7 +71,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         if (patient.isEmpty()) return null;
 
         Element paciente = patient.get(0);
-        String nombre = extraerValorDeElemento(paciente, "name", null).strip();;
+        String nombre = extraerValorDeElemento(paciente, "name", null);
         String genero = extraerValorDeElemento(paciente, "administrativeGenderCode", "code");
         String fechaNacimiento = extraerValorDeElemento(paciente, "birthTime", "value");
         String raza = extraerValorDeElemento(paciente, "raceCode", "code");
@@ -148,10 +148,13 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
                                 switch (codeSystem) {
                                     case "2.16.840.1.113883.6.96":
                                         cods.setSnomedCT(code);
+                                        break;
                                     case "2.16.840.1.113883.6.88":
                                         cods.setRxnorm(code);
+                                        break;
                                     case "2.16.840.1.113883.6.86":
                                         cods.setCui(code);
+                                        break;
                                         //case "2.16.840.1.113883.6.1":
                                     //     "LOINC";
                                     //case "2.16.840.1.113883.6.90":
@@ -161,6 +164,7 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
                                     // ...
                                     default:
                                         log.error("[extraerMedicamentos] El codigo no pertenence a los diccionarios definidos");
+                                        break;
                                 }
                                 Droga droga = new Droga(cods, nameDrug);
                                 drugs.add(droga);
