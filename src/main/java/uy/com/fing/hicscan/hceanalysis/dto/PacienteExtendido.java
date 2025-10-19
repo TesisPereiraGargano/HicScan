@@ -4,6 +4,15 @@ import lombok.Getter;
 
 import static uy.com.fing.hicscan.hceanalysis.utils.FunctionUtils.calcularEdad;
 
+/**
+ * Representa información extendida de un paciente en el contexto de una Historia Clínica Electrónica (HCE).
+ *
+ * Incluye todos los campos del {@link Paciente} básico más medidas físicas
+ * como altura y peso junto con sus unidades respectivas.
+ *
+ * Esta clase permite modelar un perfil clínico más completo para análisis y visualización médica.
+ *
+ */
 @Getter
 public class PacienteExtendido {
 

@@ -160,53 +160,6 @@ public class SustanciaAdministradaUtils {
      * @param medicamento es una sustancia que puede contener una droga con código RxNorm
      * @return booleano que dice si es diuretico o no (o null si no lo pudo clasificar)
      */
-    public static Boolean esDiuretico33(SustanciaAdministrada medicamento){
-        RestTemplate restTemplate = new RestTemplate();
-        ObjectMapper mapper = new ObjectMapper();
-        boolean hay_diuretico = false;
-        boolean hay_sust_sinRXNORM = false;
-        int i = 0;
-        while (!hay_diuretico && i < medicamento.getDrugs().size()){
-            try {
-                if (medicamento.getDrugs().get(i).getCodigos().getRxnorm() != null){
-                    String url = "https://rxnav.nlm.nih.gov/REST/rxclass/class/byRxcui.json?rxcui=" + medicamento.getDrugs().get(i).getCodigos().getRxnorm() + "&relaSource=ATC";
-                    log.info(url);
-                    String response = restTemplate.getForObject(url, String.class);
-
-                    JsonNode root = mapper.readTree(response);
-                    JsonNode listNode = root.path("rxclassDrugInfoList").path("rxclassDrugInfo");
-                    if (listNode.isArray() && !listNode.isEmpty()) {
-                        JsonNode firstItem = listNode.get(0);
-                        JsonNode rxclassMinConceptItem = firstItem.path("rxclassMinConceptItem");
-                        String codigoATC = rxclassMinConceptItem.path("classId").asText(null);
-                        if (codigoATC != null){
-                            hay_diuretico = true;
-                        }
-                    }
-                } else {
-                    hay_sust_sinRXNORM = true; //hay al menos una sustancia que no tiene RXNORM cui por lo que nodemos saber si es diretica
-                }
-                i++;
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                log.error("Error al tratar de obtener si es diuretico");
-                break;
-            }
-
-        }
-        //Si encontré un diuretico devuelvo TRUE
-        if (hay_diuretico) {
-            return true;
-        } else if (hay_sust_sinRXNORM){
-            //Si no encontré diuretico y hay al menos una sustancia que no tiene RXNorm CUI
-            return null;
-        } else {
-            return false;
-        }
-
-    }
-
     public static Boolean esDiuretico(SustanciaAdministrada medicamento) {
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper mapper = new ObjectMapper();

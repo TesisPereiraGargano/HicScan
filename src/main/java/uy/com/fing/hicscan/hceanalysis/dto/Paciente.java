@@ -4,6 +4,15 @@ import lombok.Getter;
 
 import static uy.com.fing.hicscan.hceanalysis.utils.FunctionUtils.calcularEdad;
 
+/**
+ * Representa los datos demográficos fundamentales de un paciente dentro del sistema HicScan.
+ *
+ * Incluye información personal como nombre, género, fecha de nacimiento, estado civil,
+ * raza y lugar de nacimiento.
+ *
+ * La edad se calcula dinámicamente a partir de la fecha de nacimiento.
+ */
+
 @Getter
 public class Paciente {
 

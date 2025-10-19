@@ -19,9 +19,24 @@ import java.io.File;
 import java.io.IOException;
 
 import static uy.com.fing.hicscan.hceanalysis.utils.FunctionUtils.limpiarString;
-
+/**
+ * Clase que permite la manipulación y validación de documentos XML.
+ *
+ * Incluye métodos para validar documentos XML contra esquemas XSD,
+ * extraer información mediante expresiones XPath y obtener valores
+ * de elementos y atributos de forma simplificada.
+ *
+ * Estos métodos son útiles para el procesamiento de documentos clínicos
+ * en formato CDA (Clinical Document Architecture) dentro del ecosistema de HicScan.
+ */
 public class XmlUtils {
-    //Metodo para validar un XML usando un XSD
+
+    /**
+     * Valida un documento XML contra un esquema XSD indicado.
+     * @param xml ruta del archivo XML a validar.
+     * @param xsd ruta del archivo XSD usado para la validación.
+     * @return {@code true} si el XML es válido, {@code false} si ocurre una excepción.
+     */
     public static boolean validarXML(String xml, String xsd){
         try {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
@@ -36,8 +51,13 @@ public class XmlUtils {
         }
     }
 
-    //Metodo para extraer información de un XML dado un XPath
-    public static List<Element> extraerInfoByXPath(String xmlFilePath, String xpathInput) throws Exception {
+    /**
+     * Extrae elementos del documento XML que coincidan con una expresión XPath.
+     * @param xmlFilePath ruta del archivo XML.
+     * @param xpathInput expresión XPath a evaluar.
+     * @return lista de elementos {@link Element} resultantes que coinciden con el XPath.
+     * @throws Exception si ocurre un error de lectura, análisis o evaluación XPath.
+     */    public static List<Element> extraerInfoByXPath(String xmlFilePath, String xpathInput) throws Exception {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(xmlFilePath));
         XPath xpath = XPathFactory.newInstance().newXPath();
 
@@ -53,15 +73,22 @@ public class XmlUtils {
         return elements;
     }
 
-
-    //Recorre la lista de elementos y devuelve los valores de atributo correspondientes a los
-    //elementos subElemento, si viene en null devuelve el texto dentro del elemento directamente.
-    //Ejemplo:
-    // <code code="XYZ123" displayName="Paracetamol 500mg"> texto123 </code>
-    // Si invoco con el atributo "displayName" me retorna "Paracetamol 500mg"
-    // Si no invoco con un atributo me retorna "texto123"
-    // Sirve para extracciones sencillas a un primer nivel
-    public static List<String> extraerDeElementos(List<Element> elementos, String subElemento, String atributo) {
+    /**
+     * Extrae valores de texto o atributos desde una lista de elementos XML.
+     * Ejemplo:
+     * <pre>
+     * &lt;code code="XYZ123" displayName="Paracetamol 500mg"&gt; texto123 &lt;/code&gt;
+     * </pre>
+     *
+     * Llamado con `atributo = "displayName"` retorna "Paracetamol 500mg".
+     * Llamado con `atributo = null` retorna "texto123".
+     *
+     * @param elementos lista de elementos base sobre los cuales buscar.
+     * @param subElemento nombre del subelemento a extraer.
+     * @param atributo nombre del atributo a obtener; puede ser nulo para obtener el texto interior.
+     * @return lista de valores obtenidos según el atributo o el contenido textual de los elementos.
+     */
+   public static List<String> extraerDeElementos(List<Element> elementos, String subElemento, String atributo) {
         List<String> resultados = new ArrayList<>();
 
         for (Element elem : elementos) {

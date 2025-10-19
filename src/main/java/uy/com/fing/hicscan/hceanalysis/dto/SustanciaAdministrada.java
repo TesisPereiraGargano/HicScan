@@ -4,6 +4,15 @@ import lombok.Getter;
 
 import java.util.List;
 
+/**
+ * Representa una sustancia médica administrada a un paciente, incluyendo información
+ * sobre dosis, unidad, y periodo de administración.
+ *
+ * Esta clase puede contener referencias a múltiples {@link Droga} asociadas, cada una
+ * con sus códigos en sistemas terminológicos y nombre comercial o genérico.
+ *
+ * Es una estructura clave para describir tratamientos farmacológicos dentro de la HCE.
+ */
 @Getter
 public class SustanciaAdministrada {
     String name;

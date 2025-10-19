@@ -35,6 +35,20 @@ public class ProcessHceUseCase {
     @Value("${target.lang}")
     private String targetLang;
 
+    /**
+     * Caso de uso principal para el procesamiento de Historias Clínicas Electrónicas (HCE)
+     * dentro del sistema HicScan. Se encarga de extraer, traducir, clasificar y enriquecer
+     * información clínica proveniente de documentos CDA/HL7, tanto estructurada como en texto libre.
+     *
+     * Esta clase orquesta las distintas capas del pipeline de análisis: desde la lectura del XML,
+     * pasando por la expansión química/lingüística, traducción automática y obtención de códigos UMLS y RxNorm.
+     *
+     * Dependencias inyectadas:
+     *  - {@link PlainTextProcessor}: extractor de entidades clínicas desde texto plano.
+     *  - {@link Translator}: traductor de contenido médico (ej. inglés ↔ español).
+     *  - {@link LanguageExpansion}: expansor de nombres comerciales a principios activos.
+     *  - {@link HCEAdapterFactory}: fábrica de adaptadores para documentos HCE.
+     */
     public ProcessHceUseCase (PlainTextProcessor plainTextProcessor, Translator translator, LanguageExpansion languageExpansion, HCEAdapterFactory hceAdapter){
         this.plainTextProcessor = plainTextProcessor;
         this.translator = translator;
@@ -54,7 +68,11 @@ public class ProcessHceUseCase {
         });
     }
 
-
+    /**
+     * Extrae los datos básicos de un paciente a partir del ID de la HCE.
+     * @param id identificador del documento cargado en {@link GestionDocumentosHCE}.
+     * @return un objeto {@link PacienteExtendido} con los datos relevantes o {@code null} si no existe el documento.
+     */
     public PacienteExtendido obtenerDatosPaciente(String id){
         if (GestionDocumentosHCE.existeDocumento(id)) {
             try {
@@ -96,6 +114,15 @@ public class ProcessHceUseCase {
         }
     }
 
+    /**
+     * Realiza el procesamiento completo de una HCE, extrayendo los datos básicos del paciente,
+     * en conjunto con los medicamentos que se encuentren en la HCE,
+     * y su correspondiente mapeo de códigos UMLS/RxNorm y clasificación.
+     * Es extendible a más información asociada al paciente.
+     *
+     * @param id identificador del documento cargado en memoria.
+     * @return un objeto {@link DatosHCE} con la información médica consolidada o {@code null} si el documento no existe.
+     */
     public DatosHCE obtenerDatosPacienteExtendido(String id){
         if (GestionDocumentosHCE.existeDocumento(id)) {
             try {
@@ -161,80 +188,6 @@ public class ProcessHceUseCase {
         }
     }
 
-
-    public Map<String, SustanciaAdministrada> obtenerMedicamentosEstructuradosHCE(File fileHCE) throws IOException {
-
-        log.info("*** ObtenerMedicamentosHCE ***");
-        log.info("Comienza la extracción de medicamentos en ESTRUCTURA XML");
-        Map<String, SustanciaAdministrada> meds = new HashMap<String, SustanciaAdministrada>();
-
-
-        HCEAdapter adaptador = getOrCreateAdapter(fileHCE);
-
-        String textoLibre = adaptador.getTextoLibre();
-        //Lista con los medicamentos que vinieron en formato estructurado y sus códigos
-        List<SustanciaAdministrada> medicamentos = adaptador.getMedicamentos();
-
-        for(SustanciaAdministrada sust : medicamentos){
-            meds.put(sust.getName(), sust);
-        }
-
-        /**
-        //Lista con los medicamentos extraídos del texto libre
-        //Por lo general con código RXNORM y CUI
-        List<SustanciaAdministrada> medsTextoLibre = processPlainTextHCE(textoLibre);
-
-        // Concatenar medsTextoLibre en medicamentos
-        medicamentos.addAll(medsTextoLibre); //Lista que contiene todos los medicamentos relevados
-
-        for (SustanciaAdministrada sust : medicamentos) {
-            //Completo los CUIS (si corresponde) y hallo los RXNORM
-            for (CodDiccionario droga : sust.getDrugsCodes()) {
-                if (droga.getRxnorm().isBlank()){
-                    if (droga.getCui().isBlank() && droga.getSnomedCT().isBlank()) {
-                        log.error("[ProcessHCEUseCase] Error - el medicamento no puede tener todos los códigos vacíos");
-                    } else if (droga.getCui().isBlank()) {
-                        droga.setCui(obtenerCUIDesdeSNOMEDCT(droga.getSnomedCT(), umlsApiKey));
-                    }
-                    if (!droga.getCui().isBlank()){
-                        droga.setRxnorm(obtenerRxNormDesdeCUI(droga.getCui(), this.umlsApiKey));
-                    }
-                }
-
-            }
-
-        }
-
-
-        log.info("[ProcessUseCase] Medicamentos extraídos de la seccion medicamentos de la HCE");
-        for (SustanciaAdministrada med : medicamentos) {
-            String codigoSnomed = med.getDrugsCodes().get(0).getSnomedCT();
-            log.info("[ProcessUseCase] Se agregó {}", codigoSnomed);
-            medicamentosUnificados.putIfAbsent(codigoSnomed, med);
-        }
-
-        log.info("[ProcessUseCase] Medicamentos extraídos del texto plano, hay {} medicamentos", medsTextoLibre.size());
-        // Agrego los medicamentos del texto libre solo si ya no están
-        for (int i = 0; i < medsTextoLibre.size(); i++) {
-
-            List<CodDiccionario> codDiccionarios = medsTextoLibre.get(i).getDrugsCodes();
-            for (int j = 0; j < codDiccionarios.size(); j++){
-
-                codDiccionarios.get(j).getRxnorm()
-            }
-            log.info("[ProcessUseCase] Codigo snomed {}", codigoSnomed);
-            if (codigoSnomed != null && !medicamentosUnificados.containsKey(codigoSnomed)) {
-                List<Map.Entry<String,String>> lista = new ArrayList<>();
-                lista.add(new AbstractMap.SimpleEntry<>(codigoSnomed, "2.16.840.1.113883.5.112"));
-                SustanciaAdministrada nuevoMed = new SustanciaAdministrada("", "", "", "", new ArrayList<>());
-                medicamentosUnificados.put(codigoSnomed, nuevoMed);
-            }
-        }
-         return medicamentosUnificados;
-**/
-       return meds;
-    }
-
     public Map<String, SustanciaAdministrada> obtenerMedicamentosTextoLibreHCE(File fileHCE) throws IOException {
         log.info("*** ObtenerMedicamentosTextoLibreHCE ***");
         log.info("Comienza la extracción de medicamentos en TEXTO LIBRE");
@@ -254,7 +207,13 @@ public class ProcessHceUseCase {
         return meds;
     }
 
-
+    /**
+     * Procesa el texto libre de una HCE, sustituyendo nombres comerciales por principios activos,
+     * traduciendo el texto y extrayendo las sustancias mencionadas con sus códigos UMLS.
+     *
+     * @param inputText texto libre extraído de la historia clínica.
+     * @return lista de {@link SustanciaAdministrada} detectadas en el texto.
+     */
     public List<SustanciaAdministrada> processPlainTextHCE (String inputText){
         log.info("*** ProcessPlainTextHCE ***");
         log.info("Comienza el procesamiento del texto: {}", inputText);

@@ -11,8 +11,19 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class GestionDocumentosHCE {
 
+/**
+ * Clase creada para la gestión temporal de documentos HCE (Historias Clínicas Electrónicas)
+ * en memoria. Permite almacenar, recuperar y eliminar XML asociados a un identificador.
+ * Se genero dado que sólo se va a trabajar con ejemplos en la POC, no se va a permitir cargar
+ * HCEs a través de la aplicación.
+ */
+public class GestionDocumentosHCE {
+    /**
+     * Map concurrente que almacena documentos HCE en formato XML.
+     * Clave: Identificador del documento (String)
+     * Valor: Contenido XML del documento
+     */
     private static final Map<String, String> documentos = new ConcurrentHashMap<>();
 
     public static void guardarDocumento(String id, String xml) {
@@ -31,6 +42,11 @@ public class GestionDocumentosHCE {
         documentos.remove(id);
     }
 
+    /**
+     * Constructor de la clase.
+     * Al inicializar el componente, carga los documentos HCE de prueba
+     * ubicados en el recurso {@code /HCE_CArgadas/*}.
+     */
     public GestionDocumentosHCE() {
         //Carga de HCE generadas para las pruebas
         try {

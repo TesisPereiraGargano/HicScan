@@ -4,6 +4,17 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
+/**
+ * DTO principal que representa el conjunto consolidado de información extraída
+ * de una Historia Clínica Electrónica (HCE).
+ *
+ * Incluye los datos extendidos del paciente junto con los medicamentos
+ * identificados, tanto clasificados como sin clasificar.
+ *
+ * La estructura permite agrupar los medicamentos en categorías específicas
+ * de interés clínico, por ejemplo, diuréticos y no diuréticos.
+ */
 @Getter
 @Setter
 public class DatosHCE {

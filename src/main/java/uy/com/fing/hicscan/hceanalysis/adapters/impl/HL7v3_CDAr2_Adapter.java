@@ -8,16 +8,20 @@ import org.w3c.dom.Element;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapter;
 import uy.com.fing.hicscan.hceanalysis.dto.*;
 import org.w3c.dom.*;
-
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
-
-
 import static uy.com.fing.hicscan.hceanalysis.utils.XmlUtils.*;
+
+/**
+ * Implementación de un {@link HCEAdapter} específico para archivos HL7 CDA R2 en formato XML.
+ *
+ * Este adaptador realiza la validación, extracción y parseo de datos relevantes
+ * de una historia clínica en formato CDA.
+ *
+ * Permite obtener datos como paciente, autor, medicamentos, observaciones y texto libre.
+ */
 @Getter
 @Slf4j
 public class HL7v3_CDAr2_Adapter implements HCEAdapter {
@@ -66,6 +70,16 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
 
     }
 
+    /**
+     * Extrae la información básica del paciente desde el archivo CDA.
+     *
+     * Busca en el XML los nodos correspondientes al paciente y obtiene atributos
+     * como nombre, género, fecha de nacimiento, raza, lugar de nacimiento, etc.
+     *
+     * @param XMLpath ruta del archivo XML.
+     * @return {@link Paciente} con los datos extraídos, o null si no se encuentra.
+     * @throws Exception si hay errores en el procesamiento del XML.
+     */
     public static Paciente extraerInformacionPaciente(String XMLpath) throws Exception {
         List<Element> patient = extraerInfoByXPath(XMLpath, "//patient");
         if (patient.isEmpty()) return null;
@@ -82,6 +96,15 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
 
     }
 
+    /**
+     * Extrae los datos del autor de la historia clínica del CDA.
+     *
+     * Busca en el XML los nodos `<author>` y obtiene atributos como tiempo, nombre y datos de organización.
+     *
+     * @param XMLpath ruta del archivo XML.
+     * @return {@link Autor} con los datos extraídos, o null si no se encuentra.
+     * @throws Exception si hay errores en el procesamiento.
+     */
     public static Autor extraerInformacionAutor(String XMLpath) throws Exception {
         List<Element> author = extraerInfoByXPath(XMLpath, "//author");
         if (author.isEmpty()) return null;
@@ -99,6 +122,15 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
         return new Autor(time, name, organizationId, organizationName);
     }
 
+    /**
+     * Extrae todo el texto libre contenido en la HCE.
+     *
+     * Junta todos los nodos `<text>` en una sola cadena concatenada.
+     *
+     * @param XMLpath ruta del archivo XML.
+     * @return String con el contenido textual completo.
+     * @throws Exception si hay errores en el procesamiento del XML.
+     */
     public static String extraerTextoLibre(String XMLpath) throws Exception {
         List<Element> elementosText = extraerInfoByXPath(XMLpath, "//text");
         StringBuilder sb = new StringBuilder();
@@ -110,6 +142,13 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
     }
 
 
+    /**
+     * Extrae la lista de sustancias administradas (medicamentos, terapias) del CDA.
+     *
+     * @param XMLPath ruta del archivo XML.
+     * @return Lista de {@link SustanciaAdministrada}.
+     * @throws Exception si hay errores en el parseo del XML.
+     */
     public static List<SustanciaAdministrada> extraerMedicamentos(String XMLPath) throws Exception {
         //voy a las sustancias administradas
         List<SustanciaAdministrada> sustancias = new ArrayList<>();
@@ -180,6 +219,17 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
     return sustancias;
     }
 
+
+    /**
+     * Extrae todas las observaciones clínicas del CDA.
+     *
+     * Ordena los nodos `<observation>` y crea objetos de tipo {@link Observacion}
+     * con código, sistema, estado, tiempo, valor y unidad.
+     *
+     * @param XMLPath ruta del archivo XML.
+     * @return Lista de {@link Observacion}.
+     * @throws Exception si hay errores en la extracción.
+     */
     public static List<Observacion> extraerObervaciones(String XMLPath) throws Exception {
         List<Observacion> observaciones = new ArrayList<>();
         List<Element> entries = extraerInfoByXPath(XMLPath, "//entry/observation");
