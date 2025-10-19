@@ -13,6 +13,7 @@ import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -47,7 +48,8 @@ public class InstanciateOntology {
         log.info("Starting complete woman processing with medication and reasoning");
 
         try {
-            // 1. Crear una instancia de la ontología CON razonamiento configurado pero no ejecutado automáticamente
+            // 1. Crear una instancia de la ontología CON razonamiento configurado pero no
+            // ejecutado automáticamente
             OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
 
             if (ontoModel == null) {
@@ -55,14 +57,24 @@ public class InstanciateOntology {
             }
 
             // 2. Calcular riesgo y crear mujer
-            // Necesitamos obtener el URI del modelo de riesgo para calculateRiskAndCreateWoman
+            // Necesitamos obtener el URI del modelo de riesgo para
+            // calculateRiskAndCreateWoman
             String riskModelUri = "http://purl.org/ontology/breast_cancer_recommendation#UY_model";
             String language = "en"; // Idioma por defecto
 
-            WomanRisk womanRisk = breastCancerStudiesUseCase.calculateRiskAndCreateWoman(ontoModel, riskModelUri, womanHistoryData,
+            WomanRisk womanRisk = breastCancerStudiesUseCase.calculateRiskAndCreateWoman(ontoModel, riskModelUri,
+                    womanHistoryData,
                     language);
+
+            List<BreastCancerStudiesUseCase.IndividualDescriptor> guidelines = breastCancerStudiesUseCase
+                    .getAllGuidelinesFor(womanRisk.getRiskLevelUri(), language);
+
+            String guidelineUri = guidelines.get(0).uri();
+
             String womanId = womanRisk.getWomanUri();
-            log.info("Created woman individual with ID: {} and risk level: {}", womanId, womanRisk.getRiskLevelUri());
+            
+            // WomanRecommendation womanRecommendation = breastCancerStudiesUseCase.getWomanAllRecommendations(womanId, guidelineUri, language);
+            breastCancerStudiesUseCase.getWomanAllRecommendations(ontoModel, womanId, guidelineUri, language);
 
             // 3. Crear medicamento para la mujer
             boolean medicationCreated = ontologyOperations.createMedicationForWoman(

@@ -21,6 +21,7 @@ import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel
 
 import org.apache.jena.ontology.Individual;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -37,6 +38,7 @@ import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.utils.Langua
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 @Service
@@ -96,7 +98,7 @@ public class BreastCancerStudiesUseCase {
 
 
     /**
-     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de hasRisk y hasAge. - MODIFICADA PARA RECIBIR ONTOMODEL Y NO CREAR UNO NUEVO
+     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de hasRisk, hasAge y recomendaciones. - MODIFICADA PARA RECIBIR ONTOMODEL Y NO CREAR UNO NUEVO
      * @param ontoModel modelo de la ontología
      * @param riskModel modelo de riesgo
      * @param riskLevel riesgo calculado para el individuo.
@@ -119,7 +121,6 @@ public class BreastCancerStudiesUseCase {
             System.out.println("Ha ocurrido una excepción inesperada:");
             e.printStackTrace();
         }
-
 
         String ageString = null;
         if (riskModel == RiskModel.MSP_UY) {
@@ -192,20 +193,20 @@ public class BreastCancerStudiesUseCase {
      * {@link BCRPropsEnum#HAS_RECOMMENDATION_MID_PROP}
      * @return Objeto WomanRecomendation que contiene las recomendaciones MID y HIGH.
      */
-    public WomanRecommendation getWomanAllRecommendations(String womanId, String guideUri, String language) {
+    public WomanRecommendation getWomanAllRecommendations(OntModel ontoModel, String womanId, String guideUri, String language) {
         var patient = womanIndividualsRepository.getWoman(womanId);
-        var ontoModel = patient.getOntModel();
+        // var ontoModel = patient.getOntModel();
         var guideline = ontoModel.getIndividual(guideUri);
 
         String uri = guideline.getPropertyValue(FOR_RISK_LEVEL_PROP.prop()).as(Individual.class).getURI();
 
         if(RiskLevel.MEDIUM.getUri().equals(uri)) {
             //Guìa para riesgo medio.
-            return getRecommendationFilteredWithGuide(patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
+            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
                     WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
         } else {
             //Guìa para riesgo alto.
-            return getRecommendationFilteredWithGuide(patient, guideline, HAS_RECOMMENDATION_HIGH_PROP.prop(), recomm ->
+            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline, HAS_RECOMMENDATION_HIGH_PROP.prop(), recomm ->
                     WomanRecommendation.builder().highRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
         }
     }
@@ -254,13 +255,13 @@ public class BreastCancerStudiesUseCase {
 
 //         return getRecommendationFilteredWithGuide(patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
 //            WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
-    private WomanRecommendation getRecommendationFilteredWithGuide(Individual patient, Individual guideline, Property recommendationProp,
+    private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient, Individual guideline, Property recommendationProp,
                                                                    Function<Individual, WomanRecommendation> builderF) {
         return patient.listPropertyValues(recommendationProp)
                 .mapWith(node -> node.as(Individual.class))
                 .filterKeep(recommendation ->
                         guideline.listPropertyValues(GIVES_PROP.prop())
-                                .mapWith(recomm -> recomm.as(Individual.class).getURI())
+                            .mapWith(recomm -> recomm.as(Individual.class).getURI())
                                 .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
                 .nextOptional()
                 .map(builderF)
