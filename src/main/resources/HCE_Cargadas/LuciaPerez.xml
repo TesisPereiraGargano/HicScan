@@ -1,0 +1,242 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:voc="urn:hl7-org:v3/voc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 CDA.xsd">
+    <!--
+********************************************************
+  CDA Header
+********************************************************
+-->
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="2.16.840.1.113883.3.27.1776"/>
+    <id extension="e789" root="2.16.840.1.113883.19.4"/>
+    <code code="11488-4" codeSystem="2.16.840.1.113883.6.1" displayName="Consultation note"/>
+    <title>Oncology Department Clinical Note</title>
+    <effectiveTime value="20251017"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+    <languageCode code="es-ES"/>
+    <setId extension="EE99" root="2.16.840.1.113883.19.7"/>
+    <versionNumber value="1"/>
+    <recordTarget>
+        <patientRole>
+            <id extension="67891" root="2.16.840.1.113883.19.5"/>
+            <patient>
+                <name>
+                    <given>Lucia</given>
+                    <family>Rodriguez</family>
+                </name>
+                <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+                <birthTime value="19730514"/>
+            </patient>
+            <providerOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+            </providerOrganization>
+        </patientRole>
+    </recordTarget>
+    <author>
+        <time value="202510171200"/>
+        <assignedAuthor>
+            <id extension="DR00245" root="2.16.840.1.113883.19.5"/>
+            <assignedPerson>
+                <name>
+                    <given>Andres</given>
+                    <family>López</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+                <name>Instituto Oncológico Nacional</name>
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+                <name>Instituto Oncológico Nacional</name>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    <legalAuthenticator>
+        <time value="20251018"/>
+        <signatureCode code="S"/>
+        <assignedEntity>
+            <id extension="DR00245" root="2.16.840.1.113883.19.5"/>
+            <assignedPerson>
+                <name>
+                    <given>Andres</given>
+                    <family>López</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+        </assignedEntity>
+    </legalAuthenticator>
+    <componentOf>
+        <encompassingEncounter>
+            <id extension="ONC20251017" root="2.16.840.1.113883.19.6"/>
+            <effectiveTime value="20251017"/>
+            <encounterParticipant typeCode="CON">
+                <time value="20251017"/>
+                <assignedEntity>
+                    <id extension="DR00245" root="2.16.840.1.113883.19.5"/>
+                    <assignedPerson>
+                        <name>
+                            <given>Andres</given>
+                            <family>López</family>
+                            <suffix>MD</suffix>
+                        </name>
+                    </assignedPerson>
+                </assignedEntity>
+            </encounterParticipant>
+            <location>
+                <healthCareFacility classCode="DSDLOC">
+                    <code code="ONC" codeSystem="2.16.840.1.113883.5.10588" displayName="Oncology Clinic"/>
+                </healthCareFacility>
+            </location>
+        </encompassingEncounter>
+    </componentOf>
+    <!--
+********************************************************
+  CDA Body
+********************************************************
+-->
+    <component>
+        <structuredBody>
+            <!-- Historia de enfermedad actual -->
+            <component>
+                <section>
+                    <code code="10164-2" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Historia de la enfermedad actual</title>
+                    <text>
+                        <content styleCode="Bold">Lucia Rodriguez
+                        </content>
+                        Paciente femenina de 52 años con diagnóstico reciente de carcinoma mamario izquierdo (C50.4),
+                        acude para control oncológico posterior a ciclo de quimioterapia. Presenta edema leve en miembros inferiores
+                        y aumento de la presión arterial, atribuible parcialmente al tratamiento con esteroides.
+                    </text>
+                </section>
+            </component>
+            <!-- Historial médico pasado -->
+            <component>
+                <section>
+                    <code code="10153-2" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Historial médico pasado</title>
+                    <text>
+                        <list>
+                            <item>Cáncer de mama - estadio II</item>
+                            <item>Hipertensión controlada</item>
+                            <item>Anemia secundaria a quimioterapia</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <!-- Medicamentos -->
+            <component>
+                <section>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Medicamentos</title>
+                    <text>
+                        <list>
+                            <item>Furosemida 40 mg una vez al día</item>
+                            <item>Docetaxel (Taxotere) 75 mg/m² en ciclo cada 21 días</item>
+                            <item>Dexametasona 8 mg por vía oral cada 12 horas</item>
+                            <item>Enalapril 5 mg dos veces al día</item>
+                        </list>
+                    </text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Furosemida 40 mg una vez al día</text>
+                            <effectiveTime xsi:type="PIVL_TS">
+                                <period value="24" unit="h"/>
+                            </effectiveTime>
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112"/>
+                            <doseQuantity value="40" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="317972000" codeSystem="2.16.840.1.113883.6.96" displayName="Furosemide"/>
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Docetaxel (Taxotere) 75 mg/m² en ciclo cada 21 días</text>
+                            <effectiveTime xsi:type="PIVL_TS">
+                                <period value="21" unit="d"/>
+                            </effectiveTime>
+                            <routeCode code="IV" codeSystem="2.16.840.1.113883.5.112"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="386918005" codeSystem="2.16.840.1.113883.6.96" displayName="Docetaxel"/>
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Corodex 8 mg por vía oral cada 12 horas</text>
+                            <effectiveTime xsi:type="PIVL_TS">
+                                <period value="12" unit="h"/>
+                            </effectiveTime>
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112"/>
+                            <doseQuantity value="8" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="372584003" codeSystem="2.16.840.1.113883.6.96" displayName="Dexamethasone"/>
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            <!-- Alergias -->
+            <component>
+                <section>
+                    <code code="10155-0" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Alergias y reacciones adversas</title>
+                    <text>
+                        <list>
+                            <item>Alergia leve a penicilina</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <!-- Historia social -->
+            <component>
+                <section>
+                    <code code="29762-2" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Historia social</title>
+                    <text>
+                        <list>
+                            <item>Exfumadora (dejó hace 5 años)</item>
+                            <item>No ingiere alcohol</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <!-- Examen físico -->
+            <component>
+                <section>
+                    <code code="11384-5" codeSystem="2.16.840.1.113883.6.1"/>
+                    <title>Examen Físico</title>
+                    <text>
+                        <table>
+                            <tbody>
+                                <tr><th>Date / Time</th><th>20251017</th></tr>
+                                <tr><th>Altura</th><td>162 cm</td></tr>
+                                <tr><th>Peso</th><td>68 kg</td></tr>
+                                <tr><th>Presión arterial</th><td>150/90 mmHg</td></tr>
+                            </tbody>
+                        </table>
+                    </text>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

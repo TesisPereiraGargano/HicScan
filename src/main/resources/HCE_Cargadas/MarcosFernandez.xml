@@ -1,0 +1,266 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:voc="urn:hl7-org:v3/voc"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:hl7-org:v3 CDA.xsd">
+    <!--
+********************************************************
+  CDA Header
+********************************************************
+-->
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040" />
+    <templateId root="2.16.840.1.113883.3.27.1776" />
+    <id extension="e512" root="2.16.840.1.113883.19.4" />
+    <code code="11488-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"
+        displayName="Consultation note" />
+    <title>Good Health Clinic Consultation Note</title>
+    <effectiveTime value="20251010" />
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25" />
+    <languageCode code="es-ES" />
+    <setId extension="DD12" root="2.16.840.1.113883.19.7" />
+    <versionNumber value="1" />
+    <recordTarget>
+        <patientRole>
+            <id extension="45678" root="2.16.840.1.113883.19.5" />
+            <patient>
+                <name>
+                    <given>Marcos</given>
+                    <family>Fernandez</family>
+                </name>
+                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" />
+                <birthTime value="19950402" />
+            </patient>
+            <providerOrganization>
+                <id root="2.16.840.1.113883.19.5" />
+            </providerOrganization>
+        </patientRole>
+    </recordTarget>
+    <author>
+        <time value="202510101530" />
+        <assignedAuthor>
+            <id extension="DR00987" root="2.16.840.1.113883.19.5" />
+            <assignedPerson>
+                <name>
+                    <given>Sofia</given>
+                    <family>Martinez</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="2.16.840.1.113883.19.5" />
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization>
+                <id root="2.16.840.1.113883.19.5" />
+                <name>Centro Médico del Sur</name>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    <legalAuthenticator>
+        <time value="20251011" />
+        <signatureCode code="S" />
+        <assignedEntity>
+            <id extension="DR00987" root="2.16.840.1.113883.19.5" />
+            <assignedPerson>
+                <name>
+                    <given>Sofia</given>
+                    <family>Martinez</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="2.16.840.1.113883.19.5" />
+            </representedOrganization>
+        </assignedEntity>
+    </legalAuthenticator>
+    <relatedDocument typeCode="RPLC">
+        <parentDocument>
+            <id extension="a555" root="2.16.840.1.113883.19.4" />
+            <setId extension="DD12" root="2.16.840.1.113883.19.7" />
+            <versionNumber value="1" />
+        </parentDocument>
+    </relatedDocument>
+    <componentOf>
+        <encompassingEncounter>
+            <id extension="ENC20251010" root="2.16.840.1.113883.19.6" />
+            <effectiveTime value="20251010" />
+            <encounterParticipant typeCode="CON">
+                <time value="20251010" />
+                <assignedEntity>
+                    <id extension="DR00987" root="2.16.840.1.113883.19.5" />
+                    <assignedPerson>
+                        <name>
+                            <given>Sofia</given>
+                            <family>Martinez</family>
+                            <suffix>MD</suffix>
+                        </name>
+                    </assignedPerson>
+                    <representedOrganization>
+                        <id root="2.16.840.1.113883.19.5" />
+                    </representedOrganization>
+                </assignedEntity>
+            </encounterParticipant>
+            <location>
+                <healthCareFacility classCode="DSDLOC">
+                    <code code="GIM" codeSystem="2.16.840.1.113883.5.10588"
+                        displayName="General internal medicine clinic" />
+                </healthCareFacility>
+            </location>
+        </encompassingEncounter>
+    </componentOf>
+    <!--
+********************************************************
+  CDA Body
+********************************************************
+-->
+    <component>
+        <structuredBody>
+            <component>
+                <section>
+                    <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" />
+                    <title>Historia de la enfermedad actual</title>
+                    <text>
+                        <content styleCode="Bold">Marcos Fernandez
+                        </content> Paciente masculino de
+                        30 años que consulta por dolor lumbar persistente desde hace dos meses. Sin
+                        antecedentes traumáticos recientes. Dolor aumenta con el esfuerzo físico. </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10153-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" />
+                    <title>Historial médico pasado</title>
+                    <text>
+                        <list>
+                            <item>
+                                <content ID="c1">Lumbalgia crónica</content>
+                            </item>
+                            <item>
+                                <content ID="c2">Alergia al polvo</content>
+                            </item>
+                        </list>
+                    </text>
+                    <entry>
+                        <observation classCode="COND" moodCode="EVN">
+                            <code code="279039007" codeSystem="2.16.840.1.113883.6.96"
+                                displayName="Chronic low back pain" />
+                            <statusCode code="completed" />
+                        </observation>
+                    </entry>
+                    <entry>
+                        <observation classCode="COND" moodCode="EVN">
+                            <code code="419076005" codeSystem="2.16.840.1.113883.6.96"
+                                displayName="Allergy to dust" />
+                            <statusCode code="completed" />
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" />
+                    <title>Medicamentos</title>
+                    <text>
+                        <list>
+                            <item>Ibuprofeno 400 mg cada 8 horas</item>
+                            <item>Paracetamol 500 mg cada 6 horas si hay dolor</item>
+                        </list>
+                    </text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Ibuprofeno 400 mg cada 8 horas</text>
+                            <effectiveTime xsi:type="PIVL_TS" institutionSpecified="true">
+                                <period value="8" unit="h" />
+                            </effectiveTime>
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112" />
+                            <doseQuantity value="400" unit="mg" />
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="387207008" codeSystem="2.16.840.1.113883.6.96"
+                                            displayName="Ibuprofen" />
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Paracetamol 500 mg cada 6 horas si hay dolor</text>
+                            <effectiveTime xsi:type="PIVL_TS" institutionSpecified="true">
+                                <period value="6" unit="h" />
+                            </effectiveTime>
+                            <priorityCode code="PRN" />
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112" />
+                            <doseQuantity value="500" unit="mg" />
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="387517004" codeSystem="2.16.840.1.113883.6.96"
+                                            displayName="Paracetamol" />
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10155-0" codeSystem="2.16.840.1.113883.6.1" />
+                    <title>Alergias y reacciones adversas</title>
+                    <text>
+                        <list>
+                            <item>Polvo - Rinorrea</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="11384-5" codeSystem="2.16.840.1.113883.6.1" />
+                    <title>Examen Fisico</title>
+                    <text>
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <th>Date / Time</th>
+                                    <th>20251010</th>
+                                </tr>
+                                <tr>
+                                    <th>Altura</th>
+                                    <td>180 cm</td>
+                                </tr>
+                                <tr>
+                                    <th>Peso</th>
+                                    <td>82 kg</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </text>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <code code="50373000" codeSystem="2.16.840.1.113883.6.96"
+                                codeSystemName="SNOMED CT" displayName="Medicion de altura" />
+                            <statusCode code="completed" />
+                            <effectiveTime value="200004071430" />
+                            <value xsi:type="PQ" value="1.80" unit="m"></value>
+                        </observation>
+                    </entry>
+                    <entry>
+                        <observation classCode="OBS" moodCode="EVN">
+                            <code code="363808001" codeSystem="2.16.840.1.113883.6.96"
+                                codeSystemName="SNOMED CT" displayName="Body weight measure" />
+                            <statusCode code="completed" />
+                            <effectiveTime value="200004071430" />
+                            <value xsi:type="PQ" value="82.0" unit="kg"></value>
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>
