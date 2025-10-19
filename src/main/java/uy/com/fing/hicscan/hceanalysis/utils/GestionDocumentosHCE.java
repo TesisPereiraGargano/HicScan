@@ -50,8 +50,14 @@ public class GestionDocumentosHCE {
     public GestionDocumentosHCE() {
         //Carga de HCE generadas para las pruebas
         try {
-            String xml = new String(getClass().getResourceAsStream("/HCE_CArgadas/JuanPerez.xml").readAllBytes(), StandardCharsets.UTF_8);
+            String xml = new String(getClass().getResourceAsStream("/HCE_Cargadas/JuanPerez.xml").readAllBytes(), StandardCharsets.UTF_8);
             documentos.put("1", xml);
+            String xml2 = new String(getClass().getResourceAsStream("/HCE_Cargadas/AnaGomez.xml").readAllBytes(), StandardCharsets.UTF_8);
+            documentos.put("2", xml2);
+            String xml3 = new String(getClass().getResourceAsStream("/HCE_Cargadas/MarcosFernandez.xml").readAllBytes(), StandardCharsets.UTF_8);
+            documentos.put("3", xml3);
+            String xml4 = new String(getClass().getResourceAsStream("/HCE_Cargadas/LuciaPerez.xml").readAllBytes(), StandardCharsets.UTF_8);
+            documentos.put("4", xml4);
         } catch (IOException e) {
             log.error("Error al cargar las HCE de prueba");
         }

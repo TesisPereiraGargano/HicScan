@@ -56,8 +56,8 @@ public class HceApiController {
      * @param idPaciente identificador del paciente para buscar la HCE almacenada.
      * @return {@link ResponseEntity} con estado OK y datos extendidos o NOT FOUND si no existe.
      */
-    @PostMapping("/obtenerDatosPacienteExtendido")
-    public ResponseEntity<Object> obtenerDatosPacienteExtendido(@RequestBody String idPaciente) {
+    @GetMapping("/obtenerDatosPacienteExtendido")
+    public ResponseEntity<Object> obtenerDatosPacienteExtendido(@RequestParam String idPaciente) {
         DatosHCE datosExtraidos = processHceUseCase.obtenerDatosPacienteExtendido(idPaciente);
         if(datosExtraidos == null){
             //significa que no encontró la hce

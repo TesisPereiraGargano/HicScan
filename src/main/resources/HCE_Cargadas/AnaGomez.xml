@@ -1,0 +1,295 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="CDA.xsl"?>
+<ClinicalDocument xmlns="urn:hl7-org:v3" xmlns:voc="urn:hl7-org:v3/voc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:hl7-org:v3 CDA.xsd">
+    <!--
+********************************************************
+  CDA Header
+********************************************************
+-->
+    <typeId root="2.16.840.1.113883.1.3" extension="POCD_HD000040"/>
+    <templateId root="2.16.840.1.113883.3.27.1776"/>
+    <id extension="d789" root="2.16.840.1.113883.19.4"/>
+    <code code="11488-4" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" displayName="Consultation note"/>
+    <title>Good Health Clinic Consultation Note</title>
+    <effectiveTime value="20251015"/>
+    <confidentialityCode code="N" codeSystem="2.16.840.1.113883.5.25"/>
+    <languageCode code="es-ES"/>
+    <setId extension="CC98" root="2.16.840.1.113883.19.7"/>
+    <versionNumber value="1"/>
+    <recordTarget>
+        <patientRole>
+            <id extension="98765" root="2.16.840.1.113883.19.5"/>
+            <patient>
+                <name>
+                    <given>Ana</given>
+                    <family>Gomez</family>
+                    <family>Pereira</family>
+                </name>
+                <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
+                <birthTime value="19801205"/>
+            </patient>
+            <providerOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+            </providerOrganization>
+        </patientRole>
+    </recordTarget>
+    <author>
+        <time value="202510151000"/>
+        <assignedAuthor>
+            <id extension="DR00123" root="2.16.840.1.113883.19.5"/>
+            <assignedPerson>
+                <name>
+                    <given>Luis</given>
+                    <family>Ramirez</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+            </representedOrganization>
+        </assignedAuthor>
+    </author>
+    <custodian>
+        <assignedCustodian>
+            <representedCustodianOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+                <name>Hospital General Central</name>
+            </representedCustodianOrganization>
+        </assignedCustodian>
+    </custodian>
+    <legalAuthenticator>
+        <time value="20251016"/>
+        <signatureCode code="S"/>
+        <assignedEntity>
+            <id extension="DR00123" root="2.16.840.1.113883.19.5"/>
+            <assignedPerson>
+                <name>
+                    <given>Luis</given>
+                    <family>Ramirez</family>
+                    <suffix>MD</suffix>
+                </name>
+            </assignedPerson>
+            <representedOrganization>
+                <id root="2.16.840.1.113883.19.5"/>
+            </representedOrganization>
+        </assignedEntity>
+    </legalAuthenticator>
+    <relatedDocument typeCode="RPLC">
+        <parentDocument>
+            <id extension="d456" root="2.16.840.1.113883.19.4"/>
+            <setId extension="CC98" root="2.16.840.1.113883.19.7"/>
+            <versionNumber value="1"/>
+        </parentDocument>
+    </relatedDocument>
+    <componentOf>
+        <encompassingEncounter>
+            <id extension="ENC20251015" root="2.16.840.1.113883.19.6"/>
+            <effectiveTime value="20251015"/>
+            <encounterParticipant typeCode="CON">
+                <time value="20251015"/>
+                <assignedEntity>
+                    <id extension="DR00123" root="2.16.840.1.113883.19.5"/>
+                    <assignedPerson>
+                        <name>
+                            <given>Luis</given>
+                            <family>Ramirez</family>
+                            <suffix>MD</suffix>
+                        </name>
+                    </assignedPerson>
+                    <representedOrganization>
+                        <id root="2.16.840.1.113883.19.5"/>
+                    </representedOrganization>
+                </assignedEntity>
+            </encounterParticipant>
+            <location>
+                <healthCareFacility classCode="DSDLOC">
+                    <code code="GIM" codeSystem="2.16.840.1.113883.5.10588" displayName="General internal medicine clinic"/>
+                </healthCareFacility>
+            </location>
+        </encompassingEncounter>
+    </componentOf>
+    <component>
+        <structuredBody>
+        <!-- Ejemplo de HCE electrónica dónde uno de los medicamentos no aparece en la lista
+         de medicamentos estructurados pero sí en el texto libre (el paracetamol)-->
+            <component>
+                <section>
+                    <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Historia de la enfermedad actual</title>
+                    <text>
+                        <content styleCode="Bold">Ana Gomez
+                        </content>
+                        Paciente femenina de 45 años con diagnóstico de hipertensión arterial desde hace 10 años.
+                        Presenta cefaleas frecuentes y episodios de mareo.
+                        Está bajo tratamiento con medicamentos antihipertensivos y paracetamol para las cefaleas.
+                    </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10153-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Historial médico pasado</title>
+                    <text>
+                        <list>
+                            <item>
+                                <content ID="b1">Hipertensión arterial</content>
+                            </item>
+                            <item>
+                                <content ID="b2">Diabetes tipo 2</content>
+                            </item>
+                        </list>
+                    </text>
+                    <entry>
+                        <observation classCode="COND" moodCode="EVN">
+                            <code code="38341003" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Hypertension">
+                                <originalText>
+                                    <reference value="#b1"/>
+                                </originalText>
+                            </code>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20141001"/>
+                        </observation>
+                    </entry>
+                    <entry>
+                        <observation classCode="COND" moodCode="EVN">
+                            <code code="44054006" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Type 2 diabetes mellitus">
+                                <originalText>
+                                    <reference value="#b2"/>
+                                </originalText>
+                            </code>
+                            <statusCode code="completed"/>
+                            <effectiveTime value="20180501"/>
+                        </observation>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10160-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Medicamentos</title>
+                    <text>
+                        <list>
+                            <item>Lisinopril 20 mg una vez al día</item>
+                            <item>Metformina 850 mg dos veces al día</item>
+                        </list>
+                    </text>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Lisinopril 20 mg una vez al día</text>
+                            <effectiveTime xsi:type="PIVL_TS" institutionSpecified="true">
+                                <period value="24" unit="h"/>
+                            </effectiveTime>
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112" codeSystemName="RouteOfAdministration"/>
+                            <doseQuantity value="20" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="318860005" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Lisinopril"/>
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                    <entry>
+                        <substanceAdministration classCode="SBADM" moodCode="EVN">
+                            <text>Metformina 850 mg dos veces al día</text>
+                            <effectiveTime xsi:type="PIVL_TS" institutionSpecified="true">
+                                <period value="12" unit="h"/>
+                            </effectiveTime>
+                            <routeCode code="PO" codeSystem="2.16.840.1.113883.5.112" codeSystemName="RouteOfAdministration"/>
+                            <doseQuantity value="850" unit="mg"/>
+                            <consumable>
+                                <manufacturedProduct>
+                                    <manufacturedLabeledDrug>
+                                        <code code="325279004" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Metformin"/>
+                                    </manufacturedLabeledDrug>
+                                </manufacturedProduct>
+                            </consumable>
+                        </substanceAdministration>
+                    </entry>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10155-0" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Alergias y reacciones adversas</title>
+                    <text>
+                        <list>
+                            <item>Sin alergias conocidas</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="10157-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Historia Familiar</title>
+                    <text>
+                        <list>
+                            <item>Madre con diabetes tipo 2</item>
+                            <item>Sin antecedentes de cáncer</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="29762-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Historia social</title>
+                    <text>
+                        <list>
+                            <item>No fuma</item>
+                            <item>Consume alcohol ocasionalmente</item>
+                        </list>
+                    </text>
+                </section>
+            </component>
+            <component>
+                <section>
+                    <code code="11384-5" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                    <title>Examen Fisico</title>
+                    <component>
+                        <section>
+                            <code code="8716-3" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
+                            <title>Vital Signs</title>
+                            <text>
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <th>Date / Time</th>
+                                            <th>20251015</th>
+                                        </tr>
+                                        <tr>
+                                            <th>Altura</th>
+                                            <td>165 cm</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Peso</th>
+                                            <td>70.0 kg</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </text>
+                            <entry>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <code code="50373000" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Medicion de altura"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="202510151000"/>
+                                    <value xsi:type="PQ" value="1.65" unit="m"/>
+                                </observation>
+                            </entry>
+                            <entry>
+                                <observation classCode="OBS" moodCode="EVN">
+                                    <code code="363808001" codeSystem="2.16.840.1.113883.6.96" codeSystemName="SNOMED CT" displayName="Body weight measure"/>
+                                    <statusCode code="completed"/>
+                                    <effectiveTime value="202510151000"/>
+                                    <value xsi:type="PQ" value="70.0" unit="kg"/>
+                                </observation>
+                            </entry>
+                        </section>
+                    </component>
+                </section>
+            </component>
+        </structuredBody>
+    </component>
+</ClinicalDocument>

@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class SustanciaAdministradaUtils {
@@ -214,7 +215,57 @@ public class SustanciaAdministradaUtils {
         return false;
     }
 
+    /**
+     * Compara dos listas de drogas y determina si contienen exactamente las mismas drogas,
+     * basado en la comparación de sus códigos CUI de UMLS, sin importar el orden.
+     *
+     * @param drogas1 La primera lista de drogas a comparar (puede ser nula).
+     * @param drogas2 La segunda lista de drogas a comparar (puede ser nula).
+     * @return true si ambas listas contienen el mismo conjunto de CUIs, false en caso contrario.
+     */
+    private static boolean mismasDrogas(List<Droga> drogas1, List<Droga> drogas2) {
+        if (drogas1 == null && drogas2 == null) return true;
+        if (drogas1 == null || drogas2 == null) return false;
+        if (drogas1.size() != drogas2.size()) return false;
+
+        Set<String> cuIs1 = drogas1.stream()
+                .filter(d -> d != null && d.getCodigos() != null && d.getCodigos().getCui() != null)
+                .map(d -> d.getCodigos().getCui())
+                .collect(Collectors.toSet());
+
+        Set<String> cuIs2 = drogas2.stream()
+                .filter(d -> d != null && d.getCodigos() != null && d.getCodigos().getCui() != null)
+                .map(d -> d.getCodigos().getCui())
+                .collect(Collectors.toSet());
+
+        return cuIs1.equals(cuIs2);
+    }
+
+    /**
+     * Intenta agregar una nueva Sustancia a una lista de sustancias existentes.
+     * Solo agrega si **no existe ya** una sustancia con el mismo conjunto de drogas,
+     * comparando por códigos UMLS CUI de las drogas.
+     *
+     * @param lista La lista donde se quiere agregar la nueva Sustancia.
+     * @param nueva La nueva Sustancia que se quiere agregar.
+     * @return true si se agregó la nueva Sustancia (no existía sustancia igual),
+     *         false si ya existe una sustancia con las mismas drogas (no se agregó).
+     */
+    public static boolean agregarSustanciaSiNoExiste(List<SustanciaAdministrada> lista, SustanciaAdministrada nueva) {
+        for (SustanciaAdministrada existente : lista) {
+            if (mismasDrogas(existente.getDrugs(), nueva.getDrugs())) {
+                // Sustancia ya existe con las mismas drogas
+                return false;
+            }
+        }
+
+        // Si no encontró igual, agrega la nueva sustancia
+        lista.add(nueva);
+        return true;
+    }
 }
+
+
 
 
 

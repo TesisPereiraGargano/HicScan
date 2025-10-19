@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static uy.com.fing.hicscan.hceanalysis.utils.SustanciaAdministradaUtils.*;
 
@@ -104,6 +106,27 @@ public class ProcessHceUseCase {
                         }
                     }
                 }
+
+                //Si no está en observaciones busco en el texto libre
+                String textoLibre = adaptador.getTextoLibre();
+                if (alturaValor.isBlank() && alturaUnidad.isBlank()){
+                    Pattern pattern = Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*(cm|m)\\b", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = pattern.matcher(textoLibre);
+                    if (matcher.find()) {
+                        log.info(matcher.toString());
+                        alturaValor = matcher.group(1);
+                        alturaUnidad = matcher.group(2);
+                    }
+                }
+                if (pesoValor.isBlank() && pesoUnidad.isBlank()){
+                    Pattern patternPeso = Pattern.compile("(\\d+(?:[.,]\\d+)?)\\s*(kg|lb)\\b", Pattern.CASE_INSENSITIVE);
+                    Matcher matcher = patternPeso.matcher(textoLibre);
+                    if (matcher.find()) {
+                        log.info(matcher.toString());
+                        pesoValor = matcher.group(1);
+                        pesoUnidad = matcher.group(2);
+                    }
+                }
                 return new PacienteExtendido(paciente.getNombre().strip(), paciente.getGenero(), paciente.getFechaNacimiento(), paciente.getEstadoCivil(), paciente.getRaza(), paciente.getLugarNacimiento(), alturaValor, alturaUnidad, pesoValor, pesoUnidad);
 
             } catch (IOException e) {
@@ -152,10 +175,14 @@ public class ProcessHceUseCase {
                 //Por lo general con código RXNORM y CUI
                 List<SustanciaAdministrada> medsTextoLibre = processPlainTextHCE(textoLibre);
 
-                //TO DO: Agregar que compare las listas y no genere repetidos
-                medicamentos.addAll(medsTextoLibre);
-
+                //Pueblo los códigos, y después comparo para agregar en la lista final
+                //Es necesario hacerlo así porque sino no tengo códigos para comparar
                 poblarCodigosRxNorm(medicamentos, umlsApiKey);
+                poblarCodigosRxNorm(medsTextoLibre, umlsApiKey);
+
+                for(SustanciaAdministrada sust: medsTextoLibre){
+                    agregarSustanciaSiNoExiste(medicamentos, sust);
+                }
 
                 for (SustanciaAdministrada sust : medicamentos){
                     Boolean esDiuretico = esDiuretico(sust);
