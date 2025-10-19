@@ -194,7 +194,8 @@ public class HL7v3_CDAr2_Adapter implements HCEAdapter {
                                     case "2.16.840.1.113883.6.86":
                                         cods.setCui(code);
                                         break;
-                                        //case "2.16.840.1.113883.6.1":
+                                    // Se podrían agregar tantos códigos de sistemas como se quisese, para la POC se limitó a los 3 de arriba
+                                    //case "2.16.840.1.113883.6.1":
                                     //     "LOINC";
                                     //case "2.16.840.1.113883.6.90":
                                     //     "CPT";

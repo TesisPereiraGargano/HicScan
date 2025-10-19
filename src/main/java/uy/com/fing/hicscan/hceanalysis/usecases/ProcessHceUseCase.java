@@ -175,8 +175,7 @@ public class ProcessHceUseCase {
                 //Por lo general con código RXNORM y CUI
                 List<SustanciaAdministrada> medsTextoLibre = processPlainTextHCE(textoLibre);
 
-                //Pueblo los códigos, y después comparo para agregar en la lista final
-                //Es necesario hacerlo así porque sino no tengo códigos para comparar
+
                 poblarCodigosRxNorm(medicamentos, umlsApiKey);
                 poblarCodigosRxNorm(medsTextoLibre, umlsApiKey);
 
