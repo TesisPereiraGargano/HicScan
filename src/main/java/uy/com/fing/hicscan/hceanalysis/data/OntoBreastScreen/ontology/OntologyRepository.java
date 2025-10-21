@@ -45,7 +45,7 @@ public class OntologyRepository {
     private OntModel getOntologyModelById(String ontoId, OntModelSpec ontModelSpec) {
         Model model = tripleStore.getOntologyByName(ontoId);
         OntModel ontologyModel = ModelFactory.createOntologyModel(ontModelSpec, model);
-        // ontologyModel.setStrictMode(false); //TODO: Algunas definiciones de ontologías hacen que falle apache Jena.
+        ontologyModel.setStrictMode(false); //TODO: Algunas definiciones de ontologías hacen que falle apache Jena.
         ontologyModel.setDerivationLogging(true);
         return ontologyModel;
     }

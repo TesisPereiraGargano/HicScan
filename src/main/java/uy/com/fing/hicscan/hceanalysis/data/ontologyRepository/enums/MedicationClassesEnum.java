@@ -11,7 +11,6 @@ import lombok.Getter;
 public enum MedicationClassesEnum {
     MEDICATION_HISTORY_CLASS("http://purl.org/ontology/breast_cancer_recommendation#Medication_History"),
     ACTIVE_INGREDIENT_CLASS("http://purl.org/ontology/breast_cancer_recommendation#Active_ingredient"),
-    DIURETIC_CLASS("http://purl.org/ontology/breast_cancer_recommendation#Diuretic");
-
+    DIURETIC_CLASS("http://purl.bioontology.org/ontology/ATC/C03");
     private final String uri;
 }

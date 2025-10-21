@@ -25,15 +25,18 @@ public class OntologyOperations {
     private final uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.OntologyRepository ontologyRepository;
     private final uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.persistence.WomanIndividualsRepository womanIndividualsRepository;
 
+
     /**
-     * Creates a new individual instance of a class in memory.
+     * Crea una nueva clase en la ontología.
      * 
-     * @param ontoModel the ontology model to use
-     * @param classUri the URI of the class to instantiate
-     * @return the created individual, or null if the class doesn't exist
+     * @param ontoModel el modelo de la ontología donde crear la clase
+     * @param className el nombre de la nueva clase
+     * @param parentClassUri la URI de la clase padre (superclase)
+     * @param classUri la URI específica para la nueva clase
+     * @return la clase creada, o null si hubo un error
      */
-    public Individual createIndividual(OntModel ontoModel, String classUri) {
-        log.info("Creating individual of class {} using provided ontology model", classUri);
+    public OntClass createNewClass(OntModel ontoModel, String className, String parentClassUri, String classUri) {
+        log.info("Creating new class {} with parent {} using provided ontology model", className, parentClassUri);
         
         try {
             if (ontoModel == null) {
@@ -41,22 +44,32 @@ public class OntologyOperations {
                 return null;
             }
             
-            // Check if the class exists
-            OntClass ontClass = ontoModel.getOntClass(classUri);
-            if (ontClass == null) {
-                log.error("Class {} does not exist in provided ontology model", classUri);
+            // Verificar que la clase padre existe
+            OntClass parentClass = ontoModel.getOntClass(parentClassUri);
+            if (parentClass == null) {
+                log.error("Parent class {} does not exist in provided ontology model", parentClassUri);
                 return null;
             }
             
-            // Create the individual
-            Individual individual = ontClass.createIndividual();
-            log.info("Successfully created individual {} of class {}", individual.getURI(), classUri);
+            // Crear la nueva clase
+            OntClass newClass = ontoModel.createClass(classUri);
+            if (newClass == null) {
+                log.error("Failed to create class with URI {}", classUri);
+                return null;
+            }
             
-            return individual;
+            // Establecer la clase padre (hacer que sea subclase)
+            newClass.addSuperClass(parentClass);
+            
+            // Agregar un label a la clase
+            newClass.addLabel(className, "en");
+            
+            log.info("Successfully created class {} as subclass of {}", className, parentClassUri);
+            return newClass;
             
         } catch (Exception e) {
-            log.error("Error creating individual of class {}: {}", 
-                     classUri, e.getMessage(), e);
+            log.error("Error creating class {} with parent {}: {}", 
+                    className, parentClassUri, e.getMessage(), e);
             return null;
         }
     }
@@ -320,88 +333,55 @@ public class OntologyOperations {
      */
     public boolean createMedicationForWoman(OntModel ontoModel, String womanId, String medicationName, 
                                           String activeIngredient, String code, boolean isDiuretic) {
-        log.info("Creating medication {} for woman {} using provided ontology model", medicationName, womanId);
-        
-        try {
-            if (ontoModel == null) {
-                log.error("Ontology model is null");
-                return false;
-            }
-            
-            // Obtener la instancia de la mujer desde el repositorio en memoria
-            Individual womanIndividual = womanIndividualsRepository.getWoman(womanId);
-            if (womanIndividual == null) {
-                log.error("Woman with ID {} not found in memory repository", womanId);
-                return false;
-            }
-            log.info("Found woman individual: {} with URI: {}", womanId, womanIndividual.getURI());
-            
-            // 1. Instanciar el medicamento (Medication_History)
-            Individual medicationInstance = createIndividual(ontoModel, MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri());
-            if (medicationInstance == null) {
-                log.error("Failed to create medication instance");
-                return false;
-            }
-            
-            // Agregar propiedades básicas del medicamento
-            addPropertyToIndividual(medicationInstance, MedicationPropertiesEnum.HAS_LABEL.getUri(), medicationName);
-            addPropertyToIndividual(medicationInstance, MedicationPropertiesEnum.HAS_PREF_LABEL.getUri(), medicationName);
-            
-            // 2. Si es diurético, agregar las propiedades correspondientes
-            if (isDiuretic) {
-                // Crear instancia del ingrediente activo
-                Individual activeIngredientInstance = createIndividual(ontoModel, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
-                if (activeIngredientInstance == null) {
-                    log.error("Failed to create active ingredient instance");
-                    return false;
-                }
-                
-                // Crear instancia de diurético
-                Individual diureticInstance = createIndividual(ontoModel, MedicationClassesEnum.DIURETIC_CLASS.getUri());
-                if (diureticInstance == null) {
-                    log.error("Failed to create diuretic instance");
-                    return false;
-                }
-                
-                // Agregar propiedades a las instancias
-                addPropertyToIndividual(activeIngredientInstance, MedicationPropertiesEnum.HAS_LABEL.getUri(), activeIngredient);
-                addPropertyToIndividual(activeIngredientInstance, MedicationPropertiesEnum.HAS_PREF_LABEL.getUri(), activeIngredient);
-                addPropertyToIndividual(diureticInstance, MedicationPropertiesEnum.HAS_LABEL.getUri(), "Diuretic");
-                
-                // DIURETICS(instActiveIngredient) - agregar el ingrediente activo como miembro del diurético
-                addPropertyToIndividual(diureticInstance, "http://www.w3.org/2000/01/rdf-schema#member", activeIngredientInstance.getURI());
-                
-                // hasActiveIngredient(instMedicamento, instActiveIngredient)
-                addPropertyToIndividual(medicationInstance, MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri(), activeIngredientInstance.getURI());
-            } else {
-                // Si no es diurético, solo crear el ingrediente activo
-                Individual activeIngredientInstance = createIndividual(ontoModel, MedicationClassesEnum.ACTIVE_INGREDIENT_CLASS.getUri());
-                if (activeIngredientInstance == null) {
-                    log.error("Failed to create active ingredient instance");
-                    return false;
-                }
-                
-                addPropertyToIndividual(activeIngredientInstance, MedicationPropertiesEnum.HAS_LABEL.getUri(), activeIngredient);
-                addPropertyToIndividual(activeIngredientInstance, MedicationPropertiesEnum.HAS_PREF_LABEL.getUri(), activeIngredient);
-                
-                // hasActiveIngredient(instMedicamento, instActiveIngredient)
-                addPropertyToIndividual(medicationInstance, MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri(), activeIngredientInstance.getURI());
-            }
-            
-            // 3. Agregar property: hasHistory(instWoman, instMedicamento)
-            boolean historyAdded = addProperty(womanIndividual, MedicationPropertiesEnum.HAS_HISTORY.getUri(), medicationInstance.getURI());
-            if (!historyAdded) {
-                log.error("Failed to add medication to woman's history");
-                return false;
-            }
-            
-            log.info("Successfully created medication {} with code {} for woman {}", medicationName, code, womanId);
-            return true;
-            
-        } catch (Exception e) {
-            log.error("Error creating medication for woman: {}", e.getMessage(), e);
+
+    log.info("Creating medication {} for woman {} using provided ontology model", medicationName, womanId);
+
+    try {
+        if (ontoModel == null) {
+            log.error("Ontology model is null");
             return false;
         }
+        
+        // Obtener la instancia de la mujer desde el repositorio en memoria
+        Individual womanIndividual = womanIndividualsRepository.getWoman(womanId);
+        if (womanIndividual == null) {
+            log.error("Woman with ID {} not found in memory repository", womanId);
+            return false;
+        }
+        log.info("Found woman individual: {} with URI: {}", womanId, womanIndividual.getURI());
+
+        // Crear la clase del medicamento, subclase de Medication_History
+        String medicationClassUri = "http://purl.org/ontology/breast_cancer_recommendation#" + medicationName;
+        OntClass newMedicationClass = createNewClass(ontoModel, medicationName, MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri(), medicationClassUri);
+
+        // Crear la instancia del medicamento
+        String medicationInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + medicationName + "NewWoman";
+        Individual medicationInstance = createIndividual(ontoModel, medicationClassUri, medicationInstanceUri);
+
+        // Agrego el medicamento al historial de la mujer
+        String medicationHistoryHasHistoryUri = MedicationPropertiesEnum.HAS_HISTORY.getUri();
+        addProperty(womanIndividual, medicationHistoryHasHistoryUri, medicationInstanceUri);
+
+        if (isDiuretic) {
+            // Creo la instancia del ingrediente activo en la clase DIURETICS
+            String activeIngredientInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + activeIngredient;
+            String diureticClassUri = MedicationClassesEnum.DIURETIC_CLASS.getUri();
+            Individual diureticInstance = createIndividual(ontoModel, diureticClassUri, activeIngredientInstanceUri);
+            if (diureticInstance == null) {
+                log.error("Failed to create diuretic instance");
+                return false;
+            }
+
+            // Agrego el ingrediente activo (el cual es un diuretico) al medicamento
+            String medicationPropertyHasActiveIngredientUri = MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri();
+            addProperty(medicationInstance, medicationPropertyHasActiveIngredientUri, activeIngredientInstanceUri);
+        }
+    } catch (Exception e) {
+        log.error("Error creating medication {} for woman {}: {}", medicationName, womanId, e.getMessage(), e);
+        return false;
+    }
+
+    return true;
     }
 
     /**
@@ -428,14 +408,6 @@ public class OntologyOperations {
                 log.info("Reasoner found: {}", ontoModel.getReasoner().getClass().getSimpleName());
             }
             
-            // Asegurar que el logging de derivaciones esté habilitado
-            ontoModel.setDerivationLogging(true);
-            
-            // Forzar la ejecución del razonador
-            log.info("Calling ontoModel.prepare() to execute reasoning...");
-            ontoModel.prepare();
-            log.info("Reasoning execution completed");
-            
             // Obtener todos los statements del modelo (incluyendo los derivados)
             List<String> derivedStatements = new ArrayList<>();
             List<String> derivations = new ArrayList<>();
@@ -445,9 +417,13 @@ public class OntologyOperations {
             int filteredStatements = 0;
             
             // URI del sujeto que queremos filtrar
-            String targetSubject = "http://purl.org/ontology/breast_cancer_recommendation#NewWoman";
+             String targetSubject = "http://purl.org/ontology/breast_cancer_recommendation#NewWoman";
+
+            // URI del predicado que queremos excluir
+            String excludedPredicate = "http://www.w3.org/2002/07/owl#differentFrom";
             
             log.info("Analyzing statements for subject: {}", targetSubject);
+            log.info("Excluding statements with predicate: {}", excludedPredicate);
             
             while (stmtIterator.hasNext()) {
                 Statement statement = stmtIterator.nextStatement();
@@ -458,40 +434,19 @@ public class OntologyOperations {
                     statement.getSubject().getURI() != null && 
                     statement.getSubject().getURI().equals(targetSubject)) {
                     
+                    // Excluir triplas cuyo predicado sea owl:differentFrom
+                    if (statement.getPredicate() != null && 
+                        statement.getPredicate().getURI() != null && 
+                        statement.getPredicate().getURI().equals(excludedPredicate)) {
+                        log.debug("Excluding statement with owl:differentFrom predicate: {}", statement.toString());
+                        continue;
+                    }
+                    
                     filteredStatements++;
                     // Agregar el statement a la lista
                     derivedStatements.add(statement.toString());
                     log.debug("Found statement for NewWoman: {}", statement.toString());
                     
-                    // Si es una relación hasAge, también capturar las propiedades del individuo de edad
-                    if (statement.getPredicate() != null && 
-                        statement.getPredicate().getURI() != null && 
-                        statement.getPredicate().getURI().equals("http://purl.org/ontology/breast_cancer_recommendation#hasAge")) {
-                        
-                        // Obtener el individuo de edad relacionado
-                        if (statement.getObject() != null && statement.getObject().isResource()) {
-                            String objectUri = statement.getObject().asResource().getURI();
-                            if (objectUri != null) {
-                                Individual ageIndividual = ontoModel.getIndividual(objectUri);
-                                if (ageIndividual != null) {
-                                    // Capturar las propiedades del individuo de edad
-                                    ageIndividual.listProperties().forEachRemaining(prop -> {
-                                        String ageProp = String.format("[AGE_INDIVIDUAL] %s -> %s", 
-                                            prop.getPredicate().getURI(), 
-                                            prop.getObject().toString());
-                                        derivedStatements.add(ageProp);
-                                        log.debug("Found age individual property: {}", ageProp);
-                                    });
-                                } else {
-                                    log.debug("Age individual not found for URI: {}", objectUri);
-                                }
-                            } else {
-                                log.debug("Object URI is null for hasAge statement: {}", statement.toString());
-                            }
-                        } else {
-                            log.debug("Object is not a resource for hasAge statement: {}", statement.toString());
-                        }
-                    }
                     
                     // Intentar obtener la derivación para este statement
                     try {

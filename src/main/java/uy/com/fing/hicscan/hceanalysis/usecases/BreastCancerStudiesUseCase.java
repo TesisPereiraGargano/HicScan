@@ -25,6 +25,7 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.util.iterator.ExtendedIterator;
 import org.springframework.stereotype.Service;
 
 import static uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.GUIDELINE_CLASS;
@@ -52,36 +53,42 @@ public class BreastCancerStudiesUseCase {
     private final RiskCalculatorService riskCalculatorService;
     private final OntoFormsClient ontoFormsClient;
 
-    public record IndividualDescriptor(String uri, String prettyName){}
-
+    public record IndividualDescriptor(String uri, String prettyName) {
+    }
 
     public List<IndividualDescriptor> getModels(String language) {
         OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
 
-        return ontoModel.listIndividuals(ResourceFactory.createResource(uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.MODEL_CLASS.getUri()))
+        return ontoModel.listIndividuals(ResourceFactory.createResource(
+                uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.BCRClassesEnum.MODEL_CLASS.getUri()))
                 .mapWith(in -> new IndividualDescriptor(in.getURI(),
-                        getLabelInLanguageOrDefault(in, language))).toList();
+                        getLabelInLanguageOrDefault(in, language)))
+                .toList();
     }
 
     /**
      * Calcula el riesgo y genera una nueva instancia de mujer.
      *
-     * @param riskModel modelo de riesgo
+     * @param riskModel    modelo de riesgo
      * @param womanHistory datos de la mujer.
      * @return representación riesgo mujer e identificador individuo.
      */
-    public WomanRisk calculateRiskAndCreateWoman(String riskModelUri, Map<String, String> womanHistoryProps, String language) {
+    public WomanRisk calculateRiskAndCreateWoman(String riskModelUri, Map<String, String> womanHistoryProps,
+            String language) {
         OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
         return calculateRiskAndCreateWoman(ontoModel, riskModelUri, womanHistoryProps, language);
     }
 
-    public WomanRisk calculateRiskAndCreateWoman(OntModel ontoModel, String riskModelUri, Map<String, String> womanHistoryProps, String language) {
+    public WomanRisk calculateRiskAndCreateWoman(OntModel ontoModel, String riskModelUri,
+            Map<String, String> womanHistoryProps, String language) {
 
-        RiskCalculation calculatedRisk = riskCalculatorService.calculateRiskForModelAndData(riskModelUri, womanHistoryProps);
+        RiskCalculation calculatedRisk = riskCalculatorService.calculateRiskForModelAndData(riskModelUri,
+                womanHistoryProps);
 
         Individual womanRisk = ontoModel.getIndividual(calculatedRisk.getRiskLevel().getUri());
 
-        String womanUri = createNewWomanIndividual(ontoModel, calculatedRisk.getRiskModel(), calculatedRisk.getRiskLevel(), womanHistoryProps);
+        String womanUri = createNewWomanIndividual(ontoModel, calculatedRisk.getRiskModel(),
+                calculatedRisk.getRiskLevel(), womanHistoryProps);
 
         return WomanRisk.builder()
                 .womanUri(womanUri)
@@ -96,26 +103,31 @@ public class BreastCancerStudiesUseCase {
                 .build();
     }
 
-
     /**
-     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de hasRisk, hasAge y recomendaciones. - MODIFICADA PARA RECIBIR ONTOMODEL Y NO CREAR UNO NUEVO
-     * @param ontoModel modelo de la ontología
-     * @param riskModel modelo de riesgo
-     * @param riskLevel riesgo calculado para el individuo.
+     * Genera un nuevo individuo de la clase Mujer y le agrega la relación de
+     * hasRisk, hasAge y recomendaciones. - MODIFICADA PARA RECIBIR ONTOMODEL Y NO
+     * CREAR UNO NUEVO
+     * 
+     * @param ontoModel        modelo de la ontología
+     * @param riskModel        modelo de riesgo
+     * @param riskLevel        riesgo calculado para el individuo.
      * @param womanHistoryData datos de la mujer.
      * @return individuo mujer construido.
      */
-    public String createNewWomanIndividual(OntModel ontoModel, RiskModel riskModel, RiskLevel riskLevel, Map<String, String> womanHistoryData) {
-        if(ontoModel == null) {
+    public String createNewWomanIndividual(OntModel ontoModel, RiskModel riskModel, RiskLevel riskLevel,
+            Map<String, String> womanHistoryData) {
+        if (ontoModel == null) {
             throw new IllegalStateException("No existe la ontología de Breast Cancer Recommendation");
         }
 
-        Individual patient = ontoModel.getOntClass(WOMAN_CLASS.getUri()).createIndividual("http://purl.org/ontology/breast_cancer_recommendation#NewWoman");
+        Individual patient = ontoModel.getOntClass(WOMAN_CLASS.getUri())
+                .createIndividual("http://purl.org/ontology/breast_cancer_recommendation#NewWoman");
 
         try {
             addRiskRelationship(patient, riskModel, riskLevel);
         } catch (NullPointerException e) {
-            System.out.println("NullPointerException: Puede que WOMAN_CLASS.getUri() o getOntClass() haya devuelto null.");
+            System.out.println(
+                    "NullPointerException: Puede que WOMAN_CLASS.getUri() o getOntClass() haya devuelto null.");
             e.printStackTrace();
         } catch (Exception e) {
             System.out.println("Ha ocurrido una excepción inesperada:");
@@ -154,76 +166,81 @@ public class BreastCancerStudiesUseCase {
 
         Individual recommendationIndividual;
 
-        if(RiskLevel.MEDIUM.getUri().equals(uri)) {
+        if (RiskLevel.MEDIUM.getUri().equals(uri)) {
             recommendationIndividual = patient.listPropertyValues(HAS_RECOMMENDATION_MID_PROP.prop())
                     .mapWith(node -> node.as(Individual.class))
-                    .filterKeep(recommendation ->
-                            guideline.listPropertyValues(GIVES_PROP.prop())
-                                    .mapWith(recomm -> recomm.as(Individual.class).getURI())
-                                    .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
+                    .filterKeep(recommendation -> guideline.listPropertyValues(GIVES_PROP.prop())
+                            .mapWith(recomm -> recomm.as(Individual.class).getURI())
+                            .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
                     .nextOptional()
                     .orElse(null);
         } else {
             recommendationIndividual = patient.listPropertyValues(HAS_RECOMMENDATION_HIGH_PROP.prop())
                     .mapWith(node -> node.as(Individual.class))
-                    .filterKeep(recommendation ->
-                            guideline.listPropertyValues(GIVES_PROP.prop())
-                                    .mapWith(recomm -> recomm.as(Individual.class).getURI())
-                                    .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
+                    .filterKeep(recommendation -> guideline.listPropertyValues(GIVES_PROP.prop())
+                            .mapWith(recomm -> recomm.as(Individual.class).getURI())
+                            .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
                     .nextOptional()
                     .orElse(null);
         }
 
-
         List<String> explainList = new ArrayList<>();
-        if(recommendationIndividual != null) {
+        if (recommendationIndividual != null) {
 
-            List<Statement> list = ontoModel.listStatements(patient, HAS_RECOMMENDATION_HIGH_PROP.prop(), recommendationIndividual).toList();
+            List<Statement> list = ontoModel
+                    .listStatements(patient, HAS_RECOMMENDATION_HIGH_PROP.prop(), recommendationIndividual).toList();
 
             Statement principalStmt = list.get(0);
-            ontoModel.getDerivation(principalStmt).forEachRemaining(d -> explainList.add(d.toString()) );
+            ontoModel.getDerivation(principalStmt).forEachRemaining(d -> explainList.add(d.toString()));
         }
 
         return explainList;
     }
 
     /**
-     * Dado un individuo de la clase Mujer, obtiene todas las recomendaciones de estudios relacionadas mediante
+     * Dado un individuo de la clase Mujer, obtiene todas las recomendaciones de
+     * estudios relacionadas mediante
      * las objectProperties {@link BCRPropsEnum#HAS_RECOMMENDATION_HIGH_PROP} y
      * {@link BCRPropsEnum#HAS_RECOMMENDATION_MID_PROP}
-     * @return Objeto WomanRecomendation que contiene las recomendaciones MID y HIGH.
+     * 
+     * @return Objeto WomanRecomendation que contiene las recomendaciones MID y
+     *         HIGH.
      */
-    public WomanRecommendation getWomanAllRecommendations(OntModel ontoModel, String womanId, String guideUri, String language) {
+    public WomanRecommendation getWomanAllRecommendations(OntModel ontoModel, String womanId, String guideUri,
+            String language) {
         var patient = womanIndividualsRepository.getWoman(womanId);
         // var ontoModel = patient.getOntModel();
         var guideline = ontoModel.getIndividual(guideUri);
 
         String uri = guideline.getPropertyValue(FOR_RISK_LEVEL_PROP.prop()).as(Individual.class).getURI();
 
-        if(RiskLevel.MEDIUM.getUri().equals(uri)) {
-            //Guìa para riesgo medio.
-            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
-                    WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
+        if (RiskLevel.MEDIUM.getUri().equals(uri)) {
+            // Guìa para riesgo medio.
+            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(),
+                    recomm -> WomanRecommendation.builder()
+                            .midRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
         } else {
-            //Guìa para riesgo alto.
-            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline, HAS_RECOMMENDATION_HIGH_PROP.prop(), recomm ->
-                    WomanRecommendation.builder().highRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
+            // Guìa para riesgo alto.
+            return getRecommendationFilteredWithGuide(ontoModel, patient, guideline,
+                    HAS_RECOMMENDATION_HIGH_PROP.prop(), recomm -> WomanRecommendation.builder()
+                            .highRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
         }
     }
-
 
     public List<IndividualDescriptor> getAllGuidelinesFor(String riskLevelUri, String language) {
         OntModel ontoModel = ontologyRepository.getOntologyModelABoxByIdFor(ontoFormsClient.getOntologyFileName());
 
-        if(ontoModel == null) {
+        if (ontoModel == null) {
             throw new IllegalStateException("No existe la ontología de Breast Cancer Recommendation");
         }
 
         return ontoModel.listIndividuals(ResourceFactory.createResource(GUIDELINE_CLASS.getUri()))
-                .filterKeep(guide -> riskLevelUri.equals(guide.getPropertyValue(FOR_RISK_LEVEL_PROP.prop()).asNode().getURI()))
-                .mapWith(guide -> new IndividualDescriptor(guide.getURI(), getLabelInLanguageOrDefault(guide, language))).toList();
+                .filterKeep(guide -> riskLevelUri
+                        .equals(guide.getPropertyValue(FOR_RISK_LEVEL_PROP.prop()).asNode().getURI()))
+                .mapWith(
+                        guide -> new IndividualDescriptor(guide.getURI(), getLabelInLanguageOrDefault(guide, language)))
+                .toList();
     }
-
 
     private void addHasAgeRelationship(Individual patient, Integer declaredAge) {
         var ontoModel = patient.getOntModel();
@@ -237,7 +254,8 @@ public class BreastCancerStudiesUseCase {
         patient.addProperty(HAS_RISK_PROP.prop(), riskIndividual);
     }
 
-    private WomanRecommendation.Recommendation buildRecommendationDTOFromIndividual(Individual recommendation, String language) {
+    private WomanRecommendation.Recommendation buildRecommendationDTOFromIndividual(Individual recommendation,
+            String language) {
         var imagingRec = getLabelInLanguageOrDefault(recommendation.getPropertyValue(HAS_IMAGING_PROP.prop())
                 .as(Individual.class), language);
 
@@ -253,20 +271,51 @@ public class BreastCancerStudiesUseCase {
         return new WomanRecommendation.Recommendation(imagingRec, strengthPropRec, periodicityRec, forIntervalRec);
     }
 
-//         return getRecommendationFilteredWithGuide(patient, guideline, HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
-//            WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm, language)).build());
-    private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient, Individual guideline, Property recommendationProp,
-                                                                   Function<Individual, WomanRecommendation> builderF) {
-        return patient.listPropertyValues(recommendationProp)
-                .mapWith(node -> node.as(Individual.class))
-                .filterKeep(recommendation ->
-                        guideline.listPropertyValues(GIVES_PROP.prop())
-                            .mapWith(recomm -> recomm.as(Individual.class).getURI())
-                                .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
-                .nextOptional()
+    // return getRecommendationFilteredWithGuide(patient, guideline,
+    // HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
+    // WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm,
+    // language)).build());
+    // private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient,
+    //         Individual guideline, Property recommendationProp,
+    //         Function<Individual, WomanRecommendation> builderF) {
+    //     WomanRecommendation recommendations = patient.listPropertyValues(recommendationProp)
+    //             .mapWith(node -> node.as(Individual.class))
+    //             .filterKeep(recommendation -> guideline.listPropertyValues(GIVES_PROP.prop())
+    //                     .mapWith(recomm -> recomm.as(Individual.class).getURI())
+    //                     .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
+    //             .nextOptional()
+    //             .map(builderF)
+    //             .orElse(null);
+
+    //     return recommendations;
+    // }
+
+    private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient,
+    Individual guideline, Property recommendationProp,
+    Function<Individual, WomanRecommendation> builderF) {
+
+        // Paso 1: Obtener todas las recomendaciones del paciente
+        NodeIterator patientRecommendations = patient.listPropertyValues(recommendationProp);
+
+        // Paso 2: Convertir a individuos
+        ExtendedIterator<Individual> recommendationIndividuals = patientRecommendations
+                .mapWith(node -> node.as(Individual.class));
+
+        // Paso 3: Filtrar las recomendaciones que están en la guía
+        ExtendedIterator<Individual> filteredRecommendations = recommendationIndividuals
+                .filterKeep(recommendation -> guideline.listPropertyValues(GIVES_PROP.prop())
+                        .mapWith(recomm -> recomm.as(Individual.class).getURI())
+                        .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext());
+
+        // Paso 4: Tomar la primera recomendación que cumple el filtro
+        Optional<Individual> firstRecommendation = filteredRecommendations.nextOptional();
+
+        // Paso 5: Aplicar la función builder o devolver null
+        WomanRecommendation recommendations = firstRecommendation
                 .map(builderF)
                 .orElse(null);
+
+        return recommendations;
     }
 
 }
-
