@@ -102,6 +102,9 @@ public class BreastCancerStudiesUseCase {
 
         Individual patient = ontoModel.getOntClass(WOMAN_CLASS.getUri()).createIndividual();
 
+        //TODO agregar resto de relaciones cuando vayamos a persistir, por ahora para la recomendaciòn no es necesario.
+//        addRiskRelationship(patient, riskModel, riskLevel);
+
         try {
             addRiskRelationship(patient, riskModel, riskLevel);
         } catch (NullPointerException e) {
@@ -129,6 +132,7 @@ public class BreastCancerStudiesUseCase {
     }
 
     /**
+     * TODO: Es código de prueba, no está listo o funcional.
      * @param womanId
      * @param guideUri
      * @return
