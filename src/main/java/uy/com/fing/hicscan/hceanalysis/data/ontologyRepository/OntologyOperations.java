@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.enums.MedicationClassesEnum;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.enums.MedicationPropertiesEnum;
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
+import uy.com.fing.hicscan.hceanalysis.dto.Droga;
 
 @Service
 @AllArgsConstructor
@@ -325,16 +327,12 @@ public class OntologyOperations {
      * 
      * @param ontoModel modelo de la ontología
      * @param womanId ID de la mujer existente
-     * @param medicationName Nombre del medicamento
-     * @param activeIngredient Ingrediente activo del medicamento
-     * @param code Código del medicamento
-     * @param isDiuretic Si el medicamento es diurético
+     * @param sustanciaAdministrada Sustancia administrada con sus drogas asociadas
      * @return true si se creó exitosamente, false en caso contrario
      */
-    public boolean createMedicationForWoman(OntModel ontoModel, String womanId, String medicationName, 
-                                          String activeIngredient, String code, boolean isDiuretic) {
+    public boolean createMedicationForWoman(OntModel ontoModel, String womanId, SustanciaAdministrada sustanciaAdministrada) {
 
-    log.info("Creating medication {} for woman {} using provided ontology model", medicationName, womanId);
+    log.info("Creating medication {} for woman {} using provided ontology model", sustanciaAdministrada.getName(), womanId);
 
     try {
         if (ontoModel == null) {
@@ -351,33 +349,44 @@ public class OntologyOperations {
         log.info("Found woman individual: {} with URI: {}", womanId, womanIndividual.getURI());
 
         // Crear la clase del medicamento, subclase de Medication_History
-        String medicationClassUri = "http://purl.org/ontology/breast_cancer_recommendation#" + medicationName;
-        OntClass newMedicationClass = createNewClass(ontoModel, medicationName, MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri(), medicationClassUri);
+        String medicationClassUri = "http://purl.org/ontology/breast_cancer_recommendation#" + sustanciaAdministrada.getName();
+        createNewClass(ontoModel, sustanciaAdministrada.getName(), MedicationClassesEnum.MEDICATION_HISTORY_CLASS.getUri(), medicationClassUri);
 
         // Crear la instancia del medicamento
-        String medicationInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + medicationName + "NewWoman";
+        String medicationInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + sustanciaAdministrada.getName() + "NewWoman";
         Individual medicationInstance = createIndividual(ontoModel, medicationClassUri, medicationInstanceUri);
 
         // Agrego el medicamento al historial de la mujer
         String medicationHistoryHasHistoryUri = MedicationPropertiesEnum.HAS_HISTORY.getUri();
         addProperty(womanIndividual, medicationHistoryHasHistoryUri, medicationInstanceUri);
 
-        if (isDiuretic) {
-            // Creo la instancia del ingrediente activo en la clase DIURETICS
-            String activeIngredientInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + activeIngredient;
-            String diureticClassUri = MedicationClassesEnum.DIURETIC_CLASS.getUri();
-            Individual diureticInstance = createIndividual(ontoModel, diureticClassUri, activeIngredientInstanceUri);
-            if (diureticInstance == null) {
-                log.error("Failed to create diuretic instance");
-                return false;
-            }
+        // Procesar cada droga de la sustancia administrada
+        if (sustanciaAdministrada.getDrugs() != null) {
+            for (Droga droga : sustanciaAdministrada.getDrugs()) {
+                // Verificar si la droga es diurética (CUI empieza con C03)
+                if (droga.getCodigos() != null && 
+                    droga.getCodigos().getCui() != null && 
+                    droga.getCodigos().getCui().startsWith("C03")) {
+                    
+                    // Creo la instancia del ingrediente activo en la clase DIURETICS
+                    String activeIngredientInstanceUri = "http://purl.org/ontology/breast_cancer_recommendation#" + droga.getNombre();
+                    String diureticClassUri = MedicationClassesEnum.DIURETIC_CLASS.getUri();
+                    Individual diureticInstance = createIndividual(ontoModel, diureticClassUri, activeIngredientInstanceUri);
+                    if (diureticInstance == null) {
+                        log.error("Failed to create diuretic instance for drug: {}", droga.getNombre());
+                        return false;
+                    }
 
-            // Agrego el ingrediente activo (el cual es un diuretico) al medicamento
-            String medicationPropertyHasActiveIngredientUri = MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri();
-            addProperty(medicationInstance, medicationPropertyHasActiveIngredientUri, activeIngredientInstanceUri);
+                    // Agrego el ingrediente activo (el cual es un diuretico) al medicamento
+                    String medicationPropertyHasActiveIngredientUri = MedicationPropertiesEnum.HAS_ACTIVE_INGREDIENT.getUri();
+                    addProperty(medicationInstance, medicationPropertyHasActiveIngredientUri, activeIngredientInstanceUri);
+                    
+                    log.info("Added diuretic ingredient {} to medication {}", droga.getNombre(), sustanciaAdministrada.getName());
+                }
+            }
         }
     } catch (Exception e) {
-        log.error("Error creating medication {} for woman {}: {}", medicationName, womanId, e.getMessage(), e);
+        log.error("Error creating medication {} for woman {}: {}", sustanciaAdministrada.getName(), womanId, e.getMessage(), e);
         return false;
     }
 

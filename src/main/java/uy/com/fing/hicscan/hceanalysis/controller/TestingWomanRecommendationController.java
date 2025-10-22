@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.ReasoningResult;
 import uy.com.fing.hicscan.hceanalysis.usecases.InstanciateOntology;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel;
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
+import uy.com.fing.hicscan.hceanalysis.dto.Droga;
+import uy.com.fing.hicscan.hceanalysis.dto.CodDiccionario;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,17 +68,21 @@ public class TestingWomanRecommendationController {
             // Valores por defecto para medicamento
             String medicationName = "Hydrochlorothiazide";
             String activeIngredient = "Hydrochlorothiazide";
-            String code = "C0020255";
-            boolean isDiuretic = true;
+            String code = "C030255";
+            
+            // Crear SustanciaAdministrada con los valores por defecto
+            CodDiccionario codigos = new CodDiccionario();
+            codigos.setCui(code);
+            Droga droga = new Droga(codigos, activeIngredient);
+            List<Droga> drogas = List.of(droga);
+            SustanciaAdministrada sustanciaAdministrada = new SustanciaAdministrada(
+                medicationName, "", "", "", "", drogas);
 
             // Ejecutar el procesamiento completo
             ReasoningResult result = instanciateOntology.processWomanWithMedicationAndReasoning(
                     riskModel,
                     request.getWomanHistoryData(),
-                    medicationName,
-                    activeIngredient,
-                    code,
-                    isDiuretic);
+                    sustanciaAdministrada);
 
             return ResponseEntity.ok(new CompleteWomanProcessingResponse(
                     result.isSuccess(),

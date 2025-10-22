@@ -14,6 +14,7 @@ import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
+import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
 
 @Service
 @AllArgsConstructor
@@ -35,16 +36,12 @@ public class InstanciateOntology {
      * 
      * @param riskModel        modelo de riesgo
      * @param womanHistoryData datos de la mujer
-     * @param medicationName   nombre del medicamento
-     * @param activeIngredient ingrediente activo del medicamento
-     * @param code             código del medicamento
-     * @param isDiuretic       si el medicamento es diurético
+     * @param sustanciaAdministrada sustancia administrada con sus drogas asociadas
      * @return ReasoningResult con los resultados del razonamiento
      */
     public ReasoningResult processWomanWithMedicationAndReasoning(RiskModel riskModel,
             Map<String, String> womanHistoryData,
-            String medicationName, String activeIngredient,
-            String code, boolean isDiuretic) {
+            SustanciaAdministrada sustanciaAdministrada) {
         log.info("Starting complete woman processing with medication and reasoning");
 
         try {
@@ -78,12 +75,12 @@ public class InstanciateOntology {
 
             // 3. Crear medicamento para la mujer
             boolean medicationCreated = ontologyOperations.createMedicationForWoman(
-                    ontoModel, womanId, medicationName, activeIngredient, code, isDiuretic);
+                    ontoModel, womanId, sustanciaAdministrada);
 
             if (!medicationCreated) {
                 log.warn("Failed to create medication for woman {}", womanId);
             } else {
-                log.info("Successfully created medication {} for woman {}", medicationName, womanId);
+                log.info("Successfully created medication {} for woman {}", sustanciaAdministrada.getName(), womanId);
             }
 
             // 4. Ejecutar el razonador
