@@ -33,3 +33,5 @@ build/
 .vscode/
 
 src/main/java/uy/com/fing/hicscan/hceanalysis/controller/tests
+
+ontology/
