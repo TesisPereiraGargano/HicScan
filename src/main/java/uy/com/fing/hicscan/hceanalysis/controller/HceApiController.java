@@ -1,15 +1,15 @@
 package uy.com.fing.hicscan.hceanalysis.controller;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import uy.com.fing.hicscan.hceanalysis.dto.ApiResponse;
-import uy.com.fing.hicscan.hceanalysis.dto.DatosHCE;
-import uy.com.fing.hicscan.hceanalysis.dto.PacienteExtendido;
-import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
+import uy.com.fing.hicscan.hceanalysis.dto.*;
 import uy.com.fing.hicscan.hceanalysis.usecases.ProcessHceUseCase;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,6 +28,27 @@ public class HceApiController {
     private HceApiController(ProcessHceUseCase processHceUseCase){
         this.processHceUseCase = processHceUseCase;
     }
+    /**
+     * Request DTO simplificado que recibe solo los datos de la mujer, y un identificador
+     */
+    @Getter
+    @Setter
+    public static class CompleteWomanProcessingRequest {
+        private Map<String, String> womanHistoryData = new HashMap<>();
+        private String id;
+
+        @JsonAnySetter
+        public void setWomanHistoryData(String key, String value) {
+            this.womanHistoryData.put(key, value);
+        }
+
+        @JsonAnyGetter
+        public Map<String, String> getWomanHistoryData() {
+            return womanHistoryData;
+        }
+
+        public CompleteWomanProcessingRequest() {}
+    }
 
     @GetMapping("/")
     public String index() {
@@ -40,7 +61,7 @@ public class HceApiController {
      * @param idPaciente identificador del paciente para buscar la HCE almacenada.
      * @return {@link ResponseEntity} con estado OK y datos del paciente o con estado NOT FOUND si no existe.
      */
-    @PostMapping("/obtenerDatosPacienteBasico")
+    @GetMapping("/obtenerDatosPacienteBasico")
     public ResponseEntity<Object> obtenerDatosPacienteBasico(@RequestBody String idPaciente) {
         PacienteExtendido paciente = processHceUseCase.obtenerDatosPaciente(idPaciente);
         if(paciente == null){
@@ -62,6 +83,24 @@ public class HceApiController {
         if(datosExtraidos == null){
             //significa que no encontró la hce
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El paciente con id " + idPaciente + " no tiene HCE cargada en el sistema.");
+        }
+        return ResponseEntity.ok(datosExtraidos);
+    }
+
+
+    /**
+     * Obtiene toda la información asociada al paciente y las recomendaciones brindadas al mismo.
+     *
+     * @param request que tiene la info necesaria para hacer el procesamiento que es un id de paciente con HCE cargada
+     *                en el sistema y el mapa de la información obtenida del cuestionario.
+     * @return {@link ResponseEntity} con estado OK y datos extendidos o NOT FOUND si no existe.
+     */
+    @GetMapping("/obtenerDatosPacienteExtendidoConRecomendaciones")
+    public ResponseEntity<Object> obtenerDatosPacienteExtendidoConRecomendaciones(@RequestBody CompleteWomanProcessingRequest request) {
+        PacienteRecomendacion datosExtraidos = processHceUseCase.obtenerDatosPacienteExtendidoConRecomendaciones(request.getId(), request.getWomanHistoryData());
+        if(datosExtraidos == null){
+            //significa que no encontró la hce
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El paciente con id " + request.getId() + " no tiene HCE cargada en el sistema.");
         }
         return ResponseEntity.ok(datosExtraidos);
     }

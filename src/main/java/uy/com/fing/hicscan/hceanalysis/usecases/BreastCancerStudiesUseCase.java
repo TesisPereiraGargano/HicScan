@@ -69,8 +69,8 @@ public class BreastCancerStudiesUseCase {
     /**
      * Calcula el riesgo y genera una nueva instancia de mujer.
      *
-     * @param riskModel    modelo de riesgo
-     * @param womanHistory datos de la mujer.
+     * @param riskModelUri    modelo de riesgo
+     * @param womanHistoryProps datos de la mujer.
      * @return representación riesgo mujer e identificador individuo.
      */
     public WomanRisk calculateRiskAndCreateWoman(String riskModelUri, Map<String, String> womanHistoryProps,
@@ -271,24 +271,6 @@ public class BreastCancerStudiesUseCase {
         return new WomanRecommendation.Recommendation(imagingRec, strengthPropRec, periodicityRec, forIntervalRec);
     }
 
-    // return getRecommendationFilteredWithGuide(patient, guideline,
-    // HAS_RECOMMENDATION_MID_PROP.prop(), recomm ->
-    // WomanRecommendation.builder().midRecommendation(buildRecommendationDTOFromIndividual(recomm,
-    // language)).build());
-    // private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient,
-    //         Individual guideline, Property recommendationProp,
-    //         Function<Individual, WomanRecommendation> builderF) {
-    //     WomanRecommendation recommendations = patient.listPropertyValues(recommendationProp)
-    //             .mapWith(node -> node.as(Individual.class))
-    //             .filterKeep(recommendation -> guideline.listPropertyValues(GIVES_PROP.prop())
-    //                     .mapWith(recomm -> recomm.as(Individual.class).getURI())
-    //                     .filterKeep(recomm -> recomm.equals(recommendation.getURI())).hasNext())
-    //             .nextOptional()
-    //             .map(builderF)
-    //             .orElse(null);
-
-    //     return recommendations;
-    // }
 
     private WomanRecommendation getRecommendationFilteredWithGuide(OntModel ontoModel, Individual patient,
     Individual guideline, Property recommendationProp,
