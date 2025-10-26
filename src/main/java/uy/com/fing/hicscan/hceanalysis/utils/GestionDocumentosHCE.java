@@ -2,12 +2,12 @@ package uy.com.fing.hicscan.hceanalysis.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Component
@@ -40,6 +40,15 @@ public class GestionDocumentosHCE {
 
     public static void eliminarDocumento(String id) {
         documentos.remove(id);
+    }
+
+    /**
+     * Obtiene todos los identificadores de documentos HCE almacenados en el sistema.
+     *
+     * @return conjunto de identificadores (IDs) de todos los documentos almacenados
+     */
+    public static Set<String> obtenerTodosLosIds() {
+        return documentos.keySet();
     }
 
     /**
