@@ -6,12 +6,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.ReasoningResult;
+import uy.com.fing.hicscan.hceanalysis.dto.*;
 import uy.com.fing.hicscan.hceanalysis.usecases.InstanciateOntology;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel;
-import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
-import uy.com.fing.hicscan.hceanalysis.dto.Droga;
-import uy.com.fing.hicscan.hceanalysis.dto.CodDiccionario;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,25 +63,61 @@ public class TestingWomanRecommendationController {
         try {
             // Valores por defecto para el procesamiento
             RiskModel riskModel = RiskModel.MSP_UY; // Usar MSP_UY como modelo por defecto
-            
-            // Valores por defecto para medicamento
-            String medicationName = "Hydrochlorothiazide";
-            String activeIngredient = "Hydrochlorothiazide";
-            String code = "C030255";
-            
-            // Crear SustanciaAdministrada con los valores por defecto
-            CodDiccionario codigos = new CodDiccionario();
-            codigos.setCui(code);
-            Droga droga = new Droga(codigos, activeIngredient);
-            List<Droga> drogas = List.of(droga);
-            SustanciaAdministrada sustanciaAdministrada = new SustanciaAdministrada(
-                medicationName, "", "", "", "", drogas);
+
+            DatosHCE datosHCE = new DatosHCE();
+
+            // Datos básicos del paciente
+            PacienteExtendido paciente = new PacienteExtendido("Juan Perez","M","19900924",
+                    null, null, null, "1.77", "m", "88.0", "kg");
+
+            datosHCE.setDatosBasicosPaciente(paciente);
+
+            // Inicialización de medicamentos
+            DatosHCE.Medicamentos medicamentos = new DatosHCE.Medicamentos();
+            DatosHCE.Medicamentos.Clasificados clasificados = new DatosHCE.Medicamentos.Clasificados();
+
+            // 1. Diurético
+            CodDiccionario codigosDiuretico = new CodDiccionario();
+            codigosDiuretico.setSnomedCT("376209006");
+            codigosDiuretico.setRxnorm("310798");
+            codigosDiuretico.setCui("C0977518");
+            Droga drogaDiuretico = new Droga(codigosDiuretico, "Hydrochlorothiazide 25mg tablet");
+
+            SustanciaAdministrada diuretico = new SustanciaAdministrada("HCTZ 25mg una vez al día", "mg", "25",
+                    "24", "h",List.of(drogaDiuretico));
+
+            clasificados.setDiureticos(List.of(diuretico));
+
+            // 2. No diurético
+            CodDiccionario codigosNoDiuretico = new CodDiccionario();
+            codigosNoDiuretico.setSnomedCT("66493003");
+            codigosNoDiuretico.setRxnorm("10438");
+            codigosNoDiuretico.setCui("C0039771");
+            Droga drogaNoDiuretico = new Droga(codigosNoDiuretico, "Theophylline");
+
+            SustanciaAdministrada noDiuretico = new SustanciaAdministrada("Theodur 200 mg dos veces al día","mg","200",
+                    "h", "12", List.of(drogaNoDiuretico));
+
+            clasificados.setNoDiureticos(List.of(noDiuretico));
+
+            // 3. No clasificado
+            CodDiccionario codigosNoClasificado = new CodDiccionario();
+            codigosNoClasificado.setCui("C0038317");
+            Droga drogaNoClasificado = new Droga(codigosNoClasificado, "");
+
+            SustanciaAdministrada noClasificado = new SustanciaAdministrada("Steroids", "", "", "", "",
+                    List.of(drogaNoClasificado));
+
+            medicamentos.setClasificados(clasificados);
+            medicamentos.setNoClasificados(List.of(noClasificado));
+
+            datosHCE.setMedicamentos(medicamentos);
 
             // Ejecutar el procesamiento completo
             ReasoningResult result = instanciateOntology.processWomanWithMedicationAndReasoning(
                     riskModel,
                     request.getWomanHistoryData(),
-                    sustanciaAdministrada);
+                    datosHCE);
 
             return ResponseEntity.ok(new CompleteWomanProcessingResponse(
                     result.isSuccess(),

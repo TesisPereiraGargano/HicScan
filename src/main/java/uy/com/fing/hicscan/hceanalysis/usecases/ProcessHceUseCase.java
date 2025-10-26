@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapter;
 import uy.com.fing.hicscan.hceanalysis.adapters.HCEAdapterFactory;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel;
+import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.ReasoningResult;
 import uy.com.fing.hicscan.hceanalysis.data.plainTextProcessor.PlainTextProcessor;
 import uy.com.fing.hicscan.hceanalysis.data.translator.Translator;
 import uy.com.fing.hicscan.hceanalysis.dto.*;
@@ -29,6 +31,7 @@ public class ProcessHceUseCase {
     private final HCEAdapterFactory hceAdapterFactory;
     private final Map<File, HCEAdapter> adapterCache = new HashMap<>();
     private final String umlsApiKey = "9acb4127-e18e-4a0c-a53d-6555dd08fb32";
+    private final InstanciateOntology instanciateOntology;
 
 
     @Value("${source.lang}")
@@ -51,11 +54,12 @@ public class ProcessHceUseCase {
      *  - {@link LanguageExpansion}: expansor de nombres comerciales a principios activos.
      *  - {@link HCEAdapterFactory}: fábrica de adaptadores para documentos HCE.
      */
-    public ProcessHceUseCase (PlainTextProcessor plainTextProcessor, Translator translator, LanguageExpansion languageExpansion, HCEAdapterFactory hceAdapter){
+    public ProcessHceUseCase (PlainTextProcessor plainTextProcessor, Translator translator, LanguageExpansion languageExpansion, HCEAdapterFactory hceAdapter, InstanciateOntology instanciateOntology){
         this.plainTextProcessor = plainTextProcessor;
         this.translator = translator;
         this.languajeExpansion = languageExpansion;
         this.hceAdapterFactory = hceAdapter;
+        this.instanciateOntology = instanciateOntology;
     }
 
     public HCEAdapter getOrCreateAdapter(File fileHCE) {
@@ -150,8 +154,6 @@ public class ProcessHceUseCase {
         if (GestionDocumentosHCE.existeDocumento(id)) {
             try {
                 PacienteExtendido datosPaciente = obtenerDatosPaciente(id);
-                //TO DO: REVISAR (esto se re puede mejorar ahora queda así)
-                //Yo le doy la extensión es al pedo, voy a hacer otro endpoint
 
                 File tempFile = File.createTempFile("hce-temp", ".xml");
                 try (FileWriter writer = new FileWriter(tempFile)) {
@@ -174,7 +176,6 @@ public class ProcessHceUseCase {
                 //Lista con los medicamentos extraídos del texto libre
                 //Por lo general con código RXNORM y CUI
                 List<SustanciaAdministrada> medsTextoLibre = processPlainTextHCE(textoLibre);
-
 
                 poblarCodigosRxNorm(medicamentos, umlsApiKey);
                 poblarCodigosRxNorm(medsTextoLibre, umlsApiKey);
@@ -268,6 +269,40 @@ public class ProcessHceUseCase {
 
     }
 
+
+    /**
+     * Realiza el procesamiento completo de una HCE, extrayendo los datos básicos del paciente,
+     * en conjunto con los medicamentos que se encuentren en la HCE,
+     * y su correspondiente mapeo de códigos UMLS/RxNorm y clasificación.
+     * Luego a partir de esos datos, y datos recidifos de un formulario con formato
+     * compatible con la ontología seleccionada y el modelo seleccionado:
+     * Para MSP_UY:
+     *     "http://purl.org/ontology/breast_cancer_recommendation#UY_age_question" --> edad
+     *     "http://purl.org/ontology/breast_cancer_recommendation#UY_chest_radiotherapy_question"
+     *     "http://purl.org/ontology/breast_cancer_recommendation#UY_hereditary_risk_question" --> si tiene riesgo hereditario
+     *     "http://purl.org/ontology/breast_cancer_recommendation#UY_hiperplasia_atipia_question" --> si tiene hiperplasia
+     * Infiere las recomendaciones utilizando la ontología.
+     *
+     * @param id identificador del documento cargado en memoria.
+     * @param womanHistoryData recibe la información asociada a la ontología + modelo utilizado
+     * @return un objeto {@link PacienteRecomendacion} con la información médica consolidada o null si el paciente no existe
+     */
+    public PacienteRecomendacion obtenerDatosPacienteExtendidoConRecomendaciones(String id, Map<String, String> womanHistoryData){
+        DatosHCE datosPaciente = obtenerDatosPacienteExtendido(id);
+        if (datosPaciente != null) {
+            // Valores por defecto para el procesamiento
+            RiskModel riskModel = RiskModel.MSP_UY; // Usar MSP_UY como modelo por defecto
+            // Obtengo las recomendaciones a partir de la información del paciente
+            ReasoningResult razonamiento = instanciateOntology.processWomanWithMedicationAndReasoning(
+                    riskModel,
+                    womanHistoryData,
+                    datosPaciente);
+            log.info("Información extraída correctamente e inferencias realizadas para paciente {}", id);
+            return new PacienteRecomendacion(datosPaciente, razonamiento);
+        } else {
+            log.error("NO existe paciente con id {} en el sistema", id);
+            return null;}
+    }
 }
 
 

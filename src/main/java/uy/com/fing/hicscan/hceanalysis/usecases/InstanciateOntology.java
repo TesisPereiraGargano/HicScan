@@ -14,6 +14,8 @@ import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.WomanRisk;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.List;
+
+import uy.com.fing.hicscan.hceanalysis.dto.DatosHCE;
 import uy.com.fing.hicscan.hceanalysis.dto.SustanciaAdministrada;
 
 @Service
@@ -36,12 +38,11 @@ public class InstanciateOntology {
      * 
      * @param riskModel        modelo de riesgo
      * @param womanHistoryData datos de la mujer
-     * @param sustanciaAdministrada sustancia administrada con sus drogas asociadas
      * @return ReasoningResult con los resultados del razonamiento
      */
     public ReasoningResult processWomanWithMedicationAndReasoning(RiskModel riskModel,
             Map<String, String> womanHistoryData,
-            SustanciaAdministrada sustanciaAdministrada) {
+            DatosHCE datosHCE) {
         log.info("Starting complete woman processing with medication and reasoning");
 
         try {
@@ -73,14 +74,14 @@ public class InstanciateOntology {
             // WomanRecommendation womanRecommendation = breastCancerStudiesUseCase.getWomanAllRecommendations(womanId, guidelineUri, language);
             breastCancerStudiesUseCase.getWomanAllRecommendations(ontoModel, womanId, guidelineUri, language);
 
-            // 3. Crear medicamento para la mujer
-            boolean medicationCreated = ontologyOperations.createMedicationForWoman(
-                    ontoModel, womanId, sustanciaAdministrada);
+            // 3. Crear medicamentos para la mujer
+            boolean medicationsCreated = ontologyOperations.createMedicationsFromHCE(
+                    ontoModel, womanId, datosHCE);
 
-            if (!medicationCreated) {
+            if (!medicationsCreated) {
                 log.warn("Failed to create medication for woman {}", womanId);
             } else {
-                log.info("Successfully created medication {} for woman {}", sustanciaAdministrada.getName(), womanId);
+                log.info("Successfully created medication for woman {}",  womanId);
             }
 
             // 4. Ejecutar el razonador

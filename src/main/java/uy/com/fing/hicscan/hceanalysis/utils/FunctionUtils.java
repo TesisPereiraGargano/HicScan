@@ -3,6 +3,8 @@ package uy.com.fing.hicscan.hceanalysis.utils;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.text.Normalizer;
+
 
 public class FunctionUtils {
     /**
@@ -29,5 +31,33 @@ public class FunctionUtils {
         String limpio = texto.replaceAll("\\s+", " ").trim();
         return limpio;
     }
+    /**
+     Conviente un string a formato camel case. Por ejemplo, transforma "Hydrochlorothiazide 25mg tablet"
+     en "hydrochlorothiazide25mgTablet"
+     @param texto El texto original que se quiere convertir a camel case eliminando espacios y caracteres especiales.
+     @return Una cadena limpia, en formato camelCase.
+     */
+    public static String toCamelCase(String texto) {
+            texto = Normalizer.normalize(texto, Normalizer.Form.NFD)
+                    .replaceAll("\\p{M}", ""); // quita acentos
+
+            texto = texto.replaceAll("[^A-Za-z0-9]+", " ").trim();
+
+            StringBuilder resultado = new StringBuilder();
+            for (String palabra : texto.split("\\s+")) {
+                if (!palabra.isEmpty()) {
+                    resultado.append(
+                            Character.toUpperCase(palabra.charAt(0))
+                    );
+                    if (palabra.length() > 1) {
+                        resultado.append(palabra.substring(1).toLowerCase());
+                    }
+                }
+            }
+        String resultadoFinal = resultado.toString();
+        return resultadoFinal.isEmpty()
+                ? resultadoFinal
+                : Character.toLowerCase(resultadoFinal.charAt(0)) + resultadoFinal.substring(1);
+        }
 
 }
