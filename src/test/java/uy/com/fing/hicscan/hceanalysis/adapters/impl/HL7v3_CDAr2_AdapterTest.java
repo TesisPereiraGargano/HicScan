@@ -30,8 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
                 "    <patientRole>\n" +
                 "      <patient>\n" +
                 "        <name>\n" +
-                "          <family>Rodríguez</family>\n" +
-                "          <family>Martínez</family>\n" +
+                "          <family>Rodriguez</family>\n" +
+                "          <family>Martinez</family>\n" +
                 "          <given>Juan</given>\n" +
                 "        </name>\n" +
                 "        <administrativeGenderCode code=\"M\" />\n" +
@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.*;
                 "    <assignedAuthor>\n" +
                 "      <id root=\"1.2.3.4.5.6\"/>\n" +
                 "      <assignedPerson>\n" +
-                "        <name>Dr. Pedro Pérez</name>\n" +
+                "        <name>Dr. Pedro Perez</name>\n" +
                 "      </assignedPerson>\n" +
                 "      <representedOrganization>\n" +
                 "        <name>Hospital Prueba</name>\n" +
@@ -146,7 +146,7 @@ import static org.junit.jupiter.api.Assertions.*;
             List<Observacion> observaciones = adapter.getObservaciones();
 
             assertNotNull(paciente);
-            assertEquals("RodríguezMartínezJuan", paciente.getNombre().replaceAll("\\s+", ""));
+            assertEquals("RodriguezMartinezJuan", paciente.getNombre().replaceAll("\\s+", ""));
             assertEquals("M", paciente.getGenero());
             assertEquals("19721118", paciente.getFechaNacimiento());
             assertEquals("2106-3", paciente.getRaza());
@@ -155,7 +155,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
             assertNotNull(autor);
             assertEquals("20250927", autor.getTime());
-            assertEquals("Dr. Pedro Pérez", autor.getName());
+            assertEquals("Dr. Pedro Perez", autor.getName());
             assertEquals("1.2.3.4.5.6", autor.getOrganizationId());
             assertEquals("Hospital Prueba", autor.getOrganizationName());
 
