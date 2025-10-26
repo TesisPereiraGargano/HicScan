@@ -10,6 +10,7 @@ import uy.com.fing.hicscan.hceanalysis.dto.*;
 import uy.com.fing.hicscan.hceanalysis.usecases.ProcessHceUseCase;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -103,6 +104,17 @@ public class HceApiController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("El paciente con id " + request.getId() + " no tiene HCE cargada en el sistema.");
         }
         return ResponseEntity.ok(datosExtraidos);
+    }
+
+    /**
+     * Obtiene los datos básicos de todos los pacientes con HCE cargada en el sistema.
+     *
+     * @return {@link ResponseEntity} con estado OK y lista de pacientes o lista vacía si no hay pacientes.
+     */
+    @GetMapping("/obtenerTodosLosPacientesBasicos")
+    public ResponseEntity<List<PacienteExtendido>> obtenerTodosLosPacientesBasicos() {
+        List<PacienteExtendido> pacientes = processHceUseCase.obtenerTodosLosPacientesBasicos();
+        return ResponseEntity.ok(pacientes);
     }
 
 }
