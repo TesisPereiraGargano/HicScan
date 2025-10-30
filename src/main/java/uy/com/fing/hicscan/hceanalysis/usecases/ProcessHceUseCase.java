@@ -307,15 +307,15 @@ public class ProcessHceUseCase {
     /**
      * Obtiene los datos básicos de todos los pacientes almacenados en el sistema.
      *
-     * @return lista de objetos {@link PacienteExtendido} con los datos de todos los pacientes
+     * @return lista de objetos {@link PacienteBasico} con los datos de todos los pacientes incluyendo sus IDs
      */
-    public List<PacienteExtendido> obtenerTodosLosPacientesBasicos() {
-        List<PacienteExtendido> pacientes = new ArrayList<>();
+    public List<PacienteBasico> obtenerTodosLosPacientesBasicos() {
+        List<PacienteBasico> pacientes = new ArrayList<>();
         
         for (String id : GestionDocumentosHCE.obtenerTodosLosIds()) {
             PacienteExtendido paciente = obtenerDatosPaciente(id);
             if (paciente != null) {
-                pacientes.add(paciente);
+                pacientes.add(new PacienteBasico(id, paciente));
             }
         }
         

@@ -63,7 +63,7 @@ public class HceApiController {
      * @return {@link ResponseEntity} con estado OK y datos del paciente o con estado NOT FOUND si no existe.
      */
     @GetMapping("/obtenerDatosPacienteBasico")
-    public ResponseEntity<Object> obtenerDatosPacienteBasico(@RequestParam String idPaciente) {
+    public ResponseEntity<Object> obtenerDatosPacienteBasico(@RequestBody String idPaciente) {
         PacienteExtendido paciente = processHceUseCase.obtenerDatosPaciente(idPaciente);
         if(paciente == null){
             //significa que no encontró la hce
@@ -96,7 +96,7 @@ public class HceApiController {
      *                en el sistema y el mapa de la información obtenida del cuestionario.
      * @return {@link ResponseEntity} con estado OK y datos extendidos o NOT FOUND si no existe.
      */
-    @GetMapping("/obtenerDatosPacienteExtendidoConRecomendaciones")
+    @PostMapping("/obtenerDatosPacienteExtendidoConRecomendaciones")
     public ResponseEntity<Object> obtenerDatosPacienteExtendidoConRecomendaciones(@RequestBody CompleteWomanProcessingRequest request) {
         PacienteRecomendacion datosExtraidos = processHceUseCase.obtenerDatosPacienteExtendidoConRecomendaciones(request.getId(), request.getWomanHistoryData());
         if(datosExtraidos == null){
@@ -109,11 +109,11 @@ public class HceApiController {
     /**
      * Obtiene los datos básicos de todos los pacientes con HCE cargada en el sistema.
      *
-     * @return {@link ResponseEntity} con estado OK y lista de pacientes o lista vacía si no hay pacientes.
+     * @return {@link ResponseEntity} con estado OK y lista de pacientes con sus IDs o lista vacía si no hay pacientes.
      */
     @GetMapping("/obtenerTodosLosPacientesBasicos")
-    public ResponseEntity<List<PacienteExtendido>> obtenerTodosLosPacientesBasicos() {
-        List<PacienteExtendido> pacientes = processHceUseCase.obtenerTodosLosPacientesBasicos();
+    public ResponseEntity<List<PacienteBasico>> obtenerTodosLosPacientesBasicos() {
+        List<PacienteBasico> pacientes = processHceUseCase.obtenerTodosLosPacientesBasicos();
         return ResponseEntity.ok(pacientes);
     }
 
