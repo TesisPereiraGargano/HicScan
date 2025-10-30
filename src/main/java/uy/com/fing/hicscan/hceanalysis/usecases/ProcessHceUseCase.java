@@ -303,6 +303,24 @@ public class ProcessHceUseCase {
             log.error("NO existe paciente con id {} en el sistema", id);
             return null;}
     }
+
+    /**
+     * Obtiene los datos básicos de todos los pacientes almacenados en el sistema.
+     *
+     * @return lista de objetos {@link PacienteBasico} con los datos de todos los pacientes incluyendo sus IDs
+     */
+    public List<PacienteBasico> obtenerTodosLosPacientesBasicos() {
+        List<PacienteBasico> pacientes = new ArrayList<>();
+        
+        for (String id : GestionDocumentosHCE.obtenerTodosLosIds()) {
+            PacienteExtendido paciente = obtenerDatosPaciente(id);
+            if (paciente != null) {
+                pacientes.add(new PacienteBasico(id, paciente));
+            }
+        }
+        
+        return pacientes;
+    }
 }
 
 
