@@ -16,6 +16,7 @@ import uy.com.fing.hicscan.hceanalysis.utils.GestionDocumentosHCE;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -83,7 +84,7 @@ public class ProcessHceUseCase {
         if (GestionDocumentosHCE.existeDocumento(id)) {
             try {
                 File tempFile = File.createTempFile("hce-temp", ".xml");
-                try (FileWriter writer = new FileWriter(tempFile)) {
+                try (FileWriter writer = new FileWriter(tempFile, StandardCharsets.UTF_8)) {
                     writer.write(GestionDocumentosHCE.obtenerDocumento(id));
                     writer.flush();
                 } // de esta forma se guarda el archivo correctamente
@@ -156,7 +157,7 @@ public class ProcessHceUseCase {
                 PacienteExtendido datosPaciente = obtenerDatosPaciente(id);
 
                 File tempFile = File.createTempFile("hce-temp", ".xml");
-                try (FileWriter writer = new FileWriter(tempFile)) {
+                try (FileWriter writer = new FileWriter(tempFile, StandardCharsets.UTF_8)) {
                     writer.write(GestionDocumentosHCE.obtenerDocumento(id));
                     writer.flush();
                 } // de esta forma se guarda el archivo correctamente
