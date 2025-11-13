@@ -24,7 +24,7 @@
             <id extension="45678" root="2.16.840.1.113883.19.5" />
             <patient>
                 <name>
-                    <given>Marcos</given>
+                    <given>Martina</given>
                     <family>Fernandez</family>
                 </name>
                 <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" />
@@ -123,7 +123,7 @@
                     <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC" />
                     <title>Historia de la enfermedad actual</title>
                     <text>
-                        <content styleCode="Bold">Marcos Fernandez
+                        <content styleCode="Bold"> Martina Fernandez
                         </content> Paciente masculino de
                         30 años que consulta por dolor lumbar persistente desde hace dos meses. Sin
                         antecedentes traumáticos recientes. Dolor aumenta con el esfuerzo físico. </text>

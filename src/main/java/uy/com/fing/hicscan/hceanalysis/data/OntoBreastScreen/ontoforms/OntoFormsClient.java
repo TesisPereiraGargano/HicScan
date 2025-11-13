@@ -31,7 +31,7 @@ public class OntoFormsClient {
 
     public String getOntologyFileName() {
         URI uri = UriComponentsBuilder
-                .fromUriString(HOST + "apps/ontoforms/configurations/app-mapping")
+                .fromUriString(HOST + "apps/hicscan/configurations/app-mapping")
                 .build("OntoBreastScreen");
 
 
