@@ -21,7 +21,7 @@
             <id extension="12345" root="2.16.840.1.113883.19.5"/>
             <patient>
                 <name>
-                    <given>Juan</given>
+                    <given>Juana</given>
                     <family>Perez</family>
                 </name>
                 <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
@@ -124,7 +124,7 @@
                     <code code="10164-2" codeSystem="2.16.840.1.113883.6.1" codeSystemName="LOINC"/>
                     <title>Historia de la enfermedad actual</title>
                     <text>
-                        <content styleCode="Bold">Juan Perez
+                        <content styleCode="Bold">Juana Perez
                         </content>
                         Es un hombre de 35 años remitido para tratamiento adicional del asma. El asma comenzó en su adolescencia.
                         Fue hospitalizado dos veces el año pasado y dos veces este año. No ha podido suspender gradualmente los esteroides en los últimos meses.
