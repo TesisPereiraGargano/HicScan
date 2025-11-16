@@ -27,7 +27,7 @@
                     <given>Martina</given>
                     <family>Fernandez</family>
                 </name>
-                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1" />
+                <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1" />
                 <birthTime value="19950402" />
             </patient>
             <providerOrganization>
