@@ -24,7 +24,7 @@
                     <given>Juana</given>
                     <family>Perez</family>
                 </name>
-                <administrativeGenderCode code="M" codeSystem="2.16.840.1.113883.5.1"/>
+                <administrativeGenderCode code="F" codeSystem="2.16.840.1.113883.5.1"/>
                 <birthTime value="19900924"/>
             </patient>
             <providerOrganization>
