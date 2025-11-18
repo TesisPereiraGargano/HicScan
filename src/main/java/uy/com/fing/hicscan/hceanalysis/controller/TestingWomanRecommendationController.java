@@ -128,7 +128,7 @@ public class TestingWomanRecommendationController {
             return ResponseEntity.internalServerError().body(new CompleteWomanProcessingResponse(
                     false,
                     "Error interno del servidor: " + e.getMessage(),
-                    new ReasoningResult(List.of(), List.of(), 0, false, e.getMessage())));
+                    new ReasoningResult(List.of(), List.of(), 0, false, e.getMessage(), null)));
         }
     }
 

@@ -468,7 +468,7 @@ public class OntologyOperations {
         try {
             if (ontoModel == null) {
                 log.error("Ontology model is null");
-                return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, "Ontology model is null");
+                return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, "Ontology model is null", null);
             }
             
             // Verificar que el modelo tenga un razonador configurado
@@ -551,11 +551,11 @@ public class OntologyOperations {
                 derivations.forEach(deriv -> log.debug("  - {}", deriv));
             }
             
-            return new ReasoningResult(derivedStatements, derivations, filteredStatements, true, null);
+            return new ReasoningResult(derivedStatements, derivations, filteredStatements, true, null, null);
             
         } catch (Exception e) {
             log.error("Error executing reasoner on provided model: {}", e.getMessage(), e);
-            return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, e.getMessage());
+            return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, e.getMessage(), null);
         }
     }
 

@@ -6,6 +6,7 @@ import org.apache.jena.ontology.OntModel;
 import org.springframework.stereotype.Service;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontology.OntologyRepository;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.ontoforms.OntoFormsClient;
+import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.recommend.WomanRecommendation;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.OntologyOperations;
 import uy.com.fing.hicscan.hceanalysis.data.ontologyRepository.ReasoningResult;
 import uy.com.fing.hicscan.hceanalysis.data.OntoBreastScreen.risk.dtos.RiskModel;
@@ -72,7 +73,7 @@ public class InstanciateOntology {
             String womanId = womanRisk.getWomanUri();
             
             // WomanRecommendation womanRecommendation = breastCancerStudiesUseCase.getWomanAllRecommendations(womanId, guidelineUri, language);
-            breastCancerStudiesUseCase.getWomanAllRecommendations(ontoModel, womanId, guidelineUri, language);
+            WomanRecommendation rec = breastCancerStudiesUseCase.getWomanAllRecommendations(ontoModel, womanId, guidelineUri, language);
 
             // 3. Crear medicamentos para la mujer
             boolean medicationsCreated = ontologyOperations.createMedicationsFromHCE(
@@ -92,11 +93,20 @@ public class InstanciateOntology {
             // 5. Limpiar recursos del modelo
             ontoModel.close();
 
-            return reasoningResult;
+            // 6. Crear nuevo ReasoningResult con las recomendaciones
+            ReasoningResult resultWithRecommendations = new ReasoningResult(
+                    reasoningResult.getDerivedStatements(),
+                    reasoningResult.getDerivations(),
+                    reasoningResult.getTotalStatements(),
+                    reasoningResult.isSuccess(),
+                    reasoningResult.getErrorMessage(),
+                    rec);
+
+            return resultWithRecommendations;
 
         } catch (Exception e) {
             log.error("Error in complete woman processing: {}", e.getMessage(), e);
-            return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, e.getMessage());
+            return new ReasoningResult(new ArrayList<>(), new ArrayList<>(), 0, false, e.getMessage(), null);
         }
     }
 }
